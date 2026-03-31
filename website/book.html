@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Book a Call — Loop & Convert</title>
+  <meta name="description" content="Schedule a free 30-minute discovery call with Loop & Convert. Pick a time and let's map out your AI automation strategy." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <!-- ─── Navbar ─────────────────────────────────────────── -->
+  <header class="navbar">
+    <div class="container nav-inner">
+      <a href="index.html" class="nav-logo">Loop <span class="accent">&</span> Convert</a>
+      <nav>
+        <ul class="nav-links">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="about.html">About</a></li>
+          <li><a href="contact.html">Contact</a></li>
+          <li class="nav-cta"><a href="book.html" class="btn btn-primary">Book a Call</a></li>
+        </ul>
+      </nav>
+      <button class="hamburger" aria-label="Open menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+    <div class="mobile-menu">
+      <a href="index.html">Home</a>
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
+      <a href="book.html" class="btn btn-primary">Book a Call</a>
+    </div>
+  </header>
+
+  <!-- ─── Page Header ────────────────────────────────────── -->
+  <section class="page-header">
+    <div class="container">
+      <div class="eyebrow">Let's Meet</div>
+      <h1>Book a Discovery Call</h1>
+      <p class="lead">
+        Pick a time that works for you. In 30 minutes we'll map out how AI automation
+        can save you time and grow your business.
+      </p>
+    </div>
+  </section>
+
+  <hr class="divider" />
+
+  <!-- ─── Booking ─────────────────────────────────────────── -->
+  <section>
+    <div class="container">
+
+      <!-- Feature chips -->
+      <div class="book-features">
+        <div class="book-feature">
+          <div class="book-feature-icon">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          </div>
+          <div>
+            <div class="book-feature-label">30 minutes</div>
+            <div class="book-feature-sub">Quick, focused, no fluff</div>
+          </div>
+        </div>
+        <div class="book-feature">
+          <div class="book-feature-icon">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.069A1 1 0 0121 8.882v6.236a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+            </svg>
+          </div>
+          <div>
+            <div class="book-feature-label">Zoom call</div>
+            <div class="book-feature-sub">Link sent on confirmation</div>
+          </div>
+        </div>
+        <div class="book-feature">
+          <div class="book-feature-icon">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          </div>
+          <div>
+            <div class="book-feature-label">100% Free</div>
+            <div class="book-feature-sub">No commitment required</div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        id="cal-inline"
+        data-cal-link="iulian-bostan/30min"
+        data-cal-namespace="discovery"
+        data-cal-config='{"layout":"month_view"}'
+        style="width:100%;height:700px;overflow:scroll;border:1.5px solid #E5E7EB;border-radius:20px;"
+      ></div>
+
+      <script type="text/javascript">
+        (function (C, A, L) {
+          let p = function (a, ar) { a.q.push(ar); };
+          let d = C.document;
+          C.Cal = C.Cal || function () {
+            let cal = C.Cal; let ar = arguments;
+            if (!cal.loaded) {
+              cal.ns = {}; cal.q = cal.q || [];
+              d.head.appendChild(d.createElement("script")).src = A;
+              cal.loaded = true;
+            }
+            if (ar[0] === L) {
+              const api = function () { p(api, arguments); };
+              const namespace = ar[1]; api.q = api.q || [];
+              if (typeof namespace === "string") {
+                cal.ns[namespace] = cal.ns[namespace] || api;
+                p(cal.ns[namespace], ar); p(cal, [L, namespace, api]);
+              } else p(cal, ar); return;
+            }
+            p(cal, ar);
+          };
+        })(window, "https://app.cal.com/embed/embed.js", "init");
+        Cal("init", "discovery", { origin: "https://cal.com" });
+        Cal.ns.discovery("inline", {
+          elementOrSelector: "#cal-inline",
+          calLink: "iulian-bostan/30min",
+          layout: "month_view"
+        });
+        Cal.ns.discovery("ui", { hideEventTypeDetails: false, layout: "month_view" });
+      </script>
+
+      <!-- What to expect -->
+      <div class="what-expect-grid">
+        <div class="expect-card">
+          <h3>Understand your business</h3>
+          <p>We start by learning about your current workflows, tools, and biggest time drains.</p>
+        </div>
+        <div class="expect-card">
+          <h3>Identify automation opportunities</h3>
+          <p>Together we map out exactly where AI can have the biggest impact — immediately.</p>
+        </div>
+        <div class="expect-card">
+          <h3>Walk away with a plan</h3>
+          <p>You leave with a clear, actionable roadmap — whether you work with us or not.</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─── Footer ──────────────────────────────────────────── -->
+  <footer>
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="nav-logo">Loop <span class="accent">&</span> Convert</div>
+          <p>AI automations that work for your business 24/7 — so you don't have to.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Company</h4>
+          <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="about.html">About</a></li>
+            <li><a href="contact.html">Contact</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Get Started</h4>
+          <ul>
+            <li><a href="book.html">Book a Call</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Contact</h4>
+          <ul>
+            <li><a href="mailto:loopandconvert@gmail.com">loopandconvert@gmail.com</a></li>
+            <li><a href="tel:+31625500911">+31 625 500 911</a></li>
+          </ul>
+        </div>
+      </div>
+      <!-- ─── Hover text ───────────────────────────────── -->
+      <div class="footer-hover-text">
+        <svg id="footerHoverSvg" width="100%" height="100%"
+             viewBox="0 0 500 120" xmlns="http://www.w3.org/2000/svg"
+             style="cursor:pointer;user-select:none;display:block;">
+          <defs>
+            <radialGradient id="footerRevealMask" gradientUnits="userSpaceOnUse" cx="50%" cy="50%" r="20%">
+              <stop offset="0%" stop-color="white"/>
+              <stop offset="100%" stop-color="black"/>
+            </radialGradient>
+            <mask id="footerTextMask">
+              <rect x="0" y="0" width="100%" height="100%" fill="url(#footerRevealMask)"/>
+            </mask>
+            <linearGradient id="footerTextGradient" gradientUnits="userSpaceOnUse" x1="0%" y1="0%" x2="100%" y2="0%">
+            </linearGradient>
+          </defs>
+          <text id="footerOutlineText" x="50%" y="52%" text-anchor="middle" dominant-baseline="middle"
+                fill="none" stroke="#cccccc" stroke-width="0.3"
+                font-family="Helvetica,Arial,sans-serif" font-size="48" font-weight="700"
+                textLength="492" lengthAdjust="spacing" style="opacity:0;transition:opacity .3s;">
+            Loop &amp; Convert
+          </text>
+          <text id="footerDrawText" x="50%" y="52%" text-anchor="middle" dominant-baseline="middle"
+                fill="none" stroke="#3a3a3a" stroke-width="0.3"
+                font-family="Helvetica,Arial,sans-serif" font-size="48" font-weight="700"
+                textLength="492" lengthAdjust="spacing"
+                stroke-dasharray="2000" stroke-dashoffset="2000">
+            Loop &amp; Convert
+          </text>
+          <text x="50%" y="52%" text-anchor="middle" dominant-baseline="middle"
+                fill="none" stroke="url(#footerTextGradient)" stroke-width="0.3"
+                mask="url(#footerTextMask)"
+                font-family="Helvetica,Arial,sans-serif" font-size="48" font-weight="700"
+                textLength="492" lengthAdjust="spacing">
+            Loop &amp; Convert
+          </text>
+        </svg>
+      </div>
+      <div class="footer-bottom">
+        <p>© <span id="year"></span> Loop & Convert. All rights reserved.</p>
+        <p>AI automation for forward-thinking businesses.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+  <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+  <script>
+  (function () {
+    var svg = document.getElementById('footerHoverSvg');
+    var drawText = document.getElementById('footerDrawText');
+    var outline = document.getElementById('footerOutlineText');
+    var revealGrad = document.getElementById('footerRevealMask');
+    var textGrad = document.getElementById('footerTextGradient');
+    if (!svg) return;
+    var drawn = false;
+    var observer = new IntersectionObserver(function (entries) {
+      if (entries[0].isIntersecting && !drawn) { drawn = true; drawText.classList.add('footer-draw-anim'); }
+    }, { threshold: 0.3 });
+    observer.observe(svg);
+    svg.addEventListener('mouseenter', function () {
+      outline.style.opacity = '0.7';
+      textGrad.innerHTML = '<stop offset="0%" stop-color="#ffffff"/><stop offset="30%" stop-color="#e0e0e0"/><stop offset="50%" stop-color="#ffffff"/><stop offset="70%" stop-color="#c0c0c0"/><stop offset="100%" stop-color="#ffffff"/>';
+    });
+    svg.addEventListener('mouseleave', function () {
+      outline.style.opacity = '0'; textGrad.innerHTML = '';
+      revealGrad.setAttribute('cx', '50%'); revealGrad.setAttribute('cy', '50%');
+    });
+    svg.addEventListener('mousemove', function (e) {
+      var rect = svg.getBoundingClientRect();
+      revealGrad.setAttribute('cx', ((e.clientX - rect.left) / rect.width * 100).toFixed(2) + '%');
+      revealGrad.setAttribute('cy', ((e.clientY - rect.top) / rect.height * 100).toFixed(2) + '%');
+    });
+  })();
+  </script>
+</body>
+</html>
