@@ -11,6 +11,7 @@ if (hamburger && mobileMenu) {
   hamburger.addEventListener('click', () => {
     hamburger.classList.toggle('open');
     mobileMenu.classList.toggle('open');
+    navbar.classList.toggle('menu-open');
   });
 }
 
