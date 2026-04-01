@@ -1,0 +1,4 @@
+agent/
+dashboard/
+.claude/
+*.env
