@@ -387,12 +387,18 @@ footer {
 .hero h1 {
   max-width: 800px;
   margin-bottom: 24px;
-  background: linear-gradient(110deg, #a0a0a0 0%, #ffffff 25%, #f0f0f0 40%, #ffffff 50%, #e8e8e8 60%, #ffffff 75%, #a0a0a0 100%);
-  background-size: 200% auto;
+  background: linear-gradient(110deg, #888888 0%, #ffffff 30%, #f0f0f0 43%, #ffffff 50%, #e0e0e0 57%, #ffffff 70%, #888888 100%);
+  background-size: 250% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  animation: textShimmer 6s linear infinite;
+  animation: textShimmer 5s linear infinite;
+}
+
+.hero-accent {
+  background: inherit;
+  background-clip: inherit;
+  -webkit-background-clip: inherit;
 }
 
 .hero-accent {
