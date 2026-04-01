@@ -67,6 +67,11 @@ a { text-decoration: none; color: inherit; }
   100% { background-position: -200% 0%; }
 }
 
+@keyframes textShimmer {
+  0%   { background-position: 200% center; }
+  100% { background-position: -200% center; }
+}
+
 h1 { font-size: clamp(2.4rem, 5vw, 3.6rem); font-weight: 800; line-height: 1.08; letter-spacing: -.03em; }
 h2 { font-size: clamp(1.8rem, 3.5vw, 2.5rem); font-weight: 800; line-height: 1.15; letter-spacing: -.025em; }
 h3 { font-size: 1rem; font-weight: 700; line-height: 1.4; }
@@ -99,13 +104,14 @@ section { padding: 96px 0; }
 .btn:active { transform: scale(.98); }
 
 .btn-primary {
-  background: linear-gradient(110deg, #ffffff 0%, #ffffff 40%, #d8d8d8 50%, #ffffff 60%, #ffffff 100%);
+  background: linear-gradient(110deg, #d0d0d0 0%, #ffffff 30%, #f8f8f8 42%, #ffffff 50%, #e0e0e0 58%, #ffffff 70%, #d0d0d0 100%);
   background-size: 200% 100%;
-  animation: shimmer2 2.2s infinite linear;
+  animation: shimmer2 1.8s infinite linear;
   color: #0F0F0F;
   font-weight: 700;
-  border: 1px solid rgba(255,255,255,.25);
-  transition: opacity var(--transition), transform var(--transition);
+  border: 1px solid rgba(255,255,255,.4);
+  box-shadow: 0 0 12px rgba(255,255,255,.15), inset 0 1px 0 rgba(255,255,255,.6);
+  transition: opacity var(--transition), transform var(--transition), box-shadow var(--transition);
 }
 .btn-primary:hover {
   background: linear-gradient(110deg, #c8c8c8 0%, #c8c8c8 40%, #a0a0a0 50%, #c8c8c8 60%, #c8c8c8 100%);
@@ -381,6 +387,12 @@ footer {
 .hero h1 {
   max-width: 800px;
   margin-bottom: 24px;
+  background: linear-gradient(110deg, #a0a0a0 0%, #ffffff 25%, #f0f0f0 40%, #ffffff 50%, #e8e8e8 60%, #ffffff 75%, #a0a0a0 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: textShimmer 6s linear infinite;
 }
 
 .hero-accent {
