@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Loop & Convert — AI Automation for Your Business</title>
-  <meta name="description" content="Loop & Convert builds custom AI solutions — voice agents, chatbots, automations, and intelligent workflows — that grow your business 24/7. Book a free discovery call today." />
+  <title>AI ROI Calculator — Loop & Convert</title>
+  <meta name="description" content="Calculate how much time and money your business could save by implementing AI automation. See your estimated annual value in seconds." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
@@ -38,39 +38,86 @@
     </div>
   </header>
 
-  <!-- ─── Hero ───────────────────────────────────────────── -->
-  <section class="hero">
-    <div class="hero-orb hero-orb-1"></div>
-    <div class="hero-orb hero-orb-2"></div>
-    <div class="hero-orb hero-orb-3"></div>
+  <!-- ─── Page Header ────────────────────────────────────── -->
+  <section class="page-header">
+    <div class="container">
+      <div class="eyebrow"><span class="dot"></span> Free Tool</div>
+      <h1>Calculate your <span class="accent">AI ROI</span></h1>
+      <p class="lead">See exactly how much time and money your business could save by automating with AI. Move the sliders and watch the numbers update in real time.</p>
+    </div>
+  </section>
 
-    <div class="container hero-content">
-      <div class="hero-tag">
-        <span class="dot"></span>
-        AI Automation Agency
-      </div>
-      <h1>AI automations that grow your business while you sleep</h1>
-      <p class="hero-sub">
-        Loop &amp; Convert builds custom AI solutions — from voice agents and intelligent chatbots
-        to full automation systems and custom AI tools — that run your business 24/7,
-        so you can focus on what moves the needle.
-      </p>
-      <div class="hero-actions">
-        <a href="book.html" class="btn btn-primary">Book a Free Discovery Call →</a>
-        <a href="about.html" class="btn btn-secondary">Learn More</a>
-      </div>
-      <div class="hero-stats">
-        <div>
-          <div class="stat-value">24/7</div>
-          <div class="stat-label">Your business runs</div>
+  <hr class="divider" />
+
+  <!-- ─── Calculator ─────────────────────────────────────── -->
+  <section>
+    <div class="container">
+      <div class="roi-grid">
+
+        <!-- Inputs -->
+        <div class="roi-inputs">
+
+          <div class="slider-group">
+            <div class="slider-label-row">
+              <label class="slider-label" for="leads">Leads per week</label>
+              <span class="slider-value" id="leads-val">30</span>
+            </div>
+            <input type="range" id="leads" min="5" max="300" value="30" step="5" />
+            <p class="slider-hint">How many new potential clients does your business receive each week?</p>
+          </div>
+
+          <div class="slider-group">
+            <div class="slider-label-row">
+              <label class="slider-label" for="hours">Hours/week on manual follow-up</label>
+              <span class="slider-value" id="hours-val">10 hrs</span>
+            </div>
+            <input type="range" id="hours" min="1" max="40" value="10" step="1" />
+            <p class="slider-hint">Time spent on emails, calls, scheduling, and chasing leads manually.</p>
+          </div>
+
+          <div class="slider-group">
+            <div class="slider-label-row">
+              <label class="slider-label" for="cost">Average hourly staff cost</label>
+              <span class="slider-value" id="cost-val">€25</span>
+            </div>
+            <input type="range" id="cost" min="10" max="100" value="25" step="5" />
+            <p class="slider-hint">Your own hourly rate or the cost of the employee doing this work.</p>
+          </div>
+
+          <div class="slider-group">
+            <div class="slider-label-row">
+              <label class="slider-label" for="value">Average value of a new client</label>
+              <span class="slider-value" id="value-val">€1,500</span>
+            </div>
+            <input type="range" id="value" min="100" max="10000" value="1500" step="100" />
+            <p class="slider-hint">How much revenue does one new client typically bring in?</p>
+          </div>
+
         </div>
-        <div>
-          <div class="stat-value">100%</div>
-          <div class="stat-label">Custom built for you</div>
-        </div>
-        <div>
-          <div class="stat-value">0</div>
-          <div class="stat-label">Manual outreach needed</div>
+
+        <!-- Results -->
+        <div class="roi-results">
+
+          <div class="roi-result-card">
+            <div class="roi-result-value" id="r-hours">32</div>
+            <div class="roi-result-label">Hours saved per month</div>
+          </div>
+
+          <div class="roi-result-card">
+            <div class="roi-result-value" id="r-money">€800</div>
+            <div class="roi-result-label">Staff cost saved per month</div>
+          </div>
+
+          <div class="roi-result-card">
+            <div class="roi-result-value" id="r-clients">8</div>
+            <div class="roi-result-label">Extra clients per year from faster follow-up</div>
+          </div>
+
+          <div class="roi-result-card highlight">
+            <div class="roi-result-value" id="r-annual">€21,600</div>
+            <div class="roi-result-label">Estimated total annual value</div>
+          </div>
+
         </div>
       </div>
     </div>
@@ -78,89 +125,12 @@
 
   <hr class="divider" />
 
-  <!-- ─── Services ───────────────────────────────────────── -->
-  <section>
-    <div class="container">
-      <div class="section-header">
-        <div class="eyebrow"><span class="dot"></span>What We Do</div>
-        <h2>Automation built for results</h2>
-        <p>We handle the entire build — from strategy to deployment — so you get a system that works from day one.</p>
-      </div>
-      <div class="services-grid">
-
-        <div class="service-card">
-          <div class="service-icon">
-            <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-            </svg>
-          </div>
-          <h3>AI Outreach & Lead Generation</h3>
-          <p>Build AI-powered outreach systems that find qualified leads, craft personalised emails, and book meetings automatically — at a scale no human team could match.</p>
-        </div>
-
-        <div class="service-card">
-          <div class="service-icon">
-            <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-            </svg>
-          </div>
-          <h3>Custom AI Workflows</h3>
-          <p>We design and build end-to-end AI workflows that connect your tools, eliminate manual tasks, and make intelligent decisions — running 24/7 without any intervention.</p>
-        </div>
-
-        <div class="service-card">
-          <div class="service-icon">
-            <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
-            </svg>
-          </div>
-          <h3>AI Agents & Voice Solutions</h3>
-          <p>Deploy AI voice agents that handle inbound calls and qualify leads around the clock, or intelligent chat agents on your website and social media that convert visitors into customers.</p>
-        </div>
-
-      </div>
-    </div>
-  </section>
-
-  <!-- ─── How It Works ────────────────────────────────────── -->
-  <section class="how-bg">
-    <div class="container">
-      <div class="section-header">
-        <div class="eyebrow">The Process</div>
-        <h2>From call to fully automated — fast</h2>
-      </div>
-      <div class="steps-grid">
-        <div class="step">
-          <div class="step-num">01</div>
-          <div>
-            <h3>Discovery Call</h3>
-            <p>We map out your business, your current workflows, and exactly where AI can make the biggest impact.</p>
-          </div>
-        </div>
-        <div class="step">
-          <div class="step-num">02</div>
-          <div>
-            <h3>We Build It</h3>
-            <p>Our team designs and deploys your custom automation system — tailored to your tools, your niche, your goals.</p>
-          </div>
-        </div>
-        <div class="step">
-          <div class="step-num">03</div>
-          <div>
-            <h3>It Runs Itself</h3>
-            <p>Sit back while your automations handle outreach, lead nurturing, and operations 24 hours a day.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
   <!-- ─── CTA Banner ──────────────────────────────────────── -->
   <section>
     <div class="container">
       <div class="cta-banner">
-        <h2>Ready to run your business on autopilot?</h2>
-        <p>Book a free 30-minute discovery call and we'll map out exactly how AI can save you time and drive more revenue.</p>
+        <h2>Ready to capture this value?</h2>
+        <p>Book a free 30-minute discovery call and we will map out exactly which automations will make the biggest impact for your business.</p>
         <a href="book.html" class="btn btn-primary">Book Your Free Call →</a>
       </div>
     </div>
@@ -186,6 +156,7 @@
           <h4>Get Started</h4>
           <ul>
             <li><a href="book.html">Book a Call</a></li>
+            <li><a href="roi.html">ROI Calculator</a></li>
           </ul>
         </div>
         <div class="footer-col">
@@ -196,46 +167,35 @@
           </ul>
         </div>
       </div>
-      <!-- ─── Hover text ───────────────────────────────── -->
+
       <div class="footer-hover-text">
         <svg id="footerHoverSvg" width="100%" height="100%"
              viewBox="0 0 500 120" xmlns="http://www.w3.org/2000/svg"
              style="cursor:pointer;user-select:none;display:block;">
           <defs>
-            <radialGradient id="footerRevealMask" gradientUnits="userSpaceOnUse"
-                            cx="50%" cy="50%" r="20%">
+            <radialGradient id="footerRevealMask" gradientUnits="userSpaceOnUse" cx="50%" cy="50%" r="20%">
               <stop offset="0%" stop-color="white"/>
               <stop offset="100%" stop-color="black"/>
             </radialGradient>
             <mask id="footerTextMask">
               <rect x="0" y="0" width="100%" height="100%" fill="url(#footerRevealMask)"/>
             </mask>
-            <linearGradient id="footerTextGradient" gradientUnits="userSpaceOnUse"
-                            x1="0%" y1="0%" x2="100%" y2="0%">
+            <linearGradient id="footerTextGradient" gradientUnits="userSpaceOnUse" x1="0%" y1="0%" x2="100%" y2="0%">
             </linearGradient>
           </defs>
-
-          <!-- Outline shown on hover -->
-          <text id="footerOutlineText"
-                x="50%" y="52%" text-anchor="middle" dominant-baseline="middle"
+          <text id="footerOutlineText" x="50%" y="52%" text-anchor="middle" dominant-baseline="middle"
                 fill="none" stroke="#cccccc" stroke-width="0.3"
                 font-family="Helvetica,Arial,sans-serif" font-size="48" font-weight="700"
-                textLength="492" lengthAdjust="spacing"
-                style="opacity:0;transition:opacity .3s;">
+                textLength="492" lengthAdjust="spacing" style="opacity:0;transition:opacity .3s;">
             Loop &amp; Convert
           </text>
-
-          <!-- Draw-on animated stroke -->
-          <text id="footerDrawText"
-                x="50%" y="52%" text-anchor="middle" dominant-baseline="middle"
+          <text id="footerDrawText" x="50%" y="52%" text-anchor="middle" dominant-baseline="middle"
                 fill="none" stroke="#3a3a3a" stroke-width="0.3"
                 font-family="Helvetica,Arial,sans-serif" font-size="48" font-weight="700"
                 textLength="492" lengthAdjust="spacing"
                 stroke-dasharray="2000" stroke-dashoffset="2000">
             Loop &amp; Convert
           </text>
-
-          <!-- Hover reveal with gradient, clipped to border -->
           <text x="50%" y="52%" text-anchor="middle" dominant-baseline="middle"
                 fill="none" stroke="url(#footerTextGradient)" stroke-width="0.3"
                 mask="url(#footerTextMask)"
@@ -256,8 +216,7 @@
   <script src="js/main.js"></script>
   <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
 
-
-  <!-- ─── Footer hover text ───────────────────────────────── -->
+  <!-- ─── Footer hover text ──────────────────────────────── -->
   <script>
   (function () {
     var svg        = document.getElementById('footerHoverSvg');
@@ -266,8 +225,6 @@
     var revealGrad = document.getElementById('footerRevealMask');
     var textGrad   = document.getElementById('footerTextGradient');
     if (!svg) return;
-
-    /* Trigger draw animation when footer scrolls into view */
     var drawn = false;
     var observer = new IntersectionObserver(function (entries) {
       if (entries[0].isIntersecting && !drawn) {
@@ -276,8 +233,6 @@
       }
     }, { threshold: 0.3 });
     observer.observe(svg);
-
-    /* Mouse hover: show outline + gradient reveal */
     svg.addEventListener('mouseenter', function () {
       outline.style.opacity = '0.7';
       textGrad.innerHTML =
@@ -287,15 +242,12 @@
         '<stop offset="70%"  stop-color="#c0c0c0"/>' +
         '<stop offset="100%" stop-color="#ffffff"/>';
     });
-
     svg.addEventListener('mouseleave', function () {
       outline.style.opacity = '0';
       textGrad.innerHTML = '';
       revealGrad.setAttribute('cx', '50%');
       revealGrad.setAttribute('cy', '50%');
     });
-
-    /* Track cursor to move the reveal spotlight */
     svg.addEventListener('mousemove', function (e) {
       var rect = svg.getBoundingClientRect();
       var cx = ((e.clientX - rect.left) / rect.width  * 100).toFixed(2) + '%';
@@ -316,5 +268,42 @@
     });
   })();
   </script>
+
+  <!-- ─── ROI Calculator ─────────────────────────────────── -->
+  <script>
+  (function () {
+    function fmt(n)  { return n.toLocaleString('en-EU'); }
+    function fmtEur(n) { return '€' + fmt(n); }
+
+    function calculate() {
+      var leads  = +document.getElementById('leads').value;
+      var hours  = +document.getElementById('hours').value;
+      var cost   = +document.getElementById('cost').value;
+      var value  = +document.getElementById('value').value;
+
+      var hoursSaved   = Math.round(hours * 0.8 * 4);
+      var moneySaved   = Math.round(hoursSaved * cost);
+      var extraClients = Math.round(leads * 0.05 * 52);
+      var annualValue  = Math.round((moneySaved * 12) + (extraClients * value));
+
+      document.getElementById('r-hours').textContent   = hoursSaved;
+      document.getElementById('r-money').textContent   = fmtEur(moneySaved);
+      document.getElementById('r-clients').textContent = extraClients;
+      document.getElementById('r-annual').textContent  = fmtEur(annualValue);
+
+      document.getElementById('leads-val').textContent = leads;
+      document.getElementById('hours-val').textContent = hours + ' hrs';
+      document.getElementById('cost-val').textContent  = fmtEur(cost);
+      document.getElementById('value-val').textContent = fmtEur(value);
+    }
+
+    ['leads','hours','cost','value'].forEach(function(id) {
+      document.getElementById(id).addEventListener('input', calculate);
+    });
+
+    calculate();
+  })();
+  </script>
+
 </body>
 </html>

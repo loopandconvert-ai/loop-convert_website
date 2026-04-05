@@ -759,6 +759,129 @@ footer {
 .expect-card h3 { margin-bottom: 8px; font-size: .9rem; color: var(--white); }
 .expect-card p  { font-size: .8rem; color: var(--grey-500); line-height: 1.7; }
 
+/* ─── ROI Calculator ───────────────────────────────────────── */
+.roi-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  align-items: start;
+}
+
+.roi-results {
+  position: sticky;
+  top: 88px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.roi-result-card {
+  background: #1A1A1A;
+  border: 1px solid var(--grey-200);
+  border-radius: var(--radius-md);
+  padding: 24px 28px;
+}
+
+.roi-result-card.highlight {
+  border: 1px solid rgba(255,255,255,.30);
+  background: #1f1f1f;
+  box-shadow: 0 0 24px rgba(255,255,255,.05);
+}
+
+.roi-result-value {
+  font-size: 2.2rem;
+  font-weight: 800;
+  letter-spacing: -.03em;
+  color: var(--white);
+  line-height: 1;
+  margin-bottom: 6px;
+}
+
+.roi-result-card.highlight .roi-result-value {
+  font-size: 2.8rem;
+}
+
+.roi-result-label {
+  font-size: .8rem;
+  color: var(--grey-500);
+  line-height: 1.5;
+}
+
+/* Slider inputs */
+.slider-group {
+  margin-bottom: 32px;
+}
+
+.slider-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 10px;
+}
+
+.slider-label {
+  font-size: .875rem;
+  font-weight: 600;
+  color: var(--white);
+}
+
+.slider-value {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--white);
+  min-width: 80px;
+  text-align: right;
+}
+
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 4px;
+  background: var(--grey-200);
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--white);
+  cursor: pointer;
+  box-shadow: 0 0 8px rgba(255,255,255,.25);
+  transition: transform .15s, box-shadow .15s;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+  box-shadow: 0 0 14px rgba(255,255,255,.4);
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--white);
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 0 8px rgba(255,255,255,.25);
+}
+
+.slider-hint {
+  font-size: .75rem;
+  color: var(--grey-400);
+  margin-top: 6px;
+}
+
+@media (max-width: 768px) {
+  .roi-grid { grid-template-columns: 1fr; gap: 40px; }
+  .roi-results { position: static; }
+}
+
 /* ─── Success / Error states ───────────────────────────────── */
 .form-success {
   display: none;
