@@ -159,6 +159,23 @@ section { padding: 96px 0; }
   font-weight: 800;
   letter-spacing: -.02em;
   color: var(--white);
+  display: flex;
+  align-items: center;
+}
+
+.logo-img {
+  height: 36px;
+  width: auto;
+  display: block;
+  filter: invert(1);
+}
+
+.footer-logo-img {
+  height: 48px;
+  width: auto;
+  display: block;
+  filter: invert(1);
+  opacity: 0.85;
 }
 
 .nav-links {
