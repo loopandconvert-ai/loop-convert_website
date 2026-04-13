@@ -144,8 +144,8 @@
     <div class="container">
       <div class="footer-grid">
         <div class="footer-brand">
-          <div class="nav-logo">Loop <span class="accent">&</span> Convert</div>
-          <p>AI automations that work for your business 24/7 — so you don't have to.</p>
+          <div class="nav-logo">Loop <span class="accent">&amp;</span> Convert</div>
+          <p>AI automations that work for your business 24/7 &mdash; so you don&rsquo;t have to.</p>
         </div>
         <div class="footer-col">
           <h4>Company</h4>
@@ -156,23 +156,23 @@
           </ul>
         </div>
         <div class="footer-col">
-          <h4>Get Started</h4>
+          <h4>Services</h4>
           <ul>
-            <li><a href="book.html">Book a Call</a></li>
             <li><a href="websites.html">Websites</a></li>
-          <li><a href="websites.html">Websites</a>
-      <a href="roi.html">ROI Calculator</a></li>
+            <li><a href="roi.html">ROI Calculator</a></li>
           </ul>
         </div>
         <div class="footer-col">
-          <h4>Contact</h4>
+          <h4>Get Started</h4>
           <ul>
+            <li><a href="book.html">Book a Call</a></li>
             <li><a href="mailto:loopandconvert@gmail.com">loopandconvert@gmail.com</a></li>
             <li><a href="tel:+31625500911">+31 625 500 911</a></li>
           </ul>
         </div>
       </div>
 
+      <!-- ─── Hover text ───────────────────────────────── -->
       <div class="footer-hover-text">
         <svg id="footerHoverSvg" width="100%" height="100%"
              viewBox="0 0 500 120" xmlns="http://www.w3.org/2000/svg"
@@ -212,7 +212,7 @@
       </div>
 
       <div class="footer-bottom">
-        <p>© <span id="year"></span> Loop & Convert. All rights reserved.</p>
+        <p>&copy; <span id="year"></span> Loop &amp; Convert. All rights reserved.</p>
         <p>AI automation for forward-thinking businesses.</p>
       </div>
     </div>
@@ -220,8 +220,6 @@
 
   <script src="js/main.js"></script>
   <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
-
-  <!-- ─── Footer hover text ──────────────────────────────── -->
   <script>
   (function () {
     var svg        = document.getElementById('footerHoverSvg');
@@ -232,10 +230,7 @@
     if (!svg) return;
     var drawn = false;
     var observer = new IntersectionObserver(function (entries) {
-      if (entries[0].isIntersecting && !drawn) {
-        drawn = true;
-        drawText.classList.add('footer-draw-anim');
-      }
+      if (entries[0].isIntersecting && !drawn) { drawn = true; drawText.classList.add('footer-draw-anim'); }
     }, { threshold: 0.3 });
     observer.observe(svg);
     svg.addEventListener('mouseenter', function () {
@@ -255,60 +250,10 @@
     });
     svg.addEventListener('mousemove', function (e) {
       var rect = svg.getBoundingClientRect();
-      var cx = ((e.clientX - rect.left) / rect.width  * 100).toFixed(2) + '%';
-      var cy = ((e.clientY - rect.top)  / rect.height * 100).toFixed(2) + '%';
-      revealGrad.setAttribute('cx', cx);
-      revealGrad.setAttribute('cy', cy);
+      revealGrad.setAttribute('cx', ((e.clientX - rect.left) / rect.width  * 100).toFixed(2) + '%');
+      revealGrad.setAttribute('cy', ((e.clientY - rect.top)  / rect.height * 100).toFixed(2) + '%');
     });
   })();
   </script>
-
-  <!-- ─── Spotlight card effect ──────────────────────────── -->
-  <script>
-  (function () {
-    var root = document.documentElement;
-    document.addEventListener('pointermove', function (e) {
-      root.style.setProperty('--x', e.clientX);
-      root.style.setProperty('--y', e.clientY);
-    });
-  })();
-  </script>
-
-  <!-- ─── ROI Calculator ─────────────────────────────────── -->
-  <script>
-  (function () {
-    function fmt(n)  { return n.toLocaleString('en-EU'); }
-    function fmtEur(n) { return '€' + fmt(n); }
-
-    function calculate() {
-      var leads  = +document.getElementById('leads').value;
-      var hours  = +document.getElementById('hours').value;
-      var cost   = +document.getElementById('cost').value;
-      var value  = +document.getElementById('value').value;
-
-      var hoursSaved   = Math.round(hours * 0.8 * 4);
-      var moneySaved   = Math.round(hoursSaved * cost);
-      var extraClients = Math.round(leads * 0.05 * 52);
-      var annualValue  = Math.round((moneySaved * 12) + (extraClients * value));
-
-      document.getElementById('r-hours').textContent   = hoursSaved;
-      document.getElementById('r-money').textContent   = fmtEur(moneySaved);
-      document.getElementById('r-clients').textContent = extraClients;
-      document.getElementById('r-annual').textContent  = fmtEur(annualValue);
-
-      document.getElementById('leads-val').textContent = leads;
-      document.getElementById('hours-val').textContent = hours + ' hrs';
-      document.getElementById('cost-val').textContent  = fmtEur(cost);
-      document.getElementById('value-val').textContent = fmtEur(value);
-    }
-
-    ['leads','hours','cost','value'].forEach(function(id) {
-      document.getElementById(id).addEventListener('input', calculate);
-    });
-
-    calculate();
-  })();
-  </script>
-
 </body>
 </html>

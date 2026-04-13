@@ -261,8 +261,8 @@
     <div class="container">
       <div class="footer-grid">
         <div class="footer-brand">
-          <div class="nav-logo">Loop <span class="accent">&</span> Convert</div>
-          <p>AI automations that work for your business 24/7 — so you don't have to.</p>
+          <div class="nav-logo">Loop <span class="accent">&amp;</span> Convert</div>
+          <p>AI automations that work for your business 24/7 &mdash; so you don&rsquo;t have to.</p>
         </div>
         <div class="footer-col">
           <h4>Company</h4>
@@ -275,7 +275,7 @@
         <div class="footer-col">
           <h4>Services</h4>
           <ul>
-            <li><a href="websites.html">Website Design</a></li>
+            <li><a href="websites.html">Websites</a></li>
             <li><a href="roi.html">ROI Calculator</a></li>
           </ul>
         </div>
@@ -288,6 +288,8 @@
           </ul>
         </div>
       </div>
+
+      <!-- ─── Hover text ───────────────────────────────── -->
       <div class="footer-hover-text">
         <svg id="footerHoverSvg" width="100%" height="100%"
              viewBox="0 0 500 120" xmlns="http://www.w3.org/2000/svg"
@@ -325,8 +327,9 @@
           </text>
         </svg>
       </div>
+
       <div class="footer-bottom">
-        <p>© <span id="year"></span> Loop & Convert. All rights reserved.</p>
+        <p>&copy; <span id="year"></span> Loop &amp; Convert. All rights reserved.</p>
         <p>AI automation for forward-thinking businesses.</p>
       </div>
     </div>
@@ -336,11 +339,11 @@
   <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
   <script>
   (function () {
-    var svg = document.getElementById('footerHoverSvg');
-    var drawText = document.getElementById('footerDrawText');
-    var outline = document.getElementById('footerOutlineText');
+    var svg        = document.getElementById('footerHoverSvg');
+    var drawText   = document.getElementById('footerDrawText');
+    var outline    = document.getElementById('footerOutlineText');
     var revealGrad = document.getElementById('footerRevealMask');
-    var textGrad = document.getElementById('footerTextGradient');
+    var textGrad   = document.getElementById('footerTextGradient');
     if (!svg) return;
     var drawn = false;
     var observer = new IntersectionObserver(function (entries) {
@@ -349,16 +352,23 @@
     observer.observe(svg);
     svg.addEventListener('mouseenter', function () {
       outline.style.opacity = '0.7';
-      textGrad.innerHTML = '<stop offset="0%" stop-color="#ffffff"/><stop offset="30%" stop-color="#e0e0e0"/><stop offset="50%" stop-color="#ffffff"/><stop offset="70%" stop-color="#c0c0c0"/><stop offset="100%" stop-color="#ffffff"/>';
+      textGrad.innerHTML =
+        '<stop offset="0%"   stop-color="#ffffff"/>' +
+        '<stop offset="30%"  stop-color="#e0e0e0"/>' +
+        '<stop offset="50%"  stop-color="#ffffff"/>' +
+        '<stop offset="70%"  stop-color="#c0c0c0"/>' +
+        '<stop offset="100%" stop-color="#ffffff"/>';
     });
     svg.addEventListener('mouseleave', function () {
-      outline.style.opacity = '0'; textGrad.innerHTML = '';
-      revealGrad.setAttribute('cx', '50%'); revealGrad.setAttribute('cy', '50%');
+      outline.style.opacity = '0';
+      textGrad.innerHTML = '';
+      revealGrad.setAttribute('cx', '50%');
+      revealGrad.setAttribute('cy', '50%');
     });
     svg.addEventListener('mousemove', function (e) {
       var rect = svg.getBoundingClientRect();
-      revealGrad.setAttribute('cx', ((e.clientX - rect.left) / rect.width * 100).toFixed(2) + '%');
-      revealGrad.setAttribute('cy', ((e.clientY - rect.top) / rect.height * 100).toFixed(2) + '%');
+      revealGrad.setAttribute('cx', ((e.clientX - rect.left) / rect.width  * 100).toFixed(2) + '%');
+      revealGrad.setAttribute('cy', ((e.clientY - rect.top)  / rect.height * 100).toFixed(2) + '%');
     });
   })();
   </script>

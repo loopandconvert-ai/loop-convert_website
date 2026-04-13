@@ -174,8 +174,8 @@
     <div class="container">
       <div class="footer-grid">
         <div class="footer-brand">
-          <div class="nav-logo">Loop <span class="accent">&</span> Convert</div>
-          <p>AI automations that work for your business 24/7 — so you don't have to.</p>
+          <div class="nav-logo">Loop <span class="accent">&amp;</span> Convert</div>
+          <p>AI automations that work for your business 24/7 &mdash; so you don&rsquo;t have to.</p>
         </div>
         <div class="footer-col">
           <h4>Company</h4>
@@ -186,62 +186,51 @@
           </ul>
         </div>
         <div class="footer-col">
-          <h4>Get Started</h4>
+          <h4>Services</h4>
           <ul>
-            <li><a href="book.html">Book a Call</a></li>
             <li><a href="websites.html">Websites</a></li>
-          <li><a href="websites.html">Websites</a>
-      <a href="roi.html">ROI Calculator</a></li>
+            <li><a href="roi.html">ROI Calculator</a></li>
           </ul>
         </div>
         <div class="footer-col">
-          <h4>Contact</h4>
+          <h4>Get Started</h4>
           <ul>
+            <li><a href="book.html">Book a Call</a></li>
             <li><a href="mailto:loopandconvert@gmail.com">loopandconvert@gmail.com</a></li>
             <li><a href="tel:+31625500911">+31 625 500 911</a></li>
           </ul>
         </div>
       </div>
+
       <!-- ─── Hover text ───────────────────────────────── -->
       <div class="footer-hover-text">
         <svg id="footerHoverSvg" width="100%" height="100%"
              viewBox="0 0 500 120" xmlns="http://www.w3.org/2000/svg"
              style="cursor:pointer;user-select:none;display:block;">
           <defs>
-            <radialGradient id="footerRevealMask" gradientUnits="userSpaceOnUse"
-                            cx="50%" cy="50%" r="20%">
+            <radialGradient id="footerRevealMask" gradientUnits="userSpaceOnUse" cx="50%" cy="50%" r="20%">
               <stop offset="0%" stop-color="white"/>
               <stop offset="100%" stop-color="black"/>
             </radialGradient>
             <mask id="footerTextMask">
               <rect x="0" y="0" width="100%" height="100%" fill="url(#footerRevealMask)"/>
             </mask>
-            <linearGradient id="footerTextGradient" gradientUnits="userSpaceOnUse"
-                            x1="0%" y1="0%" x2="100%" y2="0%">
+            <linearGradient id="footerTextGradient" gradientUnits="userSpaceOnUse" x1="0%" y1="0%" x2="100%" y2="0%">
             </linearGradient>
           </defs>
-
-          <!-- Outline shown on hover -->
-          <text id="footerOutlineText"
-                x="50%" y="52%" text-anchor="middle" dominant-baseline="middle"
+          <text id="footerOutlineText" x="50%" y="52%" text-anchor="middle" dominant-baseline="middle"
                 fill="none" stroke="#cccccc" stroke-width="0.3"
                 font-family="Helvetica,Arial,sans-serif" font-size="48" font-weight="700"
-                textLength="492" lengthAdjust="spacing"
-                style="opacity:0;transition:opacity .3s;">
+                textLength="492" lengthAdjust="spacing" style="opacity:0;transition:opacity .3s;">
             Loop &amp; Convert
           </text>
-
-          <!-- Draw-on animated stroke -->
-          <text id="footerDrawText"
-                x="50%" y="52%" text-anchor="middle" dominant-baseline="middle"
+          <text id="footerDrawText" x="50%" y="52%" text-anchor="middle" dominant-baseline="middle"
                 fill="none" stroke="#3a3a3a" stroke-width="0.3"
                 font-family="Helvetica,Arial,sans-serif" font-size="48" font-weight="700"
                 textLength="492" lengthAdjust="spacing"
                 stroke-dasharray="2000" stroke-dashoffset="2000">
             Loop &amp; Convert
           </text>
-
-          <!-- Hover reveal with gradient, clipped to border -->
           <text x="50%" y="52%" text-anchor="middle" dominant-baseline="middle"
                 fill="none" stroke="url(#footerTextGradient)" stroke-width="0.3"
                 mask="url(#footerTextMask)"
@@ -253,7 +242,7 @@
       </div>
 
       <div class="footer-bottom">
-        <p>© <span id="year"></span> Loop & Convert. All rights reserved.</p>
+        <p>&copy; <span id="year"></span> Loop &amp; Convert. All rights reserved.</p>
         <p>AI automation for forward-thinking businesses.</p>
       </div>
     </div>
@@ -261,9 +250,6 @@
 
   <script src="js/main.js"></script>
   <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
-
-
-  <!-- ─── Footer hover text ───────────────────────────────── -->
   <script>
   (function () {
     var svg        = document.getElementById('footerHoverSvg');
@@ -272,18 +258,11 @@
     var revealGrad = document.getElementById('footerRevealMask');
     var textGrad   = document.getElementById('footerTextGradient');
     if (!svg) return;
-
-    /* Trigger draw animation when footer scrolls into view */
     var drawn = false;
     var observer = new IntersectionObserver(function (entries) {
-      if (entries[0].isIntersecting && !drawn) {
-        drawn = true;
-        drawText.classList.add('footer-draw-anim');
-      }
+      if (entries[0].isIntersecting && !drawn) { drawn = true; drawText.classList.add('footer-draw-anim'); }
     }, { threshold: 0.3 });
     observer.observe(svg);
-
-    /* Mouse hover: show outline + gradient reveal */
     svg.addEventListener('mouseenter', function () {
       outline.style.opacity = '0.7';
       textGrad.innerHTML =
@@ -293,32 +272,16 @@
         '<stop offset="70%"  stop-color="#c0c0c0"/>' +
         '<stop offset="100%" stop-color="#ffffff"/>';
     });
-
     svg.addEventListener('mouseleave', function () {
       outline.style.opacity = '0';
       textGrad.innerHTML = '';
       revealGrad.setAttribute('cx', '50%');
       revealGrad.setAttribute('cy', '50%');
     });
-
-    /* Track cursor to move the reveal spotlight */
     svg.addEventListener('mousemove', function (e) {
       var rect = svg.getBoundingClientRect();
-      var cx = ((e.clientX - rect.left) / rect.width  * 100).toFixed(2) + '%';
-      var cy = ((e.clientY - rect.top)  / rect.height * 100).toFixed(2) + '%';
-      revealGrad.setAttribute('cx', cx);
-      revealGrad.setAttribute('cy', cy);
-    });
-  })();
-  </script>
-
-  <!-- ─── Spotlight card effect ──────────────────────────── -->
-  <script>
-  (function () {
-    var root = document.documentElement;
-    document.addEventListener('pointermove', function (e) {
-      root.style.setProperty('--x', e.clientX);
-      root.style.setProperty('--y', e.clientY);
+      revealGrad.setAttribute('cx', ((e.clientX - rect.left) / rect.width  * 100).toFixed(2) + '%');
+      revealGrad.setAttribute('cy', ((e.clientY - rect.top)  / rect.height * 100).toFixed(2) + '%');
     });
   })();
   </script>
