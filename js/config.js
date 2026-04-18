@@ -1,0 +1,4 @@
+window.LC_CONFIG = {
+  supabaseUrl: 'https://mjaqdjqlssxpymelugvq.supabase.co',
+  supabaseKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1qYXFkanFsc3N4cHltZWx1Z3ZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY0MzU4ODUsImV4cCI6MjA5MjAxMTg4NX0.IqAgySH7NLmiwD_VPC_qhegoTgARevYEN3hJstYo19Q'
+};

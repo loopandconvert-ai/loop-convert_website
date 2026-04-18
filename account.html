@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Account — Loop &amp; Convert</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="icon" type="image/png" href="images/logo.png" />
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    body { background: #0a0a0a; }
+
+    /* ── App navbar ── */
+    .app-navbar {
+      position: sticky; top: 0; z-index: 50;
+      background: rgba(10,10,10,.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid #1e1e1e;
+      padding: 0 2rem;
+    }
+    .app-navbar-inner {
+      max-width: 1200px; margin: 0 auto; height: 64px;
+      display: flex; align-items: center; justify-content: space-between; gap: 1.5rem;
+    }
+    .app-nav-logo {
+      font-size: 1.1rem; font-weight: 800; color: #fff;
+      text-decoration: none; letter-spacing: -.02em; flex-shrink: 0;
+    }
+    .app-nav-links { display: flex; gap: .25rem; list-style: none; padding: 0; margin: 0; }
+    .app-nav-links a {
+      padding: .4rem .85rem; font-size: .85rem; font-weight: 500;
+      color: #888; text-decoration: none; border-radius: 6px;
+      transition: color .15s, background .15s;
+    }
+    .app-nav-links a:hover,
+    .app-nav-links a.active { color: #fff; background: #1a1a1a; }
+
+    /* ── User pill ── */
+    .user-pill {
+      display: flex; align-items: center; gap: .55rem;
+      background: #141414; border: 1px solid #222;
+      border-radius: 999px; padding: .3rem .7rem .3rem .35rem;
+      font-size: .82rem; color: #ccc; cursor: pointer; position: relative; flex-shrink: 0;
+    }
+    .user-avatar {
+      width: 26px; height: 26px; border-radius: 50%;
+      background: #fff; color: #000; font-weight: 700; font-size: .72rem;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .user-menu {
+      position: absolute; top: calc(100% + .5rem); right: 0;
+      background: #141414; border: 1px solid #222;
+      border-radius: 8px; min-width: 180px; overflow: hidden;
+      display: none; z-index: 100; box-shadow: 0 8px 32px rgba(0,0,0,.5);
+    }
+    .user-menu.open { display: block; }
+    .user-menu-header { padding: .75rem 1rem; border-bottom: 1px solid #1e1e1e; }
+    .user-menu-name  { font-size: .85rem; font-weight: 600; color: #fff; }
+    .user-menu-email { font-size: .75rem; color: #555; margin-top: .1rem; }
+    .user-menu-plan {
+      display: inline-flex; align-items: center;
+      margin-top: .5rem; padding: .15rem .55rem;
+      font-size: .7rem; font-weight: 600; letter-spacing: .03em; text-transform: uppercase;
+      background: rgba(255,255,255,.06); border: 1px solid #2a2a2a;
+      border-radius: 999px; color: #888;
+    }
+    .user-menu a, .user-menu button {
+      display: flex; align-items: center; gap: .5rem;
+      width: 100%; text-align: left;
+      padding: .6rem 1rem; font-size: .82rem; color: #aaa;
+      text-decoration: none; background: none; border: none;
+      cursor: pointer; font-family: inherit;
+      border-top: 1px solid #1e1e1e; transition: background .15s, color .15s;
+    }
+    .user-menu a:hover { background: #1e1e1e; color: #fff; }
+    .user-menu button { color: #f87171; }
+    .user-menu button:hover { background: #1e1e1e; }
+
+    /* ── Page layout ── */
+    .account-wrap {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 3rem 2rem 6rem;
+    }
+    .account-page-title {
+      font-size: 1.5rem; font-weight: 700; color: #fff; margin-bottom: .3rem;
+    }
+    .account-page-sub {
+      font-size: .875rem; color: #555; margin-bottom: 3rem;
+    }
+
+    /* ── Section ── */
+    .account-section {
+      background: #111;
+      border: 1px solid #1e1e1e;
+      border-radius: 14px;
+      overflow: hidden;
+      margin-bottom: 1.5rem;
+    }
+    .account-section-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    .account-section-title {
+      font-size: .8rem; font-weight: 700; letter-spacing: .06em;
+      text-transform: uppercase; color: #555;
+    }
+
+    /* ── Field row ── */
+    .account-field {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid #141414;
+      gap: 1rem;
+    }
+    .account-field:last-child { border-bottom: none; }
+    .account-field-label { font-size: .8rem; color: #555; font-weight: 500; min-width: 120px; }
+    .account-field-value { font-size: .9rem; color: #ccc; flex: 1; }
+    .account-field-action {
+      font-size: .8rem; color: #555; font-weight: 500; cursor: pointer;
+      background: none; border: none; font-family: inherit;
+      padding: .3rem .6rem; border-radius: 6px; transition: color .15s, background .15s;
+      flex-shrink: 0;
+    }
+    .account-field-action:hover { color: #fff; background: #1e1e1e; }
+
+    /* ── Plan cards ── */
+    .plan-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 1rem; padding: 1.25rem 1.5rem;
+    }
+    .plan-card {
+      border: 1px solid #1e1e1e; border-radius: 10px;
+      padding: 1.25rem; position: relative;
+      transition: border-color .15s;
+    }
+    .plan-card.current { border-color: #333; }
+    .plan-card-name { font-size: .85rem; font-weight: 700; color: #fff; margin-bottom: .3rem; }
+    .plan-card-price { font-size: 1.4rem; font-weight: 800; color: #fff; margin-bottom: .6rem; }
+    .plan-card-price span { font-size: .8rem; font-weight: 400; color: #555; }
+    .plan-card-features { list-style: none; padding: 0; margin: 0 0 1.25rem; }
+    .plan-card-features li {
+      display: flex; align-items: center; gap: .5rem;
+      font-size: .8rem; color: #666; padding: .2rem 0;
+    }
+    .plan-card-features li svg { flex-shrink: 0; color: #4ade80; }
+    .plan-card-features li.disabled svg { color: #333; }
+    .plan-card-features li.disabled { color: #333; }
+    .plan-badge {
+      position: absolute; top: .75rem; right: .75rem;
+      font-size: .65rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
+      padding: .2rem .55rem; border-radius: 999px;
+      background: rgba(255,255,255,.08); color: #888; border: 1px solid #2a2a2a;
+    }
+    .plan-badge.pro { background: rgba(251,191,36,.1); color: #fbbf24; border-color: rgba(251,191,36,.2); }
+    .plan-btn {
+      display: block; width: 100%; text-align: center;
+      padding: .55rem; font-size: .82rem; font-weight: 600;
+      border-radius: 8px; border: none; cursor: pointer;
+      font-family: inherit; text-decoration: none; transition: all .15s;
+    }
+    .plan-btn-outline {
+      background: none; border: 1px solid #222; color: #555;
+    }
+    .plan-btn-primary {
+      background: #fff; color: #000;
+    }
+    .plan-btn-primary:hover { background: #e5e5e5; }
+
+    /* ── Billing rows ── */
+    .billing-empty {
+      padding: 2rem 1.5rem; text-align: center; color: #444; font-size: .875rem;
+    }
+    .billing-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: .9rem 1.5rem; border-bottom: 1px solid #141414; gap: 1rem;
+    }
+    .billing-row:last-child { border-bottom: none; }
+    .billing-row-date { font-size: .8rem; color: #555; min-width: 110px; }
+    .billing-row-desc { font-size: .85rem; color: #ccc; flex: 1; }
+    .billing-row-amount { font-size: .85rem; color: #fff; font-weight: 600; }
+    .billing-status {
+      font-size: .7rem; font-weight: 600; padding: .2rem .55rem;
+      border-radius: 999px; text-transform: uppercase; letter-spacing: .04em;
+    }
+    .billing-status-paid { background: rgba(74,222,128,.1); color: #4ade80; }
+
+    /* ── Danger zone ── */
+    .danger-zone-body { padding: 1.25rem 1.5rem; }
+    .danger-zone-body p { font-size: .85rem; color: #555; margin-bottom: 1rem; }
+    .btn-danger {
+      display: inline-flex; align-items: center; gap: .4rem;
+      padding: .5rem 1rem; font-size: .82rem; font-weight: 600;
+      border: 1px solid rgba(248,113,113,.25); border-radius: 8px;
+      color: #f87171; background: rgba(248,113,113,.06);
+      cursor: pointer; font-family: inherit; transition: all .15s;
+    }
+    .btn-danger:hover { background: rgba(248,113,113,.12); border-color: rgba(248,113,113,.4); }
+
+    @media (max-width: 560px) {
+      .plan-grid { grid-template-columns: 1fr; }
+      .account-field { flex-wrap: wrap; }
+    }
+  </style>
+</head>
+<body data-page="auth-required">
+
+  <!-- ─── App Navbar ──────────────────────────────────── -->
+  <header class="app-navbar">
+    <div class="app-navbar-inner">
+      <a href="dashboard.html" class="app-nav-logo">Loop <span class="accent">&amp;</span> Convert</a>
+      <ul class="app-nav-links">
+        <li><a href="dashboard.html">Dashboard</a></li>
+        <li><a href="upload-pro.html">+ Upload</a></li>
+      </ul>
+      <div class="user-pill" id="user-pill" style="display:none;">
+        <div class="user-avatar" id="user-avatar">?</div>
+        <span id="user-label">…</span>
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+        <div class="user-menu" id="user-menu">
+          <div class="user-menu-header">
+            <div class="user-menu-name" id="menu-name">—</div>
+            <div class="user-menu-email" id="menu-email">—</div>
+            <div class="user-menu-plan" id="menu-plan">Free plan</div>
+          </div>
+          <a href="account.html" class="active">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/></svg>
+            Account settings
+          </a>
+          <a href="account.html#plan">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/></svg>
+            My plan
+          </a>
+          <a href="account.html#billing">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"/></svg>
+            Billing
+          </a>
+          <a href="upload-pro.html">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/></svg>
+            Upload contract
+          </a>
+          <button id="sign-out-btn">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75"/></svg>
+            Sign out
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ─── Content ──────────────────────────────────────── -->
+  <div class="account-wrap">
+
+    <div class="account-page-title">Account</div>
+    <div class="account-page-sub">Manage your profile, plan, and billing.</div>
+
+    <!-- Profile -->
+    <div class="account-section">
+      <div class="account-section-header">
+        <div class="account-section-title">Profile</div>
+      </div>
+      <div class="account-field">
+        <div class="account-field-label">Full name</div>
+        <div class="account-field-value" id="profile-name">—</div>
+        <button class="account-field-action">Edit</button>
+      </div>
+      <div class="account-field">
+        <div class="account-field-label">Firm name</div>
+        <div class="account-field-value" id="profile-firm">—</div>
+        <button class="account-field-action">Edit</button>
+      </div>
+      <div class="account-field">
+        <div class="account-field-label">Email</div>
+        <div class="account-field-value" id="profile-email">—</div>
+        <button class="account-field-action">Edit</button>
+      </div>
+      <div class="account-field">
+        <div class="account-field-label">Password</div>
+        <div class="account-field-value">••••••••••</div>
+        <button class="account-field-action">Change</button>
+      </div>
+    </div>
+
+    <!-- Plan -->
+    <div class="account-section" id="plan">
+      <div class="account-section-header">
+        <div class="account-section-title">Plan</div>
+      </div>
+      <div class="plan-grid">
+
+        <!-- Free -->
+        <div class="plan-card current" id="plan-free">
+          <div class="plan-badge" id="plan-free-badge">Current</div>
+          <div class="plan-card-name">Free</div>
+          <div class="plan-card-price">€0 <span>/ month</span></div>
+          <ul class="plan-card-features">
+            <li>
+              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+              2 contract analyses
+            </li>
+            <li>
+              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+              Risk summary
+            </li>
+            <li class="disabled">
+              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+              Unlimited uploads
+            </li>
+            <li class="disabled">
+              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+              Dashboard history
+            </li>
+            <li class="disabled">
+              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+              Priority support
+            </li>
+          </ul>
+          <span class="plan-btn plan-btn-outline" style="display:block;text-align:center;padding:.55rem;font-size:.82rem;font-weight:600;border-radius:8px;border:1px solid #222;color:#444;">Current plan</span>
+        </div>
+
+        <!-- Pro -->
+        <div class="plan-card" id="plan-pro">
+          <div class="plan-badge pro">Pro</div>
+          <div class="plan-card-name">Pro</div>
+          <div class="plan-card-price">Custom <span>pricing</span></div>
+          <ul class="plan-card-features">
+            <li>
+              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+              Unlimited analyses
+            </li>
+            <li>
+              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+              Full dashboard history
+            </li>
+            <li>
+              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+              Red flags &amp; questions
+            </li>
+            <li>
+              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+              Priority support
+            </li>
+            <li>
+              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+              Onboarding call
+            </li>
+          </ul>
+          <a href="book.html" class="plan-btn plan-btn-primary">Book a call →</a>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Billing -->
+    <div class="account-section" id="billing">
+      <div class="account-section-header">
+        <div class="account-section-title">Billing history</div>
+      </div>
+      <div class="billing-empty" id="billing-empty">
+        No invoices yet. Upgrade to Pro to start billing.
+      </div>
+      <div id="billing-rows" style="display:none;"></div>
+    </div>
+
+    <!-- Danger zone -->
+    <div class="account-section">
+      <div class="account-section-header">
+        <div class="account-section-title" style="color:#f87171;">Danger zone</div>
+      </div>
+      <div class="danger-zone-body">
+        <p>Permanently delete your account and all associated data. This action cannot be undone.</p>
+        <button class="btn-danger" id="delete-account-btn">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>
+          Delete account
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/main.js"></script>
+  <script src="js/auth.js"></script>
+
+  <script>
+  (function () {
+    var pill    = document.getElementById('user-pill');
+    var avatar  = document.getElementById('user-avatar');
+    var label   = document.getElementById('user-label');
+    var menu    = document.getElementById('user-menu');
+    var signOut = document.getElementById('sign-out-btn');
+
+    document.addEventListener('lc:session', function (e) {
+      var session = e.detail;
+      if (!session) return;
+      var meta  = session.user.user_metadata || {};
+      var name  = meta.full_name || session.user.email;
+      var firstName = name.split(' ')[0];
+
+      avatar.textContent = firstName.charAt(0).toUpperCase();
+      label.textContent  = firstName;
+      pill.style.display = 'flex';
+
+      var menuName  = document.getElementById('menu-name');
+      var menuEmail = document.getElementById('menu-email');
+      if (menuName)  menuName.textContent  = name;
+      if (menuEmail) menuEmail.textContent = session.user.email;
+
+      // Fill profile fields
+      document.getElementById('profile-name').textContent  = name || '—';
+      document.getElementById('profile-firm').textContent  = meta.firm_name || '—';
+      document.getElementById('profile-email').textContent = session.user.email || '—';
+    });
+
+    pill.addEventListener('click', function (e) { e.stopPropagation(); menu.classList.toggle('open'); });
+    document.addEventListener('click', function () { menu.classList.remove('open'); });
+    signOut.addEventListener('click', function () { if (window.LC_AUTH) window.LC_AUTH.signOut(); });
+
+    // Delete account confirmation
+    document.getElementById('delete-account-btn').addEventListener('click', function () {
+      if (confirm('Are you sure? This will permanently delete your account and all data. This cannot be undone.')) {
+        alert('To complete account deletion, please contact loopandconvert@gmail.com from your registered email address.');
+      }
+    });
+
+    // Scroll to anchor on load
+    if (window.location.hash) {
+      setTimeout(function () {
+        var el = document.querySelector(window.location.hash);
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 300);
+    }
+  })();
+  </script>
+</body>
+</html>

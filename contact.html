@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Book a Call — Loop & Convert</title>
-  <meta name="description" content="Schedule a free 30-minute discovery call with Loop & Convert. Pick a time and let's map out your AI automation strategy." />
+  <title>Contact — Loop & Convert</title>
+  <meta name="description" content="Get in touch with Loop & Convert. We reply within 24 hours." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
@@ -21,9 +21,10 @@
         <ul class="nav-links">
           <li><a href="index.html">Home</a></li>
           <li><a href="about.html">About</a></li>
-          <li><a href="websites.html">Websites</a></li>
           <li><a href="roi.html">ROI Calculator</a></li>
           <li><a href="contact.html">Contact</a></li>
+          <li><a href="upload.html">Contract AI</a></li>
+          <li><a href="login.html" id="nav-auth-link">Log In</a></li>
           <li class="nav-cta"><a href="book.html" class="btn btn-primary">Book a Call</a></li>
         </ul>
       </nav>
@@ -34,9 +35,10 @@
     <div class="mobile-menu">
       <a href="index.html">Home</a>
       <a href="about.html">About</a>
-      <a href="websites.html">Websites</a>
       <a href="roi.html">ROI Calculator</a>
       <a href="contact.html">Contact</a>
+      <a href="upload.html">Contract AI</a>
+      <a href="login.html" id="mob-auth-link">Log In</a>
       <a href="book.html" class="btn btn-primary">Book a Call</a>
     </div>
   </header>
@@ -44,113 +46,90 @@
   <!-- ─── Page Header ────────────────────────────────────── -->
   <section class="page-header">
     <div class="container">
-      <div class="eyebrow">Let's Meet</div>
-      <h1>Book a Discovery Call</h1>
+      <div class="eyebrow">Get In Touch</div>
+      <h1>Let's talk</h1>
       <p class="lead">
-        Pick a time that works for you. In 30 minutes we'll map out how AI automation
-        can save you time and grow your business.
+        Have a question or want to explore how AI automation can help your business?
+        Send us a message and we'll get back to you within 24 hours.
       </p>
     </div>
   </section>
 
   <hr class="divider" />
 
-  <!-- ─── Booking ─────────────────────────────────────────── -->
+  <!-- ─── Contact Form ────────────────────────────────────── -->
   <section>
     <div class="container">
+      <div class="contact-grid">
 
-      <!-- Feature chips -->
-      <div class="book-features">
-        <div class="book-feature">
-          <div class="book-feature-icon">
-            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        <!-- Form -->
+        <div>
+          <!--
+            HOW TO ACTIVATE THIS FORM:
+            1. Go to https://formspree.io and sign up for free
+            2. Create a new form — it gives you a form ID like "xpwzknqb"
+            3. Replace YOUR_FORM_ID in the action URL below
+            4. Also replace the email address in the info column on the right
+          -->
+          <form
+            id="contact-form"
+            action="https://formspree.io/f/YOUR_FORM_ID"
+            method="POST"
+          >
+            <div class="form-row">
+              <div class="form-group">
+                <label for="name">Name</label>
+                <input type="text" id="name" name="name" placeholder="Your name" required />
+              </div>
+              <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" placeholder="your@email.com" required />
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="company">Company <span style="color:var(--grey-400); font-weight:400;">(optional)</span></label>
+              <input type="text" id="company" name="company" placeholder="Your company name" />
+            </div>
+            <div class="form-group">
+              <label for="message">Message</label>
+              <textarea id="message" name="message" placeholder="Tell us about your business and what you'd like to automate…" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary form-submit">Send Message</button>
+            <p id="form-error" class="form-error-msg">Something went wrong. Please try again or email us directly.</p>
+          </form>
+
+          <!-- Success state -->
+          <div id="form-success" class="form-success">
+            <svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
-          </div>
-          <div>
-            <div class="book-feature-label">30 minutes</div>
-            <div class="book-feature-sub">Quick, focused, no fluff</div>
+            <h3>Message sent!</h3>
+            <p>We'll get back to you within 24 hours.</p>
           </div>
         </div>
-        <div class="book-feature">
-          <div class="book-feature-icon">
-            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.069A1 1 0 0121 8.882v6.236a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
-            </svg>
+
+        <!-- Info column -->
+        <div class="contact-info">
+          <div class="info-block">
+            <h4>Prefer to book directly?</h4>
+            <p>Skip the back-and-forth and grab a time that works for you.</p>
+            <br/>
+            <a href="book.html">Book a discovery call →</a>
           </div>
-          <div>
-            <div class="book-feature-label">Zoom call</div>
-            <div class="book-feature-sub">Link sent on confirmation</div>
+          <hr class="info-divider" />
+          <div class="info-block">
+            <h4>Response time</h4>
+            <p>We reply to all messages within 24 hours on business days.</p>
+          </div>
+          <hr class="info-divider" />
+          <div class="info-block">
+            <h4>Email</h4>
+            <!-- ← Replace with your real email address -->
+            <a href="mailto:loopandconvert@gmail.com">loopandconvert@gmail.com</a>
           </div>
         </div>
-        <div class="book-feature">
-          <div class="book-feature-icon">
-            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
-          </div>
-          <div>
-            <div class="book-feature-label">100% Free</div>
-            <div class="book-feature-sub">No commitment required</div>
-          </div>
-        </div>
+
       </div>
-
-      <div
-        id="cal-inline"
-        data-cal-link="iulian-bostan/30min"
-        data-cal-namespace="discovery"
-        data-cal-config='{"layout":"month_view"}'
-        style="width:100%;height:700px;overflow:scroll;border:1.5px solid #E5E7EB;border-radius:20px;"
-      ></div>
-
-      <script type="text/javascript">
-        (function (C, A, L) {
-          let p = function (a, ar) { a.q.push(ar); };
-          let d = C.document;
-          C.Cal = C.Cal || function () {
-            let cal = C.Cal; let ar = arguments;
-            if (!cal.loaded) {
-              cal.ns = {}; cal.q = cal.q || [];
-              d.head.appendChild(d.createElement("script")).src = A;
-              cal.loaded = true;
-            }
-            if (ar[0] === L) {
-              const api = function () { p(api, arguments); };
-              const namespace = ar[1]; api.q = api.q || [];
-              if (typeof namespace === "string") {
-                cal.ns[namespace] = cal.ns[namespace] || api;
-                p(cal.ns[namespace], ar); p(cal, [L, namespace, api]);
-              } else p(cal, ar); return;
-            }
-            p(cal, ar);
-          };
-        })(window, "https://app.cal.com/embed/embed.js", "init");
-        Cal("init", "discovery", { origin: "https://cal.com" });
-        Cal.ns.discovery("inline", {
-          elementOrSelector: "#cal-inline",
-          calLink: "iulian-bostan/30min",
-          layout: "month_view"
-        });
-        Cal.ns.discovery("ui", { hideEventTypeDetails: false, layout: "month_view" });
-      </script>
-
-      <!-- What to expect -->
-      <div class="what-expect-grid">
-        <div class="expect-card">
-          <h3>Understand your business</h3>
-          <p>We start by learning about your current workflows, tools, and biggest time drains.</p>
-        </div>
-        <div class="expect-card">
-          <h3>Identify automation opportunities</h3>
-          <p>Together we map out exactly where AI can have the biggest impact — immediately.</p>
-        </div>
-        <div class="expect-card">
-          <h3>Walk away with a plan</h3>
-          <p>You leave with a clear, actionable roadmap — whether you work with us or not.</p>
-        </div>
-      </div>
-
     </div>
   </section>
 
@@ -171,9 +150,10 @@
           </ul>
         </div>
         <div class="footer-col">
-          <h4>Services</h4>
+          <h4>Product</h4>
           <ul>
-            <li><a href="websites.html">Websites</a></li>
+            <li><a href="upload.html">Contract AI</a></li>
+            <li><a href="dashboard.html">Dashboard</a></li>
             <li><a href="roi.html">ROI Calculator</a></li>
           </ul>
         </div>

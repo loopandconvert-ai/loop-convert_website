@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Loop & Convert — AI Automation for Your Business</title>
-  <meta name="description" content="Loop & Convert builds custom AI solutions — voice agents, chatbots, automations, and intelligent workflows — that grow your business 24/7. Book a free discovery call today." />
+  <title>Contract Review ROI Calculator — Loop &amp; Convert</title>
+  <meta name="description" content="Calculate how many hours and how much money your law firm saves by using AI contract analysis instead of manual review." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
@@ -21,9 +21,10 @@
         <ul class="nav-links">
           <li><a href="index.html">Home</a></li>
           <li><a href="about.html">About</a></li>
-          <li><a href="websites.html">Websites</a></li>
           <li><a href="roi.html">ROI Calculator</a></li>
           <li><a href="contact.html">Contact</a></li>
+          <li><a href="upload.html">Contract AI</a></li>
+          <li><a href="login.html" id="nav-auth-link">Log In</a></li>
           <li class="nav-cta"><a href="book.html" class="btn btn-primary">Book a Call</a></li>
         </ul>
       </nav>
@@ -34,46 +35,94 @@
     <div class="mobile-menu">
       <a href="index.html">Home</a>
       <a href="about.html">About</a>
-      <a href="websites.html">Websites</a>
       <a href="roi.html">ROI Calculator</a>
       <a href="contact.html">Contact</a>
+      <a href="upload.html">Contract AI</a>
+      <a href="login.html" id="mob-auth-link">Log In</a>
       <a href="book.html" class="btn btn-primary">Book a Call</a>
     </div>
   </header>
 
-  <!-- ─── Hero ───────────────────────────────────────────── -->
-  <section class="hero">
-    <div class="hero-orb hero-orb-1"></div>
-    <div class="hero-orb hero-orb-2"></div>
-    <div class="hero-orb hero-orb-3"></div>
+  <!-- ─── Page Header ────────────────────────────────────── -->
+  <section class="page-header">
+    <div class="container">
+      <div class="eyebrow"><span class="dot"></span>Free Tool</div>
+      <h1>How much is manual contract review <span class="accent">costing you?</span></h1>
+      <p class="lead">Move the sliders to match your firm's workload and see exactly how much time and money AI contract analysis saves you every year.</p>
+    </div>
+  </section>
 
-    <div class="container hero-content">
-      <div class="hero-tag">
-        <span class="dot"></span>
-        AI Automation Agency
-      </div>
-      <h1>AI automations that grow your business while you sleep</h1>
-      <p class="hero-sub">
-        Loop &amp; Convert builds custom AI solutions — from voice agents and intelligent chatbots
-        to full automation systems and custom AI tools — that run your business 24/7,
-        so you can focus on what moves the needle.
-      </p>
-      <div class="hero-actions">
-        <a href="book.html" class="btn btn-primary">Book a Free Discovery Call →</a>
-        <a href="about.html" class="btn btn-secondary">Learn More</a>
-      </div>
-      <div class="hero-stats">
-        <div>
-          <div class="stat-value">24/7</div>
-          <div class="stat-label">Your business runs</div>
+  <hr class="divider" />
+
+  <!-- ─── Calculator ─────────────────────────────────────── -->
+  <section>
+    <div class="container">
+      <div class="roi-grid">
+
+        <!-- Inputs -->
+        <div class="roi-inputs">
+
+          <div class="slider-group">
+            <div class="slider-label-row">
+              <label class="slider-label" for="contracts">Contracts reviewed per week</label>
+              <span class="slider-value" id="contracts-val">10</span>
+            </div>
+            <input type="range" id="contracts" min="1" max="100" value="10" step="1" />
+            <p class="slider-hint">NDAs, service agreements, leases, employment contracts — all count.</p>
+          </div>
+
+          <div class="slider-group">
+            <div class="slider-label-row">
+              <label class="slider-label" for="hours-per">Hours spent per contract (manual)</label>
+              <span class="slider-value" id="hours-per-val">2.5 hrs</span>
+            </div>
+            <input type="range" id="hours-per" min="0.5" max="8" value="2.5" step="0.5" />
+            <p class="slider-hint">Average time to read, flag risks, and summarise a contract manually.</p>
+          </div>
+
+          <div class="slider-group">
+            <div class="slider-label-row">
+              <label class="slider-label" for="rate">Attorney hourly billing rate</label>
+              <span class="slider-value" id="rate-val">€250</span>
+            </div>
+            <input type="range" id="rate" min="50" max="800" value="250" step="25" />
+            <p class="slider-hint">The rate at which your firm bills clients — or your own cost per hour.</p>
+          </div>
+
+          <div class="slider-group">
+            <div class="slider-label-row">
+              <label class="slider-label" for="recovery">% of review time that is billable</label>
+              <span class="slider-value" id="recovery-val">60%</span>
+            </div>
+            <input type="range" id="recovery" min="0" max="100" value="60" step="5" />
+            <p class="slider-hint">How much of your contract review time do you actually bill to a client?</p>
+          </div>
+
         </div>
-        <div>
-          <div class="stat-value">100%</div>
-          <div class="stat-label">Custom built for you</div>
-        </div>
-        <div>
-          <div class="stat-value">0</div>
-          <div class="stat-label">Manual outreach needed</div>
+
+        <!-- Results -->
+        <div class="roi-results">
+
+          <div class="roi-result-card">
+            <div class="roi-result-value" id="r-hours-saved">0</div>
+            <div class="roi-result-label">Hours saved per month</div>
+          </div>
+
+          <div class="roi-result-card">
+            <div class="roi-result-value" id="r-cost-saved">€0</div>
+            <div class="roi-result-label">Attorney time freed per month</div>
+          </div>
+
+          <div class="roi-result-card">
+            <div class="roi-result-value" id="r-billable">€0</div>
+            <div class="roi-result-label">Extra billable hours unlocked / month</div>
+          </div>
+
+          <div class="roi-result-card highlight">
+            <div class="roi-result-value" id="r-annual">€0</div>
+            <div class="roi-result-label">Estimated annual value</div>
+          </div>
+
         </div>
       </div>
     </div>
@@ -81,90 +130,16 @@
 
   <hr class="divider" />
 
-  <!-- ─── Services ───────────────────────────────────────── -->
-  <section>
-    <div class="container">
-      <div class="section-header">
-        <div class="eyebrow"><span class="dot"></span>What We Do</div>
-        <h2>Automation built for results</h2>
-        <p>We handle the entire build — from strategy to deployment — so you get a system that works from day one.</p>
-      </div>
-      <div class="services-grid">
-
-        <div class="service-card">
-          <div class="service-icon">
-            <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-            </svg>
-          </div>
-          <h3>AI Outreach & Lead Generation</h3>
-          <p>Build AI-powered outreach systems that find qualified leads, craft personalised emails, and book meetings automatically — at a scale no human team could match.</p>
-        </div>
-
-        <div class="service-card">
-          <div class="service-icon">
-            <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-            </svg>
-          </div>
-          <h3>Custom AI Workflows</h3>
-          <p>We design and build end-to-end AI workflows that connect your tools, eliminate manual tasks, and make intelligent decisions — running 24/7 without any intervention.</p>
-        </div>
-
-        <div class="service-card">
-          <div class="service-icon">
-            <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
-            </svg>
-          </div>
-          <h3>AI Agents & Voice Solutions</h3>
-          <p>Deploy AI voice agents that handle inbound calls and qualify leads around the clock, or intelligent chat agents on your website and social media that convert visitors into customers.</p>
-        </div>
-
-      </div>
-    </div>
-  </section>
-
-  <!-- ─── How It Works ────────────────────────────────────── -->
-  <section class="how-bg">
-    <div class="container">
-      <div class="section-header">
-        <div class="eyebrow">The Process</div>
-        <h2>From call to fully automated — fast</h2>
-      </div>
-      <div class="steps-grid">
-        <div class="step">
-          <div class="step-num">01</div>
-          <div>
-            <h3>Discovery Call</h3>
-            <p>We map out your business, your current workflows, and exactly where AI can make the biggest impact.</p>
-          </div>
-        </div>
-        <div class="step">
-          <div class="step-num">02</div>
-          <div>
-            <h3>We Build It</h3>
-            <p>Our team designs and deploys your custom automation system — tailored to your tools, your niche, your goals.</p>
-          </div>
-        </div>
-        <div class="step">
-          <div class="step-num">03</div>
-          <div>
-            <h3>It Runs Itself</h3>
-            <p>Sit back while your automations handle outreach, lead nurturing, and operations 24 hours a day.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
   <!-- ─── CTA Banner ──────────────────────────────────────── -->
   <section>
     <div class="container">
       <div class="cta-banner">
-        <h2>Ready to run your business on autopilot?</h2>
-        <p>Book a free 30-minute discovery call and we'll map out exactly how AI can save you time and drive more revenue.</p>
-        <a href="book.html" class="btn btn-primary">Book Your Free Call →</a>
+        <h2>Ready to reclaim those hours?</h2>
+        <p>Upload your first contract free and see a full AI analysis in under 3 minutes — no credit card, no commitment.</p>
+        <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
+          <a href="upload.html" class="btn btn-primary">Try It Free →</a>
+          <a href="book.html" class="btn btn-secondary">Book a Demo Call</a>
+        </div>
       </div>
     </div>
   </section>
@@ -175,7 +150,7 @@
       <div class="footer-grid">
         <div class="footer-brand">
           <div class="nav-logo">Loop <span class="accent">&amp;</span> Convert</div>
-          <p>AI automations that work for your business 24/7 &mdash; so you don&rsquo;t have to.</p>
+          <p>AI contract analysis for law firms &mdash; full review in under 3 minutes.</p>
         </div>
         <div class="footer-col">
           <h4>Company</h4>
@@ -186,9 +161,10 @@
           </ul>
         </div>
         <div class="footer-col">
-          <h4>Services</h4>
+          <h4>Product</h4>
           <ul>
-            <li><a href="websites.html">Websites</a></li>
+            <li><a href="upload.html">Contract AI</a></li>
+            <li><a href="dashboard.html">Dashboard</a></li>
             <li><a href="roi.html">ROI Calculator</a></li>
           </ul>
         </div>
@@ -243,13 +219,56 @@
 
       <div class="footer-bottom">
         <p>&copy; <span id="year"></span> Loop &amp; Convert. All rights reserved.</p>
-        <p>AI automation for forward-thinking businesses.</p>
+        <p>AI contract analysis for forward-thinking law firms.</p>
       </div>
     </div>
   </footer>
 
   <script src="js/main.js"></script>
   <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+  <script>
+  (function () {
+    var contractsEl  = document.getElementById('contracts');
+    var hoursPerEl   = document.getElementById('hours-per');
+    var rateEl       = document.getElementById('rate');
+    var recoveryEl   = document.getElementById('recovery');
+
+    function fmt(n) {
+      if (n >= 1000) return '€' + Math.round(n).toLocaleString('en-GB');
+      return '€' + Math.round(n);
+    }
+
+    function calc() {
+      var contracts  = +contractsEl.value;
+      var hoursEach  = +hoursPerEl.value;
+      var rate       = +rateEl.value;
+      var recovery   = +recoveryEl.value / 100;
+
+      var weeklyHours  = contracts * hoursEach;
+      var monthlyHours = weeklyHours * 4.33;
+      var savedHours   = monthlyHours * 0.85; // AI handles ~85% of the reading time
+
+      var costSaved    = savedHours * rate;
+      var billableGain = savedHours * recovery * rate;
+      var annual       = (costSaved + billableGain) * 12;
+
+      document.getElementById('contracts-val').textContent = contracts;
+      document.getElementById('hours-per-val').textContent = hoursEach + ' hrs';
+      document.getElementById('rate-val').textContent      = '€' + rate;
+      document.getElementById('recovery-val').textContent  = Math.round(recovery * 100) + '%';
+
+      document.getElementById('r-hours-saved').textContent = Math.round(savedHours) + 'h';
+      document.getElementById('r-cost-saved').textContent  = fmt(costSaved);
+      document.getElementById('r-billable').textContent    = fmt(billableGain);
+      document.getElementById('r-annual').textContent      = fmt(annual);
+    }
+
+    [contractsEl, hoursPerEl, rateEl, recoveryEl].forEach(function(el) {
+      el.addEventListener('input', calc);
+    });
+    calc();
+  })();
+  </script>
   <script>
   (function () {
     var svg        = document.getElementById('footerHoverSvg');

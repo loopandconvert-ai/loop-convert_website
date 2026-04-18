@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AI ROI Calculator — Loop & Convert</title>
-  <meta name="description" content="Calculate how much time and money your business could save by implementing AI automation. See your estimated annual value in seconds." />
+  <title>Book a Call — Loop & Convert</title>
+  <meta name="description" content="Schedule a free 30-minute discovery call with Loop & Convert. Pick a time and let's map out your AI automation strategy." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
@@ -21,9 +21,10 @@
         <ul class="nav-links">
           <li><a href="index.html">Home</a></li>
           <li><a href="about.html">About</a></li>
-          <li><a href="websites.html">Websites</a></li>
           <li><a href="roi.html">ROI Calculator</a></li>
           <li><a href="contact.html">Contact</a></li>
+          <li><a href="upload.html">Contract AI</a></li>
+          <li><a href="login.html" id="nav-auth-link">Log In</a></li>
           <li class="nav-cta"><a href="book.html" class="btn btn-primary">Book a Call</a></li>
         </ul>
       </nav>
@@ -34,9 +35,10 @@
     <div class="mobile-menu">
       <a href="index.html">Home</a>
       <a href="about.html">About</a>
-      <a href="websites.html">Websites</a>
       <a href="roi.html">ROI Calculator</a>
       <a href="contact.html">Contact</a>
+      <a href="upload.html">Contract AI</a>
+      <a href="login.html" id="mob-auth-link">Log In</a>
       <a href="book.html" class="btn btn-primary">Book a Call</a>
     </div>
   </header>
@@ -44,98 +46,113 @@
   <!-- ─── Page Header ────────────────────────────────────── -->
   <section class="page-header">
     <div class="container">
-      <div class="eyebrow"><span class="dot"></span> Free Tool</div>
-      <h1>Calculate your <span class="accent">AI ROI</span></h1>
-      <p class="lead">See exactly how much time and money your business could save by automating with AI. Move the sliders and watch the numbers update in real time.</p>
+      <div class="eyebrow">Let's Meet</div>
+      <h1>Book a Discovery Call</h1>
+      <p class="lead">
+        Pick a time that works for you. In 30 minutes we'll map out how AI automation
+        can save you time and grow your business.
+      </p>
     </div>
   </section>
 
   <hr class="divider" />
 
-  <!-- ─── Calculator ─────────────────────────────────────── -->
+  <!-- ─── Booking ─────────────────────────────────────────── -->
   <section>
     <div class="container">
-      <div class="roi-grid">
 
-        <!-- Inputs -->
-        <div class="roi-inputs">
-
-          <div class="slider-group">
-            <div class="slider-label-row">
-              <label class="slider-label" for="leads">Leads per week</label>
-              <span class="slider-value" id="leads-val">30</span>
-            </div>
-            <input type="range" id="leads" min="5" max="300" value="30" step="5" />
-            <p class="slider-hint">How many new potential clients does your business receive each week?</p>
+      <!-- Feature chips -->
+      <div class="book-features">
+        <div class="book-feature">
+          <div class="book-feature-icon">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
           </div>
-
-          <div class="slider-group">
-            <div class="slider-label-row">
-              <label class="slider-label" for="hours">Hours/week on manual follow-up</label>
-              <span class="slider-value" id="hours-val">10 hrs</span>
-            </div>
-            <input type="range" id="hours" min="1" max="40" value="10" step="1" />
-            <p class="slider-hint">Time spent on emails, calls, scheduling, and chasing leads manually.</p>
+          <div>
+            <div class="book-feature-label">30 minutes</div>
+            <div class="book-feature-sub">Quick, focused, no fluff</div>
           </div>
-
-          <div class="slider-group">
-            <div class="slider-label-row">
-              <label class="slider-label" for="cost">Average hourly staff cost</label>
-              <span class="slider-value" id="cost-val">€25</span>
-            </div>
-            <input type="range" id="cost" min="10" max="100" value="25" step="5" />
-            <p class="slider-hint">Your own hourly rate or the cost of the employee doing this work.</p>
-          </div>
-
-          <div class="slider-group">
-            <div class="slider-label-row">
-              <label class="slider-label" for="value">Average value of a new client</label>
-              <span class="slider-value" id="value-val">€1,500</span>
-            </div>
-            <input type="range" id="value" min="100" max="10000" value="1500" step="100" />
-            <p class="slider-hint">How much revenue does one new client typically bring in?</p>
-          </div>
-
         </div>
-
-        <!-- Results -->
-        <div class="roi-results">
-
-          <div class="roi-result-card">
-            <div class="roi-result-value" id="r-hours">32</div>
-            <div class="roi-result-label">Hours saved per month</div>
+        <div class="book-feature">
+          <div class="book-feature-icon">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.069A1 1 0 0121 8.882v6.236a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+            </svg>
           </div>
-
-          <div class="roi-result-card">
-            <div class="roi-result-value" id="r-money">€800</div>
-            <div class="roi-result-label">Staff cost saved per month</div>
+          <div>
+            <div class="book-feature-label">Zoom call</div>
+            <div class="book-feature-sub">Link sent on confirmation</div>
           </div>
-
-          <div class="roi-result-card">
-            <div class="roi-result-value" id="r-clients">8</div>
-            <div class="roi-result-label">Extra clients per year from faster follow-up</div>
+        </div>
+        <div class="book-feature">
+          <div class="book-feature-icon">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
           </div>
-
-          <div class="roi-result-card highlight">
-            <div class="roi-result-value" id="r-annual">€21,600</div>
-            <div class="roi-result-label">Estimated total annual value</div>
+          <div>
+            <div class="book-feature-label">100% Free</div>
+            <div class="book-feature-sub">No commitment required</div>
           </div>
-
         </div>
       </div>
-    </div>
-  </section>
 
-  <hr class="divider" />
+      <div
+        id="cal-inline"
+        data-cal-link="iulian-bostan/30min"
+        data-cal-namespace="discovery"
+        data-cal-config='{"layout":"month_view"}'
+        style="width:100%;height:700px;overflow:scroll;border:1.5px solid #E5E7EB;border-radius:20px;"
+      ></div>
 
-  <!-- ─── CTA Banner ──────────────────────────────────────── -->
-  <section>
-    <div class="container">
-      <div class="cta-banner">
-        <h2>Ready to capture this value?</h2>
-        <p>Book a free 30-minute discovery call and we will map out exactly which automations will make the biggest impact for your business.</p>
-        <a href="book.html" class="btn btn-primary">Book Your Free Call →</a>
+      <script type="text/javascript">
+        (function (C, A, L) {
+          let p = function (a, ar) { a.q.push(ar); };
+          let d = C.document;
+          C.Cal = C.Cal || function () {
+            let cal = C.Cal; let ar = arguments;
+            if (!cal.loaded) {
+              cal.ns = {}; cal.q = cal.q || [];
+              d.head.appendChild(d.createElement("script")).src = A;
+              cal.loaded = true;
+            }
+            if (ar[0] === L) {
+              const api = function () { p(api, arguments); };
+              const namespace = ar[1]; api.q = api.q || [];
+              if (typeof namespace === "string") {
+                cal.ns[namespace] = cal.ns[namespace] || api;
+                p(cal.ns[namespace], ar); p(cal, [L, namespace, api]);
+              } else p(cal, ar); return;
+            }
+            p(cal, ar);
+          };
+        })(window, "https://app.cal.com/embed/embed.js", "init");
+        Cal("init", "discovery", { origin: "https://cal.com" });
+        Cal.ns.discovery("inline", {
+          elementOrSelector: "#cal-inline",
+          calLink: "iulian-bostan/30min",
+          layout: "month_view"
+        });
+        Cal.ns.discovery("ui", { hideEventTypeDetails: false, layout: "month_view" });
+      </script>
+
+      <!-- What to expect -->
+      <div class="what-expect-grid">
+        <div class="expect-card">
+          <h3>Understand your business</h3>
+          <p>We start by learning about your current workflows, tools, and biggest time drains.</p>
+        </div>
+        <div class="expect-card">
+          <h3>Identify automation opportunities</h3>
+          <p>Together we map out exactly where AI can have the biggest impact — immediately.</p>
+        </div>
+        <div class="expect-card">
+          <h3>Walk away with a plan</h3>
+          <p>You leave with a clear, actionable roadmap — whether you work with us or not.</p>
+        </div>
       </div>
+
     </div>
   </section>
 

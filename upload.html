@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contract AI — Loop &amp; Convert</title>
+  <meta name="description" content="Upload any contract and get a full AI risk analysis in under 3 minutes. Try it free — no account needed." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="icon" type="image/png" href="images/logo.png" />
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    .demo-limit-box {
+      max-width: 480px;
+      margin: 0 auto;
+      text-align: center;
+      padding: 3rem 2rem;
+      background: #111;
+      border: 1px solid var(--grey-100);
+      border-radius: var(--radius-xl);
+    }
+    .demo-limit-icon {
+      width: 56px;
+      height: 56px;
+      background: #1a1a1a;
+      border: 1px solid var(--grey-100);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.5rem;
+      color: var(--grey-400);
+    }
+    .demo-limit-box h2 { font-size: 1.4rem; margin-bottom: .6rem; }
+    .demo-limit-box p  { color: var(--grey-400); margin-bottom: 2rem; line-height: 1.6; }
+    .demo-limit-actions { display: flex; gap: .75rem; justify-content: center; flex-wrap: wrap; }
+    .demo-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      background: rgba(255,255,255,.04);
+      border: 1px solid var(--grey-100);
+      border-radius: 999px;
+      padding: .3rem .85rem;
+      font-size: .8rem;
+      color: var(--grey-400);
+      margin-bottom: 1.5rem;
+    }
+    .demo-badge .dot { width: 6px; height: 6px; border-radius: 50%; background: #4ade80; flex-shrink: 0; }
+  </style>
+</head>
+<body>
+
+  <!-- ─── Navbar ─────────────────────────────────────────── -->
+  <header class="navbar">
+    <div class="container nav-inner">
+      <a href="index.html" class="nav-logo">Loop <span class="accent">&amp;</span> Convert</a>
+      <nav>
+        <ul class="nav-links">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="about.html">About</a></li>
+          <li><a href="roi.html">ROI Calculator</a></li>
+          <li><a href="contact.html">Contact</a></li>
+          <li><a href="upload.html">Contract AI</a></li>
+          <li><a href="login.html" id="nav-auth-link">Log In</a></li>
+          <li class="nav-cta"><a href="book.html" class="btn btn-primary">Book a Call</a></li>
+        </ul>
+      </nav>
+      <button class="hamburger" aria-label="Open menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+    <div class="mobile-menu">
+      <a href="index.html">Home</a>
+      <a href="about.html">About</a>
+      <a href="roi.html">ROI Calculator</a>
+      <a href="contact.html">Contact</a>
+      <a href="upload.html">Contract AI</a>
+      <a href="login.html" id="mob-auth-link">Log In</a>
+      <a href="book.html" class="btn btn-primary">Book a Call</a>
+    </div>
+  </header>
+
+  <!-- ─── Page header ───────────────────────────────────── -->
+  <section class="page-header">
+    <div class="container">
+      <div class="eyebrow"><span class="dot"></span>Free Demo</div>
+      <h1>AI Contract Analysis</h1>
+      <p class="lead">Upload any PDF contract and get a full risk analysis in under 3 minutes — completely free, no account needed.</p>
+    </div>
+  </section>
+
+  <hr class="divider" />
+
+  <!-- ─── Upload shell ──────────────────────────────────── -->
+  <div class="app-shell">
+    <div class="container">
+
+      <!-- Demo badge -->
+      <div style="text-align:center;margin-bottom:2rem;">
+        <div class="demo-badge">
+          <span class="dot"></span>
+          <span id="demo-badge-text">2 free analyses remaining</span>
+        </div>
+      </div>
+
+      <!-- ── Limit wall (hidden until 2 uses exhausted) ── -->
+      <div id="limit-wall" style="display:none;">
+        <div class="demo-limit-box">
+          <div class="demo-limit-icon">
+            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/>
+            </svg>
+          </div>
+          <h2>You've used your 2 free analyses</h2>
+          <p>Create a free account to keep analyzing contracts and save all your results in your private dashboard.</p>
+          <div class="demo-limit-actions">
+            <a href="signup.html" class="btn btn-primary">Create Free Account →</a>
+            <a href="book.html" class="btn btn-secondary">Book a Demo Call</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Upload form (shown when under limit) ── -->
+      <div id="upload-form-wrap">
+        <div class="upload-wrap">
+
+          <!-- Drop zone -->
+          <div class="upload-zone" id="dropZone">
+            <input type="file" id="fileInput" accept=".pdf" />
+            <div class="upload-icon">
+              <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m6.75 12l-3-3m0 0l-3 3m3-3v6m-1.5-15H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/>
+              </svg>
+            </div>
+            <h3>Drop your contract here</h3>
+            <p>or click anywhere to browse files</p>
+          </div>
+
+          <!-- File preview -->
+          <div class="file-preview" id="filePreview">
+            <div class="file-preview-icon">PDF</div>
+            <div class="file-preview-info">
+              <div class="file-preview-name" id="fileName">—</div>
+              <div class="file-preview-size" id="fileSize">—</div>
+            </div>
+            <button class="file-remove" id="removeFile" title="Remove">&times;</button>
+          </div>
+
+          <!-- Error -->
+          <div class="form-error-msg" id="uploadError"></div>
+
+          <!-- Analyze button -->
+          <button class="btn btn-primary analyze-btn" id="analyzeBtn" disabled>Analyze contract</button>
+
+          <!-- Progress -->
+          <div class="analyzing-state" id="analyzingState">
+            <div class="analyzing-bar">
+              <div class="analyzing-bar-fill" id="barFill"></div>
+            </div>
+            <div class="analyzing-label">
+              <span id="analyzingStep">Reading document…</span>
+            </div>
+          </div>
+
+          <!-- Trust row -->
+          <div class="upload-info-row">
+            <div class="upload-info-item">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg>
+              End-to-end encrypted
+            </div>
+            <div class="upload-info-item">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
+              Never used to train AI
+            </div>
+            <div class="upload-info-item">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253"/></svg>
+              Data stored in EU
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ─── Footer ──────────────────────────────────────────── -->
+  <footer>
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="nav-logo">Loop <span class="accent">&amp;</span> Convert</div>
+          <p>AI contract analysis for law firms &mdash; full review in under 3 minutes.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Company</h4>
+          <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="about.html">About</a></li>
+            <li><a href="contact.html">Contact</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Product</h4>
+          <ul>
+            <li><a href="upload.html">Contract AI</a></li>
+            <li><a href="dashboard.html">Dashboard</a></li>
+            <li><a href="roi.html">ROI Calculator</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Get Started</h4>
+          <ul>
+            <li><a href="book.html">Book a Call</a></li>
+            <li><a href="mailto:loopandconvert@gmail.com">loopandconvert@gmail.com</a></li>
+            <li><a href="tel:+31625500911">+31 625 500 911</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-hover-text">
+        <svg id="footerHoverSvg" width="100%" height="100%"
+             viewBox="0 0 500 120" xmlns="http://www.w3.org/2000/svg"
+             style="cursor:pointer;user-select:none;display:block;">
+          <defs>
+            <radialGradient id="footerRevealMask" gradientUnits="userSpaceOnUse" cx="50%" cy="50%" r="20%">
+              <stop offset="0%" stop-color="white"/>
+              <stop offset="100%" stop-color="black"/>
+            </radialGradient>
+            <mask id="footerTextMask">
+              <rect x="0" y="0" width="100%" height="100%" fill="url(#footerRevealMask)"/>
+            </mask>
+            <linearGradient id="footerTextGradient" gradientUnits="userSpaceOnUse" x1="0%" y1="0%" x2="100%" y2="0%">
+            </linearGradient>
+          </defs>
+          <text id="footerOutlineText" x="50%" y="52%" text-anchor="middle" dominant-baseline="middle"
+                fill="none" stroke="#cccccc" stroke-width="0.3"
+                font-family="Helvetica,Arial,sans-serif" font-size="48" font-weight="700"
+                textLength="492" lengthAdjust="spacing" style="opacity:0;transition:opacity .3s;">
+            Loop &amp; Convert
+          </text>
+          <text id="footerDrawText" x="50%" y="52%" text-anchor="middle" dominant-baseline="middle"
+                fill="none" stroke="#3a3a3a" stroke-width="0.3"
+                font-family="Helvetica,Arial,sans-serif" font-size="48" font-weight="700"
+                textLength="492" lengthAdjust="spacing"
+                stroke-dasharray="2000" stroke-dashoffset="2000">
+            Loop &amp; Convert
+          </text>
+          <text x="50%" y="52%" text-anchor="middle" dominant-baseline="middle"
+                fill="none" stroke="url(#footerTextGradient)" stroke-width="0.3"
+                mask="url(#footerTextMask)"
+                font-family="Helvetica,Arial,sans-serif" font-size="48" font-weight="700"
+                textLength="492" lengthAdjust="spacing">
+            Loop &amp; Convert
+          </text>
+        </svg>
+      </div>
+
+      <div class="footer-bottom">
+        <p>&copy; <span id="year"></span> Loop &amp; Convert. All rights reserved.</p>
+        <p>AI contract analysis for forward-thinking law firms.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/main.js"></script>
+  <script src="js/auth.js"></script>
+  <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+
+  <!-- ─── Footer SVG hover ──────────────────────────────── -->
+  <script>
+  (function () {
+    var svg = document.getElementById('footerHoverSvg');
+    var drawText = document.getElementById('footerDrawText');
+    var outline  = document.getElementById('footerOutlineText');
+    var revealGrad = document.getElementById('footerRevealMask');
+    var textGrad   = document.getElementById('footerTextGradient');
+    if (!svg) return;
+    var drawn = false;
+    var observer = new IntersectionObserver(function (entries) {
+      if (entries[0].isIntersecting && !drawn) { drawn = true; drawText.classList.add('footer-draw-anim'); }
+    }, { threshold: 0.3 });
+    observer.observe(svg);
+    svg.addEventListener('mouseenter', function () {
+      outline.style.opacity = '0.7';
+      textGrad.innerHTML =
+        '<stop offset="0%"   stop-color="#ffffff"/>' +
+        '<stop offset="30%"  stop-color="#e0e0e0"/>' +
+        '<stop offset="50%"  stop-color="#ffffff"/>' +
+        '<stop offset="70%"  stop-color="#c0c0c0"/>' +
+        '<stop offset="100%" stop-color="#ffffff"/>';
+    });
+    svg.addEventListener('mouseleave', function () {
+      outline.style.opacity = '0';
+      textGrad.innerHTML = '';
+      revealGrad.setAttribute('cx', '50%');
+      revealGrad.setAttribute('cy', '50%');
+    });
+    svg.addEventListener('mousemove', function (e) {
+      var rect = svg.getBoundingClientRect();
+      revealGrad.setAttribute('cx', ((e.clientX - rect.left) / rect.width  * 100).toFixed(2) + '%');
+      revealGrad.setAttribute('cy', ((e.clientY - rect.top)  / rect.height * 100).toFixed(2) + '%');
+    });
+  })();
+  </script>
+
+  <!-- ─── Demo limit + upload logic ────────────────────── -->
+  <script>
+  (function () {
+    var LIMIT_KEY    = 'lc_demo_count';
+    var STORAGE_KEY  = 'lc_analyses';
+    var MAX_USES     = 2;
+
+    var formWrap     = document.getElementById('upload-form-wrap');
+    var limitWall    = document.getElementById('limit-wall');
+    var badgeText    = document.getElementById('demo-badge-text');
+
+    function getCount() {
+      return parseInt(localStorage.getItem(LIMIT_KEY) || '0', 10);
+    }
+
+    function incrementCount() {
+      localStorage.setItem(LIMIT_KEY, getCount() + 1);
+    }
+
+    function updateBadge() {
+      var remaining = Math.max(0, MAX_USES - getCount());
+      badgeText.textContent = remaining + ' free ' + (remaining === 1 ? 'analysis' : 'analyses') + ' remaining';
+    }
+
+    function checkLimit() {
+      updateBadge();
+      if (getCount() >= MAX_USES) {
+        formWrap.style.display  = 'none';
+        limitWall.style.display = 'block';
+      }
+    }
+
+    checkLimit();
+
+    var dropZone       = document.getElementById('dropZone');
+    var fileInput      = document.getElementById('fileInput');
+    var filePreview    = document.getElementById('filePreview');
+    var fileName       = document.getElementById('fileName');
+    var fileSize       = document.getElementById('fileSize');
+    var removeFile     = document.getElementById('removeFile');
+    var analyzeBtn     = document.getElementById('analyzeBtn');
+    var uploadError    = document.getElementById('uploadError');
+    var analyzingState = document.getElementById('analyzingState');
+    var barFill        = document.getElementById('barFill');
+    var analyzingStep  = document.getElementById('analyzingStep');
+    var selectedFile   = null;
+
+    function fmtSize(bytes) {
+      return bytes < 1048576
+        ? (bytes / 1024).toFixed(1) + ' KB'
+        : (bytes / 1048576).toFixed(2) + ' MB';
+    }
+
+    function showFile(file) {
+      selectedFile = file;
+      fileName.textContent = file.name;
+      fileSize.textContent = fmtSize(file.size);
+      filePreview.classList.add('show');
+      dropZone.classList.add('file-selected');
+      analyzeBtn.disabled = false;
+      hideError();
+    }
+
+    function clearFile() {
+      selectedFile = null;
+      fileInput.value = '';
+      filePreview.classList.remove('show');
+      dropZone.classList.remove('file-selected', 'error-state');
+      analyzeBtn.disabled = true;
+    }
+
+    function showError(msg) {
+      uploadError.textContent = msg;
+      uploadError.classList.add('show');
+      dropZone.classList.add('error-state');
+    }
+
+    function hideError() {
+      uploadError.classList.remove('show');
+      dropZone.classList.remove('error-state');
+    }
+
+    fileInput.addEventListener('change', function () {
+      var f = fileInput.files[0];
+      if (!f) return;
+      if (f.type !== 'application/pdf') { showError('Please upload a PDF file.'); return; }
+      if (f.size > 10 * 1024 * 1024)   { showError('File is too large. Max 10 MB.'); return; }
+      showFile(f);
+    });
+
+    removeFile.addEventListener('click', function (e) { e.stopPropagation(); clearFile(); });
+
+    dropZone.addEventListener('dragover',  function (e) { e.preventDefault(); dropZone.classList.add('drag-over'); });
+    dropZone.addEventListener('dragleave', function ()  { dropZone.classList.remove('drag-over'); });
+    dropZone.addEventListener('drop', function (e) {
+      e.preventDefault();
+      dropZone.classList.remove('drag-over');
+      var f = e.dataTransfer.files[0];
+      if (!f) return;
+      if (f.type !== 'application/pdf') { showError('Please upload a PDF file.'); return; }
+      if (f.size > 10 * 1024 * 1024)   { showError('File is too large. Max 10 MB.'); return; }
+      showFile(f);
+    });
+
+    analyzeBtn.addEventListener('click', function () {
+      if (!selectedFile) return;
+      startAnalysis();
+    });
+
+    function startAnalysis() {
+      analyzeBtn.disabled = true;
+      analyzingState.classList.add('show');
+
+      var steps = [
+        { label: 'Reading document…',       pct: 20  },
+        { label: 'Extracting key clauses…', pct: 45  },
+        { label: 'Identifying risks…',      pct: 65  },
+        { label: 'Flagging red flags…',     pct: 82  },
+        { label: 'Generating questions…',   pct: 95  },
+        { label: 'Finalising analysis…',    pct: 100 },
+      ];
+
+      var i = 0;
+      function nextStep() {
+        if (i >= steps.length) { finish(); return; }
+        var s = steps[i++];
+        barFill.style.width = s.pct + '%';
+        analyzingStep.textContent = s.label;
+        setTimeout(nextStep, 600 + Math.random() * 400);
+      }
+      nextStep();
+    }
+
+    function finish() {
+      var risks     = ['High', 'Medium', 'Low'];
+      var riskLevel = risks[Math.floor(Math.random() * risks.length)];
+
+      var analysis = {
+        id:         'lc-' + Date.now(),
+        fileName:   selectedFile.name,
+        riskLevel:  riskLevel,
+        analyzedAt: new Date().toISOString(),
+        riskSummary: [
+          'Liability cap is limited to 3 months of fees, which may be insufficient for significant damages.',
+          'Automatic renewal clause activates 90 days before expiry with no opt-out notice provision.',
+          'Jurisdiction clause designates courts in a foreign territory, creating potential enforcement difficulties.',
+          'IP assignment is overly broad and may capture pre-existing intellectual property of the signing party.',
+        ],
+        keyClauses: [
+          { clause: 'Limitation of Liability',   explanation: 'The maximum the other party can be held responsible for is capped at three months of fees paid. In the event of major losses this may leave you significantly undercompensated.' },
+          { clause: 'Automatic Renewal',          explanation: 'The contract automatically renews for the same term unless written notice is given 90 days before the end date. Missing this window locks you in for another full term.' },
+          { clause: 'Intellectual Property',      explanation: 'All work product created during the engagement is assigned exclusively to the client, including any improvements to pre-existing tools or methods.' },
+          { clause: 'Governing Law',              explanation: 'Disputes are resolved under the laws of a specified jurisdiction. If that territory is unfamiliar, litigation costs and complexity increase substantially.' },
+          { clause: 'Termination for Convenience', explanation: 'Either party may terminate with 30 days written notice. However, outstanding fees for work already commenced become immediately payable on termination.' },
+        ],
+        redFlags: riskLevel !== 'Low' ? [
+          'No dispute resolution or mediation step before litigation — any disagreement goes directly to court.',
+          'Indemnification clause is one-sided: only one party is required to indemnify the other.',
+        ] : [],
+        recommendedQuestions: [
+          'Can the liability cap be increased to reflect the full contract value or potential business impact?',
+          'Is there flexibility to extend the renewal notice window from 90 days to 30 days?',
+          'Can we clarify that pre-existing intellectual property is explicitly excluded from the IP assignment clause?',
+        ],
+      };
+
+      // Increment demo counter
+      incrementCount();
+
+      // Save to localStorage
+      var stored = [];
+      try { stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); } catch (e) {}
+      stored.push(analysis);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(stored));
+
+      window.location.href = 'analysis.html?id=' + analysis.id;
+    }
+  })();
+  </script>
+</body>
+</html>
