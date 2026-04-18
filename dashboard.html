@@ -292,8 +292,37 @@
       .doc-row > *:nth-child(4) { display: none; }
       .dash-wrap { padding: 1.5rem 1rem 3rem; }
     }
-    @media (max-width: 480px) {
-      .dash-stats { grid-template-columns: 1fr 1fr; }
+
+    @media (max-width: 540px) {
+      /* Navbar: hide text links, keep logo + user pill */
+      .app-navbar { padding: 0 1rem; }
+      .app-nav-links { display: none; }
+      .app-nav-logo { font-size: .9rem; }
+      /* user pill: hide name label on very small screens */
+      #user-label { display: none; }
+
+      /* Welcome bar: stack vertically */
+      .dash-welcome { flex-direction: column; align-items: flex-start; gap: .75rem; margin-bottom: 1.75rem; }
+      .dash-welcome h1 { font-size: 1.25rem; }
+      .dash-welcome .btn { align-self: stretch; text-align: center; }
+
+      /* Stats: 2 columns */
+      .dash-stats { grid-template-columns: 1fr 1fr; gap: .75rem; margin-bottom: 1.75rem; }
+      .stat-card { padding: 1rem; gap: .65rem; }
+      .stat-icon { width: 34px; height: 34px; }
+      .stat-value { font-size: 1.4rem; }
+
+      /* Toolbar: search full width on first row, filters + sort on second */
+      .table-toolbar { flex-direction: column; align-items: stretch; gap: .6rem; padding: .85rem; }
+      .search-box { width: 100%; }
+      .filter-tabs { justify-content: flex-start; }
+      .sort-select { align-self: flex-start; }
+
+      /* Table rows */
+      .table-head { padding: .5rem .85rem; }
+      .doc-row { padding: .8rem .85rem; }
+      .doc-icon { width: 30px; height: 30px; font-size: .55rem; border-radius: 6px; }
+      .doc-filename { font-size: .82rem; }
     }
   </style>
 </head>
