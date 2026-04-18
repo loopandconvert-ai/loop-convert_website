@@ -1555,3 +1555,18 @@ input[type="range"]::-moz-range-thumb {
 @media (max-width: 480px) {
   .dash-stats { grid-template-columns: 1fr; }
 }
+
+/* Pricing grid */
+.pricing-grid {
+  max-width: 720px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+@media (max-width: 640px) {
+  .pricing-grid {
+    grid-template-columns: 1fr;
+    max-width: 400px;
+  }
+}
