@@ -273,6 +273,7 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <script src="js/config.js"></script>
   <script src="js/main.js"></script>
   <script src="js/auth.js"></script>
@@ -305,16 +306,22 @@
   })();
   </script>
 
-  <!-- Upload logic (no limit) -->
+  <!-- Upload logic — real PDF extraction + Claude analysis -->
   <script>
   (function () {
-    var STORAGE_KEY  = 'lc_analyses';
+    var STORAGE_KEY = 'lc_analyses';
+
+    // Set PDF.js worker
+    if (window.pdfjsLib) {
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+        'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    }
 
     var dropZone       = document.getElementById('dropZone');
     var fileInput      = document.getElementById('fileInput');
     var filePreview    = document.getElementById('filePreview');
-    var fileName       = document.getElementById('fileName');
-    var fileSize       = document.getElementById('fileSize');
+    var fileNameEl     = document.getElementById('fileName');
+    var fileSizeEl     = document.getElementById('fileSize');
     var removeFile     = document.getElementById('removeFile');
     var analyzeBtn     = document.getElementById('analyzeBtn');
     var uploadError    = document.getElementById('uploadError');
@@ -331,8 +338,8 @@
 
     function showFile(file) {
       selectedFile = file;
-      fileName.textContent = file.name;
-      fileSize.textContent = fmtSize(file.size);
+      fileNameEl.textContent = file.name;
+      fileSizeEl.textContent = fmtSize(file.size);
       filePreview.classList.add('show');
       dropZone.classList.add('file-selected');
       analyzeBtn.disabled = false;
@@ -351,6 +358,8 @@
       uploadError.textContent = msg;
       uploadError.classList.add('show');
       dropZone.classList.add('error-state');
+      analyzeBtn.disabled = false;
+      analyzingState.classList.remove('show');
     }
 
     function hideError() {
@@ -380,91 +389,123 @@
       showFile(f);
     });
 
+    dropZone.addEventListener('click', function () { fileInput.click(); });
+
     analyzeBtn.addEventListener('click', function () {
       if (!selectedFile) return;
       startAnalysis();
     });
 
-    function startAnalysis() {
-      analyzeBtn.disabled = true;
-      analyzingState.classList.add('show');
-
-      var steps = [
-        { label: 'Reading document…',       pct: 20  },
-        { label: 'Extracting key clauses…', pct: 45  },
-        { label: 'Identifying risks…',      pct: 65  },
-        { label: 'Flagging red flags…',     pct: 82  },
-        { label: 'Generating questions…',   pct: 95  },
-        { label: 'Finalising analysis…',    pct: 100 },
-      ];
-
-      var i = 0;
-      function nextStep() {
-        if (i >= steps.length) { finish(); return; }
-        var s = steps[i++];
-        barFill.style.width = s.pct + '%';
-        analyzingStep.textContent = s.label;
-        setTimeout(nextStep, 600 + Math.random() * 400);
-      }
-      nextStep();
+    function setStep(label, pct) {
+      barFill.style.width = pct + '%';
+      analyzingStep.textContent = label;
     }
 
-    function finish() {
-      var risks     = ['High', 'Medium', 'Low'];
-      var riskLevel = risks[Math.floor(Math.random() * risks.length)];
+    function delay(ms) {
+      return new Promise(function (resolve) { setTimeout(resolve, ms); });
+    }
 
+    async function extractPdfText(file) {
+      if (!window.pdfjsLib) throw new Error('PDF library not loaded');
+      var arrayBuffer = await file.arrayBuffer();
+      var pdf = await window.pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+      var text = '';
+      for (var i = 1; i <= pdf.numPages; i++) {
+        var page = await pdf.getPage(i);
+        var content = await page.getTextContent();
+        text += content.items.map(function (item) { return item.str; }).join(' ') + '\n';
+      }
+      return text.trim();
+    }
+
+    async function callAnalyzeAPI(text, fileName) {
+      var response = await fetch('/api/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: text, fileName: fileName }),
+      });
+      if (!response.ok) {
+        var err = await response.json().catch(function () { return {}; });
+        throw new Error(err.error || 'Analysis failed');
+      }
+      return response.json();
+    }
+
+    async function startAnalysis() {
+      analyzeBtn.disabled = true;
+      analyzingState.classList.add('show');
+      hideError();
+
+      try {
+        setStep('Reading document…', 15);
+        var text = await extractPdfText(selectedFile);
+
+        if (!text || text.length < 50) {
+          throw new Error('Could not extract text from this PDF. Make sure it is not a scanned image.');
+        }
+
+        await delay(400);
+        setStep('Sending to AI for analysis…', 35);
+
+        // Start API call
+        var apiPromise = callAnalyzeAPI(text, selectedFile.name);
+
+        // Show cosmetic progress while waiting
+        await delay(2000);
+        setStep('Identifying risks and clauses…', 55);
+        await delay(2500);
+        setStep('Flagging red flags…', 72);
+        await delay(2000);
+        setStep('Generating recommendations…', 88);
+
+        // Wait for actual API response
+        var result = await apiPromise;
+
+        setStep('Finalising…', 96);
+        await delay(400);
+        setStep('Done!', 100);
+        await delay(300);
+
+        await saveAndRedirect(result);
+
+      } catch (err) {
+        console.error('Analysis error:', err);
+        showError(err.message || 'Analysis failed. Please try again.');
+      }
+    }
+
+    async function saveAndRedirect(result) {
       var analysis = {
-        id:         'lc-' + Date.now(),
-        fileName:   selectedFile.name,
-        riskLevel:  riskLevel,
-        analyzedAt: new Date().toISOString(),
-        riskSummary: [
-          'Liability cap is limited to 3 months of fees, which may be insufficient for significant damages.',
-          'Automatic renewal clause activates 90 days before expiry with no opt-out notice provision.',
-          'Jurisdiction clause designates courts in a foreign territory, creating potential enforcement difficulties.',
-          'IP assignment is overly broad and may capture pre-existing intellectual property of the signing party.',
-        ],
-        keyClauses: [
-          { clause: 'Limitation of Liability',    explanation: 'The maximum the other party can be held responsible for is capped at three months of fees paid. In the event of major losses this may leave you significantly undercompensated.' },
-          { clause: 'Automatic Renewal',           explanation: 'The contract automatically renews for the same term unless written notice is given 90 days before the end date. Missing this window locks you in for another full term.' },
-          { clause: 'Intellectual Property',       explanation: 'All work product created during the engagement is assigned exclusively to the client, including any improvements to pre-existing tools or methods.' },
-          { clause: 'Governing Law',               explanation: 'Disputes are resolved under the laws of a specified jurisdiction. If that territory is unfamiliar, litigation costs and complexity increase substantially.' },
-          { clause: 'Termination for Convenience', explanation: 'Either party may terminate with 30 days written notice. However, outstanding fees for work already commenced become immediately payable on termination.' },
-        ],
-        redFlags: riskLevel !== 'Low' ? [
-          'No dispute resolution or mediation step before litigation — any disagreement goes directly to court.',
-          'Indemnification clause is one-sided: only one party is required to indemnify the other.',
-        ] : [],
-        recommendedQuestions: [
-          'Can the liability cap be increased to reflect the full contract value or potential business impact?',
-          'Is there flexibility to extend the renewal notice window from 90 days to 30 days?',
-          'Can we clarify that pre-existing intellectual property is explicitly excluded from the IP assignment clause?',
-        ],
+        id:                  'lc-' + Date.now(),
+        fileName:            selectedFile.name,
+        riskLevel:           result.riskLevel   || 'Medium',
+        analyzedAt:          new Date().toISOString(),
+        riskSummary:         result.riskSummary         || [],
+        keyClauses:          result.keyClauses          || [],
+        redFlags:            result.redFlags            || [],
+        recommendedQuestions: result.recommendedQuestions || [],
       };
 
-      // Save to localStorage always
+      // Save to localStorage
       var stored = [];
       try { stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); } catch (e) {}
       stored.push(analysis);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(stored));
 
-      // Save to Supabase if logged in
+      // Save to Supabase and redirect
       if (window.LC_AUTH) {
-        window.LC_AUTH.saveAnalysis({
+        var res = await window.LC_AUTH.saveAnalysis({
           file_name:     analysis.fileName,
           risk_level:    analysis.riskLevel,
           analyzed_at:   analysis.analyzedAt,
           analysis_data: analysis,
-        }).then(function (res) {
-          if (res && res.data && res.data[0]) {
-            window.location.href = 'analysis.html?id=' + res.data[0].id;
-          } else {
-            window.location.href = 'analysis.html?id=' + analysis.id;
-          }
         });
-      } else {
-        window.location.href = 'analysis.html?id=' + analysis.id;
+        if (res && res.data && res.data[0]) {
+          window.location.href = 'analysis.html?id=' + res.data[0].id;
+          return;
+        }
       }
+      window.location.href = 'analysis.html?id=' + analysis.id;
     }
   })();
   </script>
