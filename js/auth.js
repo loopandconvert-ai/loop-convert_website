@@ -75,10 +75,10 @@
         if (!session) return Promise.reject('not authenticated');
         return sb.from('analyses').insert({
           user_id:       session.user.id,
-          file_name:     payload.fileName,
-          risk_level:    payload.riskLevel,
-          analyzed_at:   payload.analyzedAt || new Date().toISOString(),
-          analysis_data: payload
+          file_name:     payload.file_name,
+          risk_level:    payload.risk_level,
+          analyzed_at:   payload.analyzed_at || new Date().toISOString(),
+          analysis_data: payload.analysis_data
         });
       });
     },
