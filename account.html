@@ -200,9 +200,69 @@
     }
     .btn-danger:hover { background: rgba(248,113,113,.12); border-color: rgba(248,113,113,.4); }
 
+    /* ── Mobile drawer ── */
+    .mob-hamburger {
+      display: none; align-items: center; justify-content: center;
+      width: 36px; height: 36px; border-radius: 8px;
+      background: none; border: none; cursor: pointer; color: #888;
+      transition: color .15s, background .15s; flex-shrink: 0;
+    }
+    .mob-hamburger:hover { color: #fff; background: #1a1a1a; }
+    .mob-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,.65); z-index: 150;
+    }
+    .mob-overlay.open { display: block; }
+    .mob-drawer {
+      position: fixed; top: 0; left: 0; bottom: 0; width: 280px;
+      background: #0d0d0d; border-right: 1px solid #1e1e1e;
+      z-index: 151; display: flex; flex-direction: column;
+      transform: translateX(-100%);
+      transition: transform .25s cubic-bezier(.4,0,.2,1);
+    }
+    .mob-drawer.open { transform: translateX(0); }
+    .mob-drawer-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1rem 1.1rem; border-bottom: 1px solid #1a1a1a; flex-shrink: 0;
+    }
+    .mob-drawer-logo { font-size: .95rem; font-weight: 800; color: #fff; text-decoration: none; letter-spacing: -.02em; }
+    .mob-drawer-close {
+      width: 30px; height: 30px; border-radius: 7px;
+      background: none; border: none; cursor: pointer; color: #555;
+      display: flex; align-items: center; justify-content: center;
+      transition: color .15s, background .15s;
+    }
+    .mob-drawer-close:hover { color: #fff; background: #1a1a1a; }
+    .mob-drawer-nav { flex: 1; padding: .6rem .7rem; overflow-y: auto; }
+    .mob-drawer-nav a {
+      display: flex; align-items: center; gap: .65rem;
+      padding: .7rem .85rem; border-radius: 8px; font-size: .9rem;
+      font-weight: 500; color: #888; text-decoration: none;
+      transition: background .12s, color .12s;
+    }
+    .mob-drawer-nav a:hover { background: #161616; color: #fff; }
+    .mob-drawer-nav a.active { background: #1a1a1a; color: #fff; }
+    .mob-drawer-nav a svg { flex-shrink: 0; opacity: .6; }
+    .mob-drawer-nav a:hover svg, .mob-drawer-nav a.active svg { opacity: 1; }
+    .mob-drawer-divider { height: 1px; background: #1a1a1a; margin: .5rem .85rem; }
+    .mob-drawer-footer { padding: .7rem; border-top: 1px solid #1a1a1a; flex-shrink: 0; }
+    .mob-drawer-footer button {
+      display: flex; align-items: center; gap: .65rem;
+      width: 100%; padding: .7rem .85rem; border-radius: 8px;
+      background: none; border: none; cursor: pointer; font-family: inherit;
+      font-size: .9rem; font-weight: 500; color: #f87171;
+      transition: background .12s;
+    }
+    .mob-drawer-footer button:hover { background: rgba(248,113,113,.06); }
+    .mob-drawer-footer button svg { flex-shrink: 0; opacity: .7; }
+
     @media (max-width: 560px) {
       .plan-grid { grid-template-columns: 1fr; }
       .account-field { flex-wrap: wrap; }
+      .app-navbar { padding: 0 1rem; }
+      .app-nav-links { display: none; }
+      .mob-hamburger { display: flex; }
+      #user-label { display: none; }
     }
   </style>
 </head>
@@ -211,9 +271,17 @@
   <!-- ─── App Navbar ──────────────────────────────────── -->
   <header class="app-navbar">
     <div class="app-navbar-inner">
-      <a href="dashboard.html" class="app-nav-logo">Loop <span class="accent">&amp;</span> Convert</a>
+      <div style="display:flex;align-items:center;gap:.5rem;">
+        <button class="mob-hamburger" id="mob-hamburger" title="Menu">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5M3.75 17.25h16.5"/>
+          </svg>
+        </button>
+        <a href="dashboard.html" class="app-nav-logo">Loop <span class="accent">&amp;</span> Convert</a>
+      </div>
       <ul class="app-nav-links">
         <li><a href="dashboard.html">Dashboard</a></li>
+        <li><a href="agent.html">Lex AI</a></li>
         <li><a href="upload-pro.html">+ Upload</a></li>
       </ul>
       <div class="user-pill" id="user-pill" style="display:none;">
@@ -381,10 +449,64 @@
 
   </div>
 
+  <!-- ─── Mobile drawer ──────────────────────────────── -->
+  <div class="mob-overlay" id="mob-overlay"></div>
+  <div class="mob-drawer" id="mob-drawer">
+    <div class="mob-drawer-header">
+      <a href="dashboard.html" class="mob-drawer-logo">Loop &amp; Convert</a>
+      <button class="mob-drawer-close" id="mob-drawer-close">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+    <nav class="mob-drawer-nav">
+      <a href="dashboard.html">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z"/></svg>
+        Dashboard
+      </a>
+      <a href="agent.html">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.625 9.75a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375m-13.5 3.01c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.184-4.183a1.14 1.14 0 01.778-.332 48.294 48.294 0 005.83-.498c1.585-.233 2.708-1.626 2.708-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z"/></svg>
+        Lex AI
+      </a>
+      <a href="upload-pro.html">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/></svg>
+        Upload contract
+      </a>
+      <div class="mob-drawer-divider"></div>
+      <a href="account.html" class="active">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/></svg>
+        Account settings
+      </a>
+    </nav>
+    <div class="mob-drawer-footer">
+      <button id="mob-sign-out">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75"/></svg>
+        Sign out
+      </button>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <script src="js/config.js"></script>
   <script src="js/main.js"></script>
   <script src="js/auth.js"></script>
+
+  <script>
+  (function () {
+    var hamburger = document.getElementById('mob-hamburger');
+    var drawer    = document.getElementById('mob-drawer');
+    var overlay   = document.getElementById('mob-overlay');
+    var closeBtn  = document.getElementById('mob-drawer-close');
+    var mobSignOut = document.getElementById('mob-sign-out');
+    function openDrawer()  { drawer.classList.add('open'); overlay.classList.add('open'); document.body.style.overflow = 'hidden'; }
+    function closeDrawer() { drawer.classList.remove('open'); overlay.classList.remove('open'); document.body.style.overflow = ''; }
+    hamburger.addEventListener('click', openDrawer);
+    closeBtn.addEventListener('click', closeDrawer);
+    overlay.addEventListener('click', closeDrawer);
+    mobSignOut.addEventListener('click', function () { closeDrawer(); if (window.LC_AUTH) window.LC_AUTH.signOut(); });
+  })();
+  </script>
 
   <script>
   (function () {
