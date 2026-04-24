@@ -111,7 +111,7 @@
     }
   </style>
 </head>
-<body data-page="auth-page">
+<body id="signup-body">
 
   <div class="auth-wrap">
     <div class="auth-card">
@@ -164,14 +164,44 @@
   <script src="js/auth.js"></script>
   <script>
   (function () {
-    // Detect invite link — pre-fill email, show banner, hide firm field
     var params      = new URLSearchParams(window.location.search);
-    var inviteEmail = params.get('invite');
+    var inviteEmail = params.get('invite') ? decodeURIComponent(params.get('invite')) : null;
+
     if (inviteEmail) {
+      // Show invite banner and pre-fill email
       document.getElementById('invite-banner').style.display = 'block';
-      document.getElementById('email').value = decodeURIComponent(inviteEmail);
+      document.getElementById('email').value    = inviteEmail;
       document.getElementById('email').readOnly = true;
       document.getElementById('firm-field').style.display = 'none';
+
+      // If someone is already logged in, don't redirect to dashboard —
+      // instead show a "sign out to accept invite" screen
+      document.addEventListener('lc:session', function (e) {
+        var session = e.detail;
+        if (!session) return;
+        // Hide the signup form, show a sign-out prompt instead
+        document.getElementById('signup-form').style.display  = 'none';
+        document.getElementById('invite-banner').style.display = 'none';
+        var card = document.querySelector('.auth-card');
+        var msg  = document.createElement('div');
+        msg.innerHTML =
+          '<div style="text-align:center;padding:1rem 0;">' +
+            '<div style="font-size:2rem;margin-bottom:1rem;">👋</div>' +
+            '<div style="font-size:1.1rem;font-weight:700;color:#fff;margin-bottom:.5rem;">You have an invitation</div>' +
+            '<div style="font-size:.875rem;color:#555;margin-bottom:1.5rem;">You\'re currently signed in as <strong style="color:#888;">' + session.user.email + '</strong>.<br>Sign out to accept this invite as <strong style="color:#f59e0b;">' + inviteEmail + '</strong>.</div>' +
+            '<button id="signout-to-invite" style="width:100%;padding:.75rem;background:#fff;color:#000;border:none;border-radius:12px;font-size:.95rem;font-weight:700;cursor:pointer;font-family:inherit;">Sign out &amp; accept invite</button>' +
+            '<div style="margin-top:1rem;"><a href="dashboard.html" style="font-size:.85rem;color:#555;text-decoration:underline;">Back to my dashboard</a></div>' +
+          '</div>';
+        card.appendChild(msg);
+        document.getElementById('signout-to-invite').addEventListener('click', function () {
+          window.LC_AUTH.supabase.auth.signOut().then(function () {
+            window.location.reload();
+          });
+        });
+      });
+    } else {
+      // Normal signup page — redirect if already logged in
+      document.body.dataset.page = 'auth-page';
     }
   })();
   </script>
