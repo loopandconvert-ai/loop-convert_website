@@ -494,12 +494,19 @@
 
       // Save to Supabase and redirect
       if (window.LC_AUTH) {
-        var res = await window.LC_AUTH.saveAnalysis({
+        // Look up workspace membership so we can tag the analysis
+        var wsRes = await window.LC_AUTH.getMyMembership().catch(function() { return { data: null }; });
+        var workspaceId = wsRes && wsRes.data && wsRes.data.workspace_id || null;
+
+        var payload = {
           file_name:     analysis.fileName,
           risk_level:    analysis.riskLevel,
           analyzed_at:   analysis.analyzedAt,
           analysis_data: analysis,
-        });
+        };
+        if (workspaceId) payload.workspace_id = workspaceId;
+
+        var res = await window.LC_AUTH.saveAnalysis(payload);
         if (res && res.data && res.data[0]) {
           window.location.href = 'analysis.html?id=' + res.data[0].id;
           return;

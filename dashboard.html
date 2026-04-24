@@ -293,6 +293,28 @@
       .dash-wrap { padding: 1.5rem 1rem 3rem; }
     }
 
+    /* ── Team toggle ── */
+    .team-toggle-bar {
+      display: none; align-items: center; gap: .4rem;
+      background: #111; border: 1px solid #1e1e1e;
+      border-radius: 10px; padding: .3rem;
+      margin-bottom: 1.25rem;
+    }
+    .team-toggle-bar.visible { display: flex; }
+    .team-toggle-btn {
+      padding: .4rem 1rem; border-radius: 7px; font-size: .82rem;
+      font-weight: 600; border: none; cursor: pointer; font-family: inherit;
+      color: #555; background: none; transition: color .15s, background .15s;
+    }
+    .team-toggle-btn.active { background: #1e1e1e; color: #fff; }
+    .doc-uploader {
+      font-size: .72rem; color: #555; margin-top: .15rem;
+      display: flex; align-items: center; gap: .3rem;
+    }
+    .doc-uploader-dot {
+      width: 5px; height: 5px; border-radius: 50%; background: #333; flex-shrink: 0;
+    }
+
     /* ── Mobile drawer ── */
     .mob-hamburger {
       display: none; align-items: center; justify-content: center;
@@ -537,6 +559,12 @@
       </div>
     </div>
 
+    <!-- Team toggle (only visible for workspace owners) -->
+    <div class="team-toggle-bar" id="team-toggle-bar">
+      <button class="team-toggle-btn active" id="toggle-mine" data-view="mine">My work</button>
+      <button class="team-toggle-btn"        id="toggle-team" data-view="team">All team</button>
+    </div>
+
     <!-- Table -->
     <div class="table-section">
 
@@ -667,7 +695,8 @@
           id:        d.id,
           fileName:  d.file_name  || d.fileName  || 'Untitled',
           riskLevel: d.risk_level || d.riskLevel  || 'Unknown',
-          date:      d.analyzed_at || d.analyzedAt || new Date().toISOString()
+          date:      d.analyzed_at || d.analyzedAt || new Date().toISOString(),
+          uploaderEmail: d.uploader_email || null
         };
       });
     }
@@ -734,10 +763,16 @@
       }
 
       list.innerHTML = docs.map(function(doc) {
+        var uploaderHtml = doc.uploaderEmail
+          ? '<div class="doc-uploader"><span class="doc-uploader-dot"></span>' + escHtml(doc.uploaderEmail.split('@')[0]) + '</div>'
+          : '';
         return '<div class="doc-row" onclick="location.href=\'analysis.html?id=' + doc.id + '\'">' +
           '<div class="doc-row-name">' +
             '<div class="doc-icon">PDF</div>' +
-            '<span class="doc-filename">' + escHtml(doc.fileName) + '</span>' +
+            '<div>' +
+              '<span class="doc-filename">' + escHtml(doc.fileName) + '</span>' +
+              uploaderHtml +
+            '</div>' +
           '</div>' +
           '<div><span class="risk-badge ' + riskClass(doc.riskLevel) + '">' + escHtml(doc.riskLevel) + '</span></div>' +
           '<div class="doc-date">' + formatDate(doc.date) + '</div>' +
@@ -775,6 +810,9 @@
     });
 
     // Load data
+    var currentView  = 'mine';
+    var currentWsId  = null;
+
     function loadFromLocalStorage() {
       try {
         var docs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
@@ -782,16 +820,60 @@
       } catch(e) { setDocs([]); }
     }
 
+    function loadMine() {
+      window.LC_AUTH.loadAnalyses().then(function(res) {
+        if (res.error) { loadFromLocalStorage(); return; }
+        setDocs(res.data || []);
+      });
+    }
+
+    function loadTeam() {
+      if (!currentWsId) { loadMine(); return; }
+      window.LC_AUTH.loadWorkspaceAnalyses(currentWsId).then(function(res) {
+        if (res.error) { loadMine(); return; }
+        var docs = (res.data || []).map(function(d) {
+          d.uploader_email = d.uploader_email || null;
+          return d;
+        });
+        setDocs(docs);
+      });
+    }
+
+    function loadData() {
+      if (!window.LC_AUTH) { loadFromLocalStorage(); return; }
+      if (currentView === 'team' && currentWsId) {
+        loadTeam();
+      } else {
+        loadMine();
+      }
+    }
+
+    // Team toggle buttons
+    document.getElementById('toggle-mine').addEventListener('click', function() {
+      currentView = 'mine';
+      document.getElementById('toggle-mine').classList.add('active');
+      document.getElementById('toggle-team').classList.remove('active');
+      loadData();
+    });
+    document.getElementById('toggle-team').addEventListener('click', function() {
+      currentView = 'team';
+      document.getElementById('toggle-team').classList.add('active');
+      document.getElementById('toggle-mine').classList.remove('active');
+      loadData();
+    });
+
     document.addEventListener('lc:session', function (e) {
       var session = e.detail;
-      if (session && window.LC_AUTH) {
-        window.LC_AUTH.loadAnalyses().then(function(res) {
-          if (res.error) { loadFromLocalStorage(); return; }
-          setDocs(res.data || []);
-        });
-      } else {
-        loadFromLocalStorage();
-      }
+      if (!session || !window.LC_AUTH) { loadFromLocalStorage(); return; }
+
+      // Check if user owns a workspace → show toggle
+      window.LC_AUTH.getMyWorkspace().then(function(res) {
+        if (!res.error && res.data) {
+          currentWsId = res.data.id;
+          document.getElementById('team-toggle-bar').classList.add('visible');
+        }
+        loadData();
+      });
     });
 
     setTimeout(function () {

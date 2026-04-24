@@ -188,6 +188,57 @@
     }
     .billing-status-paid { background: rgba(74,222,128,.1); color: #4ade80; }
 
+    /* ── Team section ── */
+    .team-member-row {
+      display: flex; align-items: center; gap: 1rem;
+      padding: .9rem 1.5rem; border-bottom: 1px solid #141414;
+    }
+    .team-member-row:last-child { border-bottom: none; }
+    .team-member-avatar {
+      width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
+      background: #1e1e1e; border: 1px solid #2a2a2a;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .72rem; font-weight: 700; color: #888;
+    }
+    .team-member-info { flex: 1; min-width: 0; }
+    .team-member-name { font-size: .85rem; color: #ccc; font-weight: 500; }
+    .team-member-email { font-size: .75rem; color: #444; margin-top: .1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .team-member-badge {
+      font-size: .65rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+      padding: .15rem .5rem; border-radius: 999px; flex-shrink: 0;
+    }
+    .team-badge-owner   { background: rgba(245,158,11,.1); color: #f59e0b; border: 1px solid rgba(245,158,11,.2); }
+    .team-badge-active  { background: rgba(74,222,128,.08); color: #4ade80; border: 1px solid rgba(74,222,128,.15); }
+    .team-badge-pending { background: rgba(255,255,255,.05); color: #555; border: 1px solid #222; }
+    .team-remove-btn {
+      background: none; border: none; cursor: pointer; color: #333;
+      font-size: .75rem; padding: .25rem .5rem; border-radius: 5px;
+      transition: color .15s, background .15s; font-family: inherit; flex-shrink: 0;
+    }
+    .team-remove-btn:hover { color: #f87171; background: rgba(248,113,113,.08); }
+    .team-add-form {
+      display: flex; gap: .6rem; padding: 1rem 1.5rem;
+      border-top: 1px solid #1a1a1a;
+    }
+    .team-add-input {
+      flex: 1; background: #191919; border: 1px solid #1e1e1e;
+      border-radius: 8px; padding: .55rem .85rem; color: #fff;
+      font-size: .85rem; font-family: inherit; outline: none;
+      transition: border-color .15s;
+    }
+    .team-add-input:focus { border-color: #2a2a2a; }
+    .team-add-input::placeholder { color: #444; }
+    .team-add-btn {
+      background: #1a1a1a; border: 1px solid #222; border-radius: 8px;
+      color: #ccc; font-size: .82rem; font-weight: 600; padding: .55rem 1rem;
+      cursor: pointer; font-family: inherit; white-space: nowrap;
+      transition: background .15s, color .15s;
+    }
+    .team-add-btn:hover { background: #222; color: #fff; }
+    .team-msg { padding: .6rem 1.5rem; font-size: .8rem; }
+    .team-msg.ok  { color: #4ade80; }
+    .team-msg.err { color: #f87171; }
+
     /* ── Danger zone ── */
     .danger-zone-body { padding: 1.25rem 1.5rem; }
     .danger-zone-body p { font-size: .85rem; color: #555; margin-bottom: 1rem; }
@@ -349,6 +400,22 @@
         <div class="account-field-label">Password</div>
         <div class="account-field-value">••••••••••</div>
         <button class="account-field-action">Change</button>
+      </div>
+    </div>
+
+    <!-- Team (owner only) -->
+    <div class="account-section" id="team-section" style="display:none;">
+      <div class="account-section-header">
+        <div class="account-section-title">Team</div>
+        <div style="font-size:.75rem;color:#444;" id="team-workspace-name"></div>
+      </div>
+      <div id="team-members-list">
+        <div style="padding:1.5rem;text-align:center;color:#444;font-size:.85rem;">Loading team…</div>
+      </div>
+      <div id="team-msg" class="team-msg" style="display:none;"></div>
+      <div class="team-add-form">
+        <input type="email" class="team-add-input" id="team-add-email" placeholder="colleague@lawfirm.com" autocomplete="off" />
+        <button class="team-add-btn" id="team-add-btn">Add member</button>
       </div>
     </div>
 
@@ -556,6 +623,111 @@
         if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }, 300);
     }
+  })();
+  </script>
+
+  <!-- Team management -->
+  <script>
+  (function () {
+    var teamSection  = document.getElementById('team-section');
+    var membersList  = document.getElementById('team-members-list');
+    var wsNameEl     = document.getElementById('team-workspace-name');
+    var msgEl        = document.getElementById('team-msg');
+    var addEmailEl   = document.getElementById('team-add-email');
+    var addBtn       = document.getElementById('team-add-btn');
+    var currentWsId  = null;
+
+    function showMsg(text, type) {
+      msgEl.textContent   = text;
+      msgEl.className     = 'team-msg ' + type;
+      msgEl.style.display = 'block';
+      setTimeout(function () { msgEl.style.display = 'none'; }, 4000);
+    }
+
+    function initials(email) {
+      return email ? email.charAt(0).toUpperCase() : '?';
+    }
+
+    function renderMembers(members) {
+      if (!members || members.length === 0) {
+        membersList.innerHTML =
+          '<div style="padding:1.5rem;text-align:center;color:#444;font-size:.85rem;">No members yet. Add a colleague below.</div>';
+        return;
+      }
+      membersList.innerHTML = members.map(function (m) {
+        var isOwner  = m.role === 'owner';
+        var badgeCls = isOwner ? 'team-badge-owner' : (m.status === 'active' ? 'team-badge-active' : 'team-badge-pending');
+        var badgeTxt = isOwner ? 'Owner' : (m.status === 'active' ? 'Active' : 'Pending');
+        var name     = m.full_name || m.email.split('@')[0];
+        return '<div class="team-member-row">' +
+          '<div class="team-member-avatar">' + initials(m.email) + '</div>' +
+          '<div class="team-member-info">' +
+            '<div class="team-member-name">' + escHtml(name) + '</div>' +
+            '<div class="team-member-email">' + escHtml(m.email) + '</div>' +
+          '</div>' +
+          '<span class="team-member-badge ' + badgeCls + '">' + badgeTxt + '</span>' +
+          (!isOwner
+            ? '<button class="team-remove-btn" data-id="' + m.id + '">Remove</button>'
+            : '') +
+        '</div>';
+      }).join('');
+
+      membersList.querySelectorAll('.team-remove-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          if (!confirm('Remove this member from the workspace?')) return;
+          window.LC_AUTH.removeWorkspaceMember(btn.dataset.id).then(function (res) {
+            if (res.error) { showMsg('Could not remove member.', 'err'); return; }
+            loadMembers();
+            showMsg('Member removed.', 'ok');
+          });
+        });
+      });
+    }
+
+    function escHtml(s) {
+      return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function loadMembers() {
+      if (!currentWsId) return;
+      window.LC_AUTH.loadWorkspaceMembers(currentWsId).then(function (res) {
+        renderMembers(res.data || []);
+      });
+    }
+
+    addBtn.addEventListener('click', function () {
+      var email = addEmailEl.value.trim().toLowerCase();
+      if (!email || !email.includes('@')) { showMsg('Enter a valid email address.', 'err'); return; }
+      if (!currentWsId) { showMsg('No workspace found.', 'err'); return; }
+      addBtn.disabled = true;
+      window.LC_AUTH.addWorkspaceMember(email, currentWsId).then(function (res) {
+        addBtn.disabled = false;
+        if (res.error) {
+          showMsg(res.error.message || 'Could not add member.', 'err');
+        } else {
+          addEmailEl.value = '';
+          loadMembers();
+          showMsg('Invite sent! They will join automatically when they sign up or log in.', 'ok');
+        }
+      });
+    });
+
+    addEmailEl.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') addBtn.click();
+    });
+
+    document.addEventListener('lc:session', function (e) {
+      var session = e.detail;
+      if (!session || !window.LC_AUTH) return;
+      window.LC_AUTH.getMyWorkspace().then(function (res) {
+        if (res.error || !res.data) return;
+        var ws = res.data;
+        currentWsId = ws.id;
+        teamSection.style.display = 'block';
+        wsNameEl.textContent = ws.name;
+        loadMembers();
+      });
+    });
   })();
   </script>
 </body>
