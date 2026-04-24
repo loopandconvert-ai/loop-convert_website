@@ -121,6 +121,12 @@
       <h1 class="auth-title">Create your account</h1>
       <p class="auth-sub">Start analyzing contracts for free — no credit card needed.</p>
 
+      <!-- Shown when arriving via invite link -->
+      <div id="invite-banner" style="display:none;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);border-radius:10px;padding:.85rem 1rem;margin-bottom:1.25rem;">
+        <div style="font-size:.82rem;font-weight:600;color:#f59e0b;margin-bottom:.2rem;">You've been invited</div>
+        <div style="font-size:.8rem;color:#888;">Create your account below to join your team's workspace on Loop &amp; Convert.</div>
+      </div>
+
       <div class="auth-error"   id="signup-error"></div>
       <div class="auth-success" id="signup-success">
         Account created! Check your email to confirm your address, then log in.
@@ -131,8 +137,8 @@
           <label for="name">Full name</label>
           <input type="text" id="name" placeholder="Jane Smith" autocomplete="name" required />
         </div>
-        <div class="auth-field">
-          <label for="firm">Law firm name</label>
+        <div class="auth-field" id="firm-field">
+          <label for="firm">Law firm name <span style="color:#444;font-weight:400;">(optional)</span></label>
           <input type="text" id="firm" placeholder="Smith &amp; Partners LLP" autocomplete="organization" />
         </div>
         <div class="auth-field">
@@ -156,6 +162,20 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <script src="js/config.js"></script>
   <script src="js/auth.js"></script>
+  <script>
+  (function () {
+    // Detect invite link — pre-fill email, show banner, hide firm field
+    var params      = new URLSearchParams(window.location.search);
+    var inviteEmail = params.get('invite');
+    if (inviteEmail) {
+      document.getElementById('invite-banner').style.display = 'block';
+      document.getElementById('email').value = decodeURIComponent(inviteEmail);
+      document.getElementById('email').readOnly = true;
+      document.getElementById('firm-field').style.display = 'none';
+    }
+  })();
+  </script>
+
   <script>
   (function () {
     var form       = document.getElementById('signup-form');
@@ -201,11 +221,11 @@
           btn.textContent = 'Create Account';
           btn.disabled    = false;
         } else {
-          // If a firm name was entered, create a workspace for this user
-          if (firm && res.data && res.data.user && window.LC_AUTH) {
-            window.LC_AUTH.createWorkspace(firm).catch(function () {});
-          }
-          form.style.display       = 'none';
+          form.style.display = 'none';
+          var params = new URLSearchParams(window.location.search);
+          successBox.textContent = params.get('invite')
+            ? 'Account created! Confirm your email, then log in — you\'ll automatically join your team\'s workspace.'
+            : 'Account created! Check your email to confirm your address, then log in.';
           successBox.style.display = 'block';
         }
       });

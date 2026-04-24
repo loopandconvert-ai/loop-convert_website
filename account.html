@@ -710,8 +710,8 @@
     }
 
     function showInviteLink(email) {
-      var base     = window.location.origin + window.location.pathname.replace('account.html', '');
-      var signupUrl = base + 'signup.html';
+      var base      = window.location.origin + window.location.pathname.replace('account.html', '');
+      var signupUrl = base + 'signup.html?invite=' + encodeURIComponent(email);
       var inviteEl  = document.getElementById('invite-link-box');
       if (!inviteEl) return;
       inviteEl.style.display = 'block';

@@ -42,16 +42,64 @@
     if (page === 'auth-required')  requireAuth(session);
     if (page === 'auth-page')      redirectIfAuthed(session);
 
-    // Auto-join any pending workspace invites for this user
     if (session) {
-      window.LC_AUTH && window.LC_AUTH.checkAndJoinPendingInvites &&
-        window.LC_AUTH.checkAndJoinPendingInvites(session.user.email, session.user.id);
+      // On every login: join pending invites first, then set up workspace if needed
+      setupWorkspace(session);
     }
 
-    // expose for inline scripts
     window.LC_SESSION = session;
     document.dispatchEvent(new CustomEvent('lc:session', { detail: session }));
   });
+
+  function setupWorkspace(session) {
+    var email  = session.user.email;
+    var userId = session.user.id;
+    var meta   = session.user.user_metadata || {};
+
+    // Step 1: check for pending invites
+    sb.from('workspace_members')
+      .select('id')
+      .eq('email', email)
+      .eq('status', 'pending')
+      .then(function (res) {
+        if (!res.error && res.data && res.data.length > 0) {
+          // User was invited — join the workspace, do NOT create their own
+          var ids = res.data.map(function (r) { return r.id; });
+          return sb.from('workspace_members').update({
+            user_id:   userId,
+            status:    'active',
+            joined_at: new Date().toISOString()
+          }).in('id', ids);
+        }
+
+        // Step 2: no invite — check if they already have a workspace
+        return sb.from('workspaces')
+          .select('id')
+          .eq('owner_id', userId)
+          .maybeSingle()
+          .then(function (wsRes) {
+            if (!wsRes.error && wsRes.data) return; // already has workspace
+            // Step 3: no workspace, no invite — auto-create if they have a firm name
+            var firmName = meta.firm_name || '';
+            if (!firmName) return;
+            return sb.from('workspaces').insert({
+              name:     firmName,
+              owner_id: userId
+            }).select().then(function (r) {
+              if (r.error || !r.data || !r.data[0]) return;
+              var wsId = r.data[0].id;
+              return sb.from('workspace_members').insert({
+                workspace_id: wsId,
+                user_id:      userId,
+                email:        email,
+                role:         'owner',
+                status:       'active',
+                joined_at:    new Date().toISOString()
+              });
+            });
+          });
+      });
+  }
 
   // ── Auth helpers ──────────────────────────────────────────
   window.LC_AUTH = {
