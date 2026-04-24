@@ -1,8 +1,10 @@
 // Navbar scroll shadow
 const navbar = document.querySelector('.navbar');
-window.addEventListener('scroll', () => {
-  navbar.classList.toggle('scrolled', window.scrollY > 10);
-});
+if (navbar) {
+  window.addEventListener('scroll', () => {
+    navbar.classList.toggle('scrolled', window.scrollY > 10);
+  });
+}
 
 // Mobile hamburger menu
 const hamburger = document.querySelector('.hamburger');

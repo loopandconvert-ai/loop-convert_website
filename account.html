@@ -797,15 +797,33 @@
       var session = e.detail;
       if (!session || !window.LC_AUTH) return;
       var meta = session.user.user_metadata || {};
-      teamSection.style.display = 'block';
       window.LC_AUTH.getMyWorkspace().then(function (res) {
         if (!res.error && res.data) {
+          // User is an owner — show full Team section
           currentWsId = res.data.id;
+          teamSection.style.display = 'block';
           wsNameEl.textContent = res.data.name;
           loadMembers();
         } else {
-          wsNameEl.textContent = 'No workspace';
-          showCreatePrompt(meta.firm_name || '');
+          // Not an owner — check if they're a member of someone else's workspace
+          window.LC_AUTH.getMyMembership().then(function (mRes) {
+            if (!mRes.error && mRes.data && mRes.data.role === 'member') {
+              // They're a member — show read-only info, no management
+              teamSection.style.display = 'block';
+              var ws = mRes.data.workspaces || {};
+              wsNameEl.textContent = ws.name || 'Your team';
+              membersList.innerHTML =
+                '<div style="padding:1.25rem 1.5rem;font-size:.85rem;color:#555;">' +
+                  'You are a member of <strong style="color:#888;">' + escHtml(ws.name || 'this workspace') + '</strong>. ' +
+                  'Contact your workspace owner to manage team members.' +
+                '</div>';
+            } else {
+              // No workspace at all — show create prompt
+              teamSection.style.display = 'block';
+              wsNameEl.textContent = 'No workspace';
+              showCreatePrompt(meta.firm_name || '');
+            }
+          });
         }
       });
     });
