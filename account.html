@@ -417,6 +417,20 @@
         <input type="email" class="team-add-input" id="team-add-email" placeholder="colleague@lawfirm.com" autocomplete="off" />
         <button class="team-add-btn" id="team-add-btn">Add member</button>
       </div>
+      <!-- Invite link shown after adding a member -->
+      <div id="invite-link-box" style="display:none;margin:0 1.5rem 1.25rem;padding:1rem;background:#0d0d0d;border:1px solid #1e1e1e;border-radius:10px;">
+        <div style="font-size:.75rem;color:#555;margin-bottom:.6rem;">
+          Share this link with <strong id="invite-link-email" style="color:#888;"></strong> — they sign up with the same email and automatically join your workspace.
+        </div>
+        <div style="display:flex;gap:.5rem;align-items:center;">
+          <input id="invite-link-url" type="text" readonly
+            style="flex:1;background:#111;border:1px solid #1e1e1e;border-radius:7px;padding:.45rem .75rem;color:#888;font-size:.8rem;font-family:inherit;outline:none;" />
+          <button id="invite-copy-btn"
+            style="background:#1a1a1a;border:1px solid #222;border-radius:7px;color:#ccc;font-size:.8rem;font-weight:600;padding:.45rem .85rem;cursor:pointer;font-family:inherit;white-space:nowrap;transition:background .15s;">
+            Copy link
+          </button>
+        </div>
+      </div>
     </div>
 
     <!-- Plan -->
@@ -695,6 +709,16 @@
       });
     }
 
+    function showInviteLink(email) {
+      var base     = window.location.origin + window.location.pathname.replace('account.html', '');
+      var signupUrl = base + 'signup.html';
+      var inviteEl  = document.getElementById('invite-link-box');
+      if (!inviteEl) return;
+      inviteEl.style.display = 'block';
+      document.getElementById('invite-link-url').value = signupUrl;
+      document.getElementById('invite-link-email').textContent = email;
+    }
+
     addBtn.addEventListener('click', function () {
       var email = addEmailEl.value.trim().toLowerCase();
       if (!email || !email.includes('@')) { showMsg('Enter a valid email address.', 'err'); return; }
@@ -705,15 +729,32 @@
         if (res.error) {
           showMsg(res.error.message || 'Could not add member.', 'err');
         } else {
+          var invitedEmail = email;
           addEmailEl.value = '';
           loadMembers();
-          showMsg('Invite sent! They will join automatically when they sign up or log in.', 'ok');
+          showMsg('Member added!', 'ok');
+          showInviteLink(invitedEmail);
         }
       });
     });
 
     addEmailEl.addEventListener('keydown', function (e) {
       if (e.key === 'Enter') addBtn.click();
+    });
+
+    document.addEventListener('click', function (e) {
+      if (e.target && e.target.id === 'invite-copy-btn') {
+        var urlInput = document.getElementById('invite-link-url');
+        urlInput.select();
+        navigator.clipboard.writeText(urlInput.value).then(function () {
+          e.target.textContent = 'Copied!';
+          setTimeout(function () { e.target.textContent = 'Copy link'; }, 2000);
+        }).catch(function () {
+          document.execCommand('copy');
+          e.target.textContent = 'Copied!';
+          setTimeout(function () { e.target.textContent = 'Copy link'; }, 2000);
+        });
+      }
     });
 
     function showCreatePrompt(defaultName) {
