@@ -716,16 +716,56 @@
       if (e.key === 'Enter') addBtn.click();
     });
 
+    function showCreatePrompt(defaultName) {
+      membersList.innerHTML =
+        '<div style="padding:1.25rem 1.5rem;">' +
+          '<p style="font-size:.85rem;color:#555;margin-bottom:1rem;">You don\'t have a team workspace yet. Create one to start adding colleagues.</p>' +
+          '<div style="display:flex;gap:.6rem;">' +
+            '<input id="ws-name-input" class="team-add-input" placeholder="Your firm name" value="' + escHtml(defaultName || '') + '" style="max-width:260px;" />' +
+            '<button id="ws-create-btn" class="team-add-btn">Create workspace</button>' +
+          '</div>' +
+        '</div>';
+
+      document.getElementById('ws-create-btn').addEventListener('click', function () {
+        var name = document.getElementById('ws-name-input').value.trim();
+        if (!name) { showMsg('Enter a workspace name.', 'err'); return; }
+        this.disabled = true;
+        this.textContent = 'Creating…';
+        var btn = this;
+        window.LC_AUTH.createWorkspace(name).then(function (res) {
+          if (res && res.error) {
+            showMsg(res.error.message || 'Could not create workspace.', 'err');
+            btn.disabled = false;
+            btn.textContent = 'Create workspace';
+            return;
+          }
+          // Reload to pick up new workspace
+          window.LC_AUTH.getMyWorkspace().then(function (r) {
+            if (!r.error && r.data) {
+              currentWsId = r.data.id;
+              wsNameEl.textContent = r.data.name;
+              loadMembers();
+              showMsg('Workspace created! You can now add team members.', 'ok');
+            }
+          });
+        });
+      });
+    }
+
     document.addEventListener('lc:session', function (e) {
       var session = e.detail;
       if (!session || !window.LC_AUTH) return;
+      var meta = session.user.user_metadata || {};
+      teamSection.style.display = 'block';
       window.LC_AUTH.getMyWorkspace().then(function (res) {
-        if (res.error || !res.data) return;
-        var ws = res.data;
-        currentWsId = ws.id;
-        teamSection.style.display = 'block';
-        wsNameEl.textContent = ws.name;
-        loadMembers();
+        if (!res.error && res.data) {
+          currentWsId = res.data.id;
+          wsNameEl.textContent = res.data.name;
+          loadMembers();
+        } else {
+          wsNameEl.textContent = 'No workspace';
+          showCreatePrompt(meta.firm_name || '');
+        }
       });
     });
   })();
