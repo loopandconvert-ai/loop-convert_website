@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Team — Loop &amp; Convert</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="icon" type="image/png" href="images/logo.png" />
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    body { background: #0a0a0a; }
+
+    /* ── App navbar ── */
+    .app-navbar {
+      position: sticky; top: 0; z-index: 50;
+      background: rgba(10,10,10,.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid #1e1e1e;
+      padding: 0 2rem;
+    }
+    .app-navbar-inner {
+      max-width: 1200px; margin: 0 auto; height: 64px;
+      display: flex; align-items: center; justify-content: space-between; gap: 1.5rem;
+    }
+    .app-nav-logo {
+      font-size: 1.1rem; font-weight: 800; color: #fff;
+      text-decoration: none; letter-spacing: -.02em; flex-shrink: 0;
+    }
+    .app-nav-links { display: flex; gap: .25rem; list-style: none; padding: 0; margin: 0; }
+    .app-nav-links a {
+      padding: .4rem .85rem; font-size: .85rem; font-weight: 500;
+      color: #888; text-decoration: none; border-radius: 6px;
+      transition: color .15s, background .15s;
+    }
+    .app-nav-links a:hover,
+    .app-nav-links a.active { color: #fff; background: #1a1a1a; }
+
+    /* ── User pill ── */
+    .user-pill {
+      display: flex; align-items: center; gap: .55rem;
+      background: #141414; border: 1px solid #222;
+      border-radius: 999px; padding: .3rem .7rem .3rem .35rem;
+      font-size: .82rem; color: #ccc; cursor: pointer; position: relative; flex-shrink: 0;
+    }
+    .user-avatar {
+      width: 26px; height: 26px; border-radius: 50%;
+      background: #fff; color: #000; font-weight: 700; font-size: .72rem;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .user-menu {
+      position: absolute; top: calc(100% + .5rem); right: 0;
+      background: #141414; border: 1px solid #222;
+      border-radius: 8px; min-width: 180px; overflow: hidden;
+      display: none; z-index: 100; box-shadow: 0 8px 32px rgba(0,0,0,.5);
+    }
+    .user-menu.open { display: block; }
+    .user-menu-header { padding: .75rem 1rem; border-bottom: 1px solid #1e1e1e; }
+    .user-menu-name  { font-size: .85rem; font-weight: 600; color: #fff; }
+    .user-menu-email { font-size: .75rem; color: #555; margin-top: .1rem; }
+    .user-menu a, .user-menu button {
+      display: flex; align-items: center; gap: .5rem;
+      width: 100%; text-align: left;
+      padding: .6rem 1rem; font-size: .82rem; color: #aaa;
+      text-decoration: none; background: none; border: none;
+      cursor: pointer; font-family: inherit;
+      border-top: 1px solid #1e1e1e; transition: background .15s, color .15s;
+    }
+    .user-menu a:hover { background: #1e1e1e; color: #fff; }
+    .user-menu button { color: #f87171; }
+    .user-menu button:hover { background: #1e1e1e; }
+
+    /* ── Page ── */
+    .page-wrap { max-width: 900px; margin: 0 auto; padding: 2.5rem 2rem 5rem; }
+
+    .page-header {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      gap: 1rem; flex-wrap: wrap; margin-bottom: 2rem;
+    }
+    .page-title { font-size: 1.5rem; font-weight: 700; color: #fff; margin-bottom: .25rem; }
+    .page-sub   { font-size: .875rem; color: #555; }
+
+    /* ── Stats row ── */
+    .team-stats {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 1rem; margin-bottom: 2rem;
+    }
+    .team-stat {
+      background: #111; border: 1px solid #1e1e1e;
+      border-radius: 12px; padding: 1.1rem 1.4rem;
+    }
+    .team-stat-value { font-size: 1.6rem; font-weight: 800; color: #fff; line-height: 1; margin-bottom: .25rem; }
+    .team-stat-label { font-size: .75rem; color: #555; font-weight: 500; }
+
+    /* ── Main card ── */
+    .team-card {
+      background: #111; border: 1px solid #1e1e1e;
+      border-radius: 14px; overflow: hidden;
+    }
+
+    /* ── Toolbar ── */
+    .team-toolbar {
+      display: flex; align-items: center; gap: .75rem;
+      padding: 1rem 1.25rem; border-bottom: 1px solid #1a1a1a;
+      flex-wrap: wrap;
+    }
+    .search-box {
+      display: flex; align-items: center; gap: .5rem;
+      background: #0e0e0e; border: 1px solid #1e1e1e;
+      border-radius: 8px; padding: .45rem .75rem;
+      flex: 1; min-width: 180px;
+    }
+    .search-box svg { color: #444; flex-shrink: 0; }
+    .search-box input {
+      background: none; border: none; outline: none;
+      color: #fff; font-size: .85rem; font-family: inherit; width: 100%;
+    }
+    .search-box input::placeholder { color: #444; }
+
+    .filter-tabs { display: flex; gap: .35rem; }
+    .filter-tab {
+      padding: .35rem .8rem; font-size: .78rem; font-weight: 600;
+      border-radius: 6px; border: 1px solid #222; background: none;
+      color: #666; cursor: pointer; font-family: inherit; transition: all .15s;
+    }
+    .filter-tab:hover { border-color: #333; color: #aaa; }
+    .filter-tab.active { background: #fff; color: #000; border-color: #fff; }
+
+    /* ── Table head ── */
+    .team-head {
+      display: grid; grid-template-columns: 1fr 90px 110px 90px 40px;
+      padding: .6rem 1.25rem; border-bottom: 1px solid #1a1a1a;
+    }
+    .team-head span {
+      font-size: .7rem; font-weight: 600; color: #444;
+      text-transform: uppercase; letter-spacing: .08em;
+    }
+
+    /* ── Member rows ── */
+    .member-row {
+      display: grid; grid-template-columns: 1fr 90px 110px 90px 40px;
+      align-items: center; padding: .85rem 1.25rem;
+      border-bottom: 1px solid #141414; transition: background .12s;
+    }
+    .member-row:last-child { border-bottom: none; }
+    .member-row:hover { background: #161616; }
+    .member-row.hidden { display: none; }
+
+    .member-info { display: flex; align-items: center; gap: .75rem; min-width: 0; }
+    .member-avatar {
+      width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
+      background: #1e1e1e; border: 1px solid #2a2a2a;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .75rem; font-weight: 700; color: #888;
+    }
+    .member-name  { font-size: .875rem; font-weight: 500; color: #e0e0e0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .member-email { font-size: .75rem; color: #444; margin-top: .1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    .member-role  { font-size: .8rem; color: #666; }
+
+    .member-badge {
+      display: inline-flex; align-items: center;
+      font-size: .65rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+      padding: .2rem .55rem; border-radius: 999px;
+    }
+    .badge-owner   { background: rgba(245,158,11,.1);  color: #f59e0b; border: 1px solid rgba(245,158,11,.2); }
+    .badge-active  { background: rgba(74,222,128,.08); color: #4ade80; border: 1px solid rgba(74,222,128,.15); }
+    .badge-pending { background: rgba(255,255,255,.05); color: #555;   border: 1px solid #222; }
+
+    .member-joined { font-size: .75rem; color: #444; }
+
+    .member-remove {
+      background: none; border: none; cursor: pointer; color: #333;
+      padding: .3rem; border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      transition: color .15s, background .15s;
+    }
+    .member-remove:hover { color: #f87171; background: rgba(248,113,113,.08); }
+
+    /* ── Empty state ── */
+    .team-empty {
+      padding: 4rem 2rem; text-align: center; color: #444;
+    }
+    .team-empty svg { margin-bottom: 1rem; opacity: .3; }
+    .team-empty p   { font-size: .875rem; }
+
+    /* ── Add member section ── */
+    .add-section {
+      background: #111; border: 1px solid #1e1e1e;
+      border-radius: 14px; padding: 1.5rem;
+      margin-top: 1.5rem;
+    }
+    .add-section-title {
+      font-size: .8rem; font-weight: 700; color: #555;
+      text-transform: uppercase; letter-spacing: .06em;
+      margin-bottom: 1rem;
+    }
+    .add-form { display: flex; gap: .75rem; flex-wrap: wrap; }
+    .add-input {
+      flex: 1; min-width: 220px;
+      background: #191919; border: 1px solid #1e1e1e;
+      border-radius: 10px; padding: .65rem 1rem;
+      color: #fff; font-size: .9rem; font-family: inherit;
+      outline: none; transition: border-color .15s;
+    }
+    .add-input:focus { border-color: #333; }
+    .add-input::placeholder { color: #444; }
+    .add-btn {
+      background: #fff; color: #000; border: none;
+      border-radius: 10px; padding: .65rem 1.25rem;
+      font-size: .875rem; font-weight: 700;
+      cursor: pointer; font-family: inherit;
+      transition: background .15s; white-space: nowrap;
+    }
+    .add-btn:hover { background: #e5e5e5; }
+    .add-btn:disabled { opacity: .5; cursor: not-allowed; }
+
+    .add-msg { margin-top: .75rem; font-size: .82rem; }
+    .add-msg.ok  { color: #4ade80; }
+    .add-msg.err { color: #f87171; }
+
+    /* ── Invite link box ── */
+    .invite-box {
+      margin-top: 1rem; padding: 1rem;
+      background: #0d0d0d; border: 1px solid #1e1e1e;
+      border-radius: 10px; display: none;
+    }
+    .invite-box-label {
+      font-size: .75rem; color: #555; margin-bottom: .65rem;
+    }
+    .invite-box-label strong { color: #888; }
+    .invite-row { display: flex; gap: .5rem; align-items: center; }
+    .invite-url {
+      flex: 1; background: #111; border: 1px solid #1e1e1e;
+      border-radius: 7px; padding: .45rem .75rem;
+      color: #888; font-size: .8rem; font-family: inherit;
+      outline: none;
+    }
+    .invite-copy {
+      background: #1a1a1a; border: 1px solid #222; border-radius: 7px;
+      color: #ccc; font-size: .8rem; font-weight: 600;
+      padding: .45rem .85rem; cursor: pointer; font-family: inherit;
+      white-space: nowrap; transition: background .15s;
+    }
+    .invite-copy:hover { background: #222; color: #fff; }
+
+    /* ── Mobile drawer ── */
+    .mob-hamburger {
+      display: none; align-items: center; justify-content: center;
+      width: 36px; height: 36px; border-radius: 8px;
+      background: none; border: none; cursor: pointer; color: #888;
+      transition: color .15s, background .15s; flex-shrink: 0;
+    }
+    .mob-hamburger:hover { color: #fff; background: #1a1a1a; }
+    .mob-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,.65); z-index: 150;
+    }
+    .mob-overlay.open { display: block; }
+    .mob-drawer {
+      position: fixed; top: 0; left: 0; bottom: 0; width: 280px;
+      background: #0d0d0d; border-right: 1px solid #1e1e1e;
+      z-index: 151; display: flex; flex-direction: column;
+      transform: translateX(-100%);
+      transition: transform .25s cubic-bezier(.4,0,.2,1);
+    }
+    .mob-drawer.open { transform: translateX(0); }
+    .mob-drawer-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1rem 1.1rem; border-bottom: 1px solid #1a1a1a; flex-shrink: 0;
+    }
+    .mob-drawer-logo { font-size: .95rem; font-weight: 800; color: #fff; text-decoration: none; }
+    .mob-drawer-close {
+      width: 30px; height: 30px; border-radius: 7px;
+      background: none; border: none; cursor: pointer; color: #555;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .mob-drawer-close:hover { color: #fff; background: #1a1a1a; }
+    .mob-drawer-nav { flex: 1; padding: .6rem .7rem; overflow-y: auto; }
+    .mob-drawer-nav a {
+      display: flex; align-items: center; gap: .65rem;
+      padding: .7rem .85rem; border-radius: 8px; font-size: .9rem;
+      font-weight: 500; color: #888; text-decoration: none;
+      transition: background .12s, color .12s;
+    }
+    .mob-drawer-nav a:hover { background: #161616; color: #fff; }
+    .mob-drawer-nav a.active { background: #1a1a1a; color: #fff; }
+    .mob-drawer-nav a svg { flex-shrink: 0; opacity: .6; }
+    .mob-drawer-nav a:hover svg, .mob-drawer-nav a.active svg { opacity: 1; }
+    .mob-drawer-divider { height: 1px; background: #1a1a1a; margin: .5rem .85rem; }
+    .mob-drawer-footer { padding: .7rem; border-top: 1px solid #1a1a1a; flex-shrink: 0; }
+    .mob-drawer-footer button {
+      display: flex; align-items: center; gap: .65rem;
+      width: 100%; padding: .7rem .85rem; border-radius: 8px;
+      background: none; border: none; cursor: pointer; font-family: inherit;
+      font-size: .9rem; font-weight: 500; color: #f87171;
+    }
+    .mob-drawer-footer button:hover { background: rgba(248,113,113,.06); }
+
+    @media (max-width: 640px) {
+      .team-stats { grid-template-columns: 1fr 1fr; }
+      .team-head  { display: none; }
+      .member-row { grid-template-columns: 1fr auto auto; gap: .5rem; }
+      .member-row > .member-role,
+      .member-row > .member-joined { display: none; }
+      .app-nav-links { display: none; }
+      .mob-hamburger { display: flex; }
+      #user-label { display: none; }
+    }
+  </style>
+</head>
+<body data-page="auth-required">
+
+  <!-- ─── App Navbar ───────────────────────────────── -->
+  <header class="app-navbar">
+    <div class="app-navbar-inner">
+      <div style="display:flex;align-items:center;gap:.5rem;">
+        <button class="mob-hamburger" id="mob-hamburger" title="Menu">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5M3.75 17.25h16.5"/>
+          </svg>
+        </button>
+        <a href="dashboard.html" class="app-nav-logo">Loop <span class="accent">&amp;</span> Convert</a>
+      </div>
+      <ul class="app-nav-links">
+        <li><a href="dashboard.html">Dashboard</a></li>
+        <li><a href="agent.html">Lex AI</a></li>
+        <li><a href="team.html" class="active">Team</a></li>
+        <li><a href="upload-pro.html">+ Upload</a></li>
+      </ul>
+      <div class="user-pill" id="user-pill" style="display:none;">
+        <div class="user-avatar" id="user-avatar">?</div>
+        <span id="user-label">…</span>
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+        <div class="user-menu" id="user-menu">
+          <div class="user-menu-header">
+            <div class="user-menu-name" id="menu-name">—</div>
+            <div class="user-menu-email" id="menu-email">—</div>
+          </div>
+          <a href="dashboard.html">Dashboard</a>
+          <a href="team.html" style="color:#fff;">Team</a>
+          <a href="account.html">Account settings</a>
+          <a href="upload-pro.html">Upload contract</a>
+          <button id="sign-out-btn">Sign out</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ─── Content ─────────────────────────────────── -->
+  <div class="page-wrap" id="page-wrap" style="display:none;">
+
+    <div class="page-header">
+      <div>
+        <div class="page-title" id="ws-title">Team</div>
+        <div class="page-sub" id="ws-sub">Manage your workspace members</div>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="team-stats">
+      <div class="team-stat">
+        <div class="team-stat-value" id="stat-total">—</div>
+        <div class="team-stat-label">Total members</div>
+      </div>
+      <div class="team-stat">
+        <div class="team-stat-value" id="stat-active">—</div>
+        <div class="team-stat-label">Active</div>
+      </div>
+      <div class="team-stat">
+        <div class="team-stat-value" id="stat-pending">—</div>
+        <div class="team-stat-label">Pending invite</div>
+      </div>
+    </div>
+
+    <!-- Member list -->
+    <div class="team-card">
+      <div class="team-toolbar">
+        <div class="search-box">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 115 11a6 6 0 0112 0z"/>
+          </svg>
+          <input type="text" id="member-search" placeholder="Search by name or email…" autocomplete="off" />
+        </div>
+        <div class="filter-tabs">
+          <button class="filter-tab active" data-filter="all">All</button>
+          <button class="filter-tab" data-filter="active">Active</button>
+          <button class="filter-tab" data-filter="pending">Pending</button>
+        </div>
+      </div>
+
+      <div class="team-head">
+        <span>Member</span>
+        <span>Role</span>
+        <span>Status</span>
+        <span>Joined</span>
+        <span></span>
+      </div>
+
+      <div id="members-list">
+        <div class="team-empty">
+          <svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/>
+          </svg>
+          <p>Loading members…</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add member -->
+    <div class="add-section">
+      <div class="add-section-title">Add team member</div>
+      <div class="add-form">
+        <input type="email" class="add-input" id="add-email" placeholder="colleague@lawfirm.com" autocomplete="off" />
+        <button class="add-btn" id="add-btn">Send invite</button>
+      </div>
+      <div class="add-msg" id="add-msg" style="display:none;"></div>
+      <div class="invite-box" id="invite-box">
+        <div class="invite-box-label">
+          Share this link with <strong id="invite-email-label"></strong> — they sign up with the same email and automatically join your workspace.
+        </div>
+        <div class="invite-row">
+          <input id="invite-url" type="text" class="invite-url" readonly />
+          <button class="invite-copy" id="invite-copy">Copy link</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Not owner message -->
+  <div id="not-owner-msg" style="display:none;max-width:480px;margin:5rem auto;padding:2rem;text-align:center;color:#555;">
+    <div style="font-size:2rem;margin-bottom:1rem;">🔒</div>
+    <div style="font-size:1rem;font-weight:600;color:#888;margin-bottom:.5rem;">Owner access only</div>
+    <div style="font-size:.875rem;margin-bottom:1.5rem;">This page is only available to workspace owners.</div>
+    <a href="dashboard.html" style="font-size:.85rem;color:#888;text-decoration:underline;">Back to dashboard</a>
+  </div>
+
+  <!-- ─── Mobile drawer ───────────────────────────── -->
+  <div class="mob-overlay" id="mob-overlay"></div>
+  <div class="mob-drawer" id="mob-drawer">
+    <div class="mob-drawer-header">
+      <a href="dashboard.html" class="mob-drawer-logo">Loop &amp; Convert</a>
+      <button class="mob-drawer-close" id="mob-drawer-close">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+    <nav class="mob-drawer-nav">
+      <a href="dashboard.html">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z"/></svg>
+        Dashboard
+      </a>
+      <a href="agent.html">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.625 9.75a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375m-13.5 3.01c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.184-4.183a1.14 1.14 0 01.778-.332 48.294 48.294 0 005.83-.498c1.585-.233 2.708-1.626 2.708-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z"/></svg>
+        Lex AI
+      </a>
+      <a href="team.html" class="active">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/></svg>
+        Team
+      </a>
+      <a href="upload-pro.html">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/></svg>
+        Upload contract
+      </a>
+      <div class="mob-drawer-divider"></div>
+      <a href="account.html">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/></svg>
+        Account settings
+      </a>
+    </nav>
+    <div class="mob-drawer-footer">
+      <button id="mob-sign-out">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75"/></svg>
+        Sign out
+      </button>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/main.js"></script>
+  <script src="js/auth.js"></script>
+
+  <!-- Mobile drawer -->
+  <script>
+  (function () {
+    var hamburger = document.getElementById('mob-hamburger');
+    var drawer    = document.getElementById('mob-drawer');
+    var overlay   = document.getElementById('mob-overlay');
+    var closeBtn  = document.getElementById('mob-drawer-close');
+    var mobSignOut = document.getElementById('mob-sign-out');
+    function openDrawer()  { drawer.classList.add('open'); overlay.classList.add('open'); document.body.style.overflow = 'hidden'; }
+    function closeDrawer() { drawer.classList.remove('open'); overlay.classList.remove('open'); document.body.style.overflow = ''; }
+    hamburger.addEventListener('click', openDrawer);
+    closeBtn.addEventListener('click', closeDrawer);
+    overlay.addEventListener('click', closeDrawer);
+    mobSignOut.addEventListener('click', function () { closeDrawer(); if (window.LC_AUTH) window.LC_AUTH.signOut(); });
+  })();
+  </script>
+
+  <!-- User pill -->
+  <script>
+  (function () {
+    var pill    = document.getElementById('user-pill');
+    var avatar  = document.getElementById('user-avatar');
+    var label   = document.getElementById('user-label');
+    var menu    = document.getElementById('user-menu');
+    var signOut = document.getElementById('sign-out-btn');
+
+    document.addEventListener('lc:session', function (e) {
+      var session = e.detail;
+      if (!session) return;
+      var meta      = session.user.user_metadata || {};
+      var name      = meta.full_name || session.user.email;
+      var firstName = name.split(' ')[0];
+      avatar.textContent = firstName.charAt(0).toUpperCase();
+      label.textContent  = firstName;
+      pill.style.display = 'flex';
+      document.getElementById('menu-name').textContent  = name;
+      document.getElementById('menu-email').textContent = session.user.email;
+    });
+
+    pill.addEventListener('click', function (e) { e.stopPropagation(); menu.classList.toggle('open'); });
+    document.addEventListener('click', function () { menu.classList.remove('open'); });
+    signOut.addEventListener('click', function () { if (window.LC_AUTH) window.LC_AUTH.signOut(); });
+  })();
+  </script>
+
+  <!-- Team page logic -->
+  <script>
+  (function () {
+    var allMembers   = [];
+    var currentWsId  = null;
+    var currentFilter = 'all';
+    var currentSearch = '';
+
+    function esc(s) {
+      return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function fmt(dateStr) {
+      if (!dateStr) return '—';
+      var d = new Date(dateStr);
+      return d.toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
+    }
+
+    function updateStats(members) {
+      var active  = members.filter(function (m) { return m.status === 'active'; }).length;
+      var pending = members.filter(function (m) { return m.status === 'pending'; }).length;
+      document.getElementById('stat-total').textContent   = members.length;
+      document.getElementById('stat-active').textContent  = active;
+      document.getElementById('stat-pending').textContent = pending;
+    }
+
+    function renderMembers() {
+      var list = allMembers.filter(function (m) {
+        var q = currentSearch.toLowerCase();
+        var matchSearch = !q ||
+          (m.email && m.email.toLowerCase().includes(q)) ||
+          (m.full_name && m.full_name.toLowerCase().includes(q));
+        var matchFilter = currentFilter === 'all' ||
+          (currentFilter === 'active'  && (m.status === 'active'  || m.role === 'owner')) ||
+          (currentFilter === 'pending' && m.status === 'pending');
+        return matchSearch && matchFilter;
+      });
+
+      var el = document.getElementById('members-list');
+
+      if (list.length === 0) {
+        el.innerHTML =
+          '<div class="team-empty"><svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/></svg>' +
+          '<p>' + (currentSearch || currentFilter !== 'all' ? 'No members match your search.' : 'No members yet. Add a colleague below.') + '</p></div>';
+        return;
+      }
+
+      el.innerHTML = list.map(function (m) {
+        var isOwner   = m.role === 'owner';
+        var name      = m.full_name || m.email.split('@')[0];
+        var initials  = m.email ? m.email.charAt(0).toUpperCase() : '?';
+        var badgeCls  = isOwner ? 'badge-owner' : (m.status === 'active' ? 'badge-active' : 'badge-pending');
+        var badgeTxt  = isOwner ? 'Owner' : (m.status === 'active' ? 'Active' : 'Pending');
+        var roleTxt   = isOwner ? 'Owner' : 'Member';
+        var joinedTxt = m.joined_at ? fmt(m.joined_at) : (m.status === 'pending' ? 'Invited ' + fmt(m.invited_at) : '—');
+        return (
+          '<div class="member-row" data-id="' + m.id + '" data-status="' + m.status + '" data-role="' + (m.role||'member') + '">' +
+            '<div class="member-info">' +
+              '<div class="member-avatar">' + esc(initials) + '</div>' +
+              '<div>' +
+                '<div class="member-name">' + esc(name) + '</div>' +
+                '<div class="member-email">' + esc(m.email) + '</div>' +
+              '</div>' +
+            '</div>' +
+            '<div class="member-role">' + esc(roleTxt) + '</div>' +
+            '<div><span class="member-badge ' + badgeCls + '">' + badgeTxt + '</span></div>' +
+            '<div class="member-joined">' + esc(joinedTxt) + '</div>' +
+            (!isOwner
+              ? '<button class="member-remove" data-id="' + m.id + '" title="Remove member"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></button>'
+              : '<div></div>') +
+          '</div>'
+        );
+      }).join('');
+
+      el.querySelectorAll('.member-remove').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          if (!confirm('Remove this member from the workspace?')) return;
+          window.LC_AUTH.removeWorkspaceMember(btn.dataset.id).then(function (res) {
+            if (res.error) { showAddMsg('Could not remove member.', 'err'); return; }
+            loadMembers();
+            showAddMsg('Member removed.', 'ok');
+          });
+        });
+      });
+    }
+
+    function loadMembers() {
+      if (!currentWsId) return;
+      window.LC_AUTH.loadWorkspaceMembers(currentWsId).then(function (res) {
+        allMembers = res.data || [];
+        updateStats(allMembers);
+        renderMembers();
+      });
+    }
+
+    function showAddMsg(text, type) {
+      var el = document.getElementById('add-msg');
+      el.textContent   = text;
+      el.className     = 'add-msg ' + type;
+      el.style.display = 'block';
+      setTimeout(function () { el.style.display = 'none'; }, 4000);
+    }
+
+    function showInviteLink(email) {
+      var base = window.location.origin + '/';
+      var url  = base + 'signup.html?invite=' + encodeURIComponent(email);
+      var box  = document.getElementById('invite-box');
+      box.style.display = 'block';
+      document.getElementById('invite-url').value          = url;
+      document.getElementById('invite-email-label').textContent = email;
+    }
+
+    // Search
+    document.getElementById('member-search').addEventListener('input', function () {
+      currentSearch = this.value.trim();
+      renderMembers();
+    });
+
+    // Filter tabs
+    document.querySelectorAll('.filter-tab').forEach(function (tab) {
+      tab.addEventListener('click', function () {
+        document.querySelectorAll('.filter-tab').forEach(function (t) { t.classList.remove('active'); });
+        tab.classList.add('active');
+        currentFilter = tab.dataset.filter;
+        renderMembers();
+      });
+    });
+
+    // Add member
+    var addEmailEl = document.getElementById('add-email');
+    var addBtn     = document.getElementById('add-btn');
+
+    addBtn.addEventListener('click', function () {
+      var email = addEmailEl.value.trim().toLowerCase();
+      if (!email || !email.includes('@')) { showAddMsg('Enter a valid email address.', 'err'); return; }
+      if (!currentWsId) { showAddMsg('No workspace found.', 'err'); return; }
+      addBtn.disabled    = true;
+      addBtn.textContent = 'Sending…';
+      window.LC_AUTH.addWorkspaceMember(email, currentWsId).then(function (res) {
+        addBtn.disabled    = false;
+        addBtn.textContent = 'Send invite';
+        if (res.error) {
+          showAddMsg(res.error.message || 'Could not add member.', 'err');
+        } else {
+          var invited = email;
+          addEmailEl.value = '';
+          document.getElementById('invite-box').style.display = 'none';
+          loadMembers();
+          showAddMsg('Invite sent!', 'ok');
+          showInviteLink(invited);
+        }
+      });
+    });
+
+    addEmailEl.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') addBtn.click();
+    });
+
+    // Copy link
+    document.getElementById('invite-copy').addEventListener('click', function () {
+      var inp = document.getElementById('invite-url');
+      inp.select();
+      navigator.clipboard.writeText(inp.value).then(function () {
+        document.getElementById('invite-copy').textContent = 'Copied!';
+        setTimeout(function () { document.getElementById('invite-copy').textContent = 'Copy link'; }, 2000);
+      }).catch(function () {
+        document.execCommand('copy');
+        document.getElementById('invite-copy').textContent = 'Copied!';
+        setTimeout(function () { document.getElementById('invite-copy').textContent = 'Copy link'; }, 2000);
+      });
+    });
+
+    // Auth check
+    document.addEventListener('lc:session', function (e) {
+      var session = e.detail;
+      if (!session || !window.LC_AUTH) return;
+      window.LC_AUTH.getMyWorkspace().then(function (res) {
+        if (!res.error && res.data) {
+          currentWsId = res.data.id;
+          document.getElementById('ws-title').textContent = res.data.name + ' — Team';
+          document.getElementById('ws-sub').textContent   = 'Manage your workspace members and invites';
+          document.getElementById('page-wrap').style.display = 'block';
+          loadMembers();
+        } else {
+          document.getElementById('not-owner-msg').style.display = 'block';
+        }
+      });
+    });
+  })();
+  </script>
+
+</body>
+</html>
