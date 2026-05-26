@@ -1,10 +1,10 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Contract AI — Loop &amp; Convert</title>
-  <meta name="description" content="Upload any contract and get a full AI risk analysis in under 3 minutes. Try it free — no account needed." />
+  <title>Contract AI â€” Loop &amp; Convert</title>
+  <meta name="description" content="Upload any contract and get a full AI risk analysis in under 3 minutes. Try it free â€” no account needed." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
@@ -52,7 +52,7 @@
 </head>
 <body>
 
-  <!-- ─── Navbar ─────────────────────────────────────────── -->
+  <!-- â”€â”€â”€ Navbar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
   <header class="navbar">
     <div class="container nav-inner">
       <a href="index.html" class="nav-logo">Loop <span class="accent">&amp;</span> Convert</a>
@@ -82,18 +82,18 @@
     </div>
   </header>
 
-  <!-- ─── Page header ───────────────────────────────────── -->
+  <!-- â”€â”€â”€ Page header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
   <section class="page-header">
     <div class="container">
       <div class="eyebrow"><span class="dot"></span>Free Demo</div>
       <h1>AI Contract Analysis</h1>
-      <p class="lead">Upload any PDF contract and get a full risk analysis in under 3 minutes — completely free, no account needed.</p>
+      <p class="lead">Upload any PDF contract and get a full risk analysis in under 3 minutes â€” completely free, no account needed.</p>
     </div>
   </section>
 
   <hr class="divider" />
 
-  <!-- ─── Upload shell ──────────────────────────────────── -->
+  <!-- â”€â”€â”€ Upload shell â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
   <div class="app-shell">
     <div class="container">
 
@@ -105,7 +105,7 @@
         </div>
       </div>
 
-      <!-- ── Limit wall (hidden until 2 uses exhausted) ── -->
+      <!-- â”€â”€ Limit wall (hidden until 2 uses exhausted) â”€â”€ -->
       <div id="limit-wall" style="display:none;">
         <div class="demo-limit-box">
           <div class="demo-limit-icon">
@@ -116,13 +116,13 @@
           <h2>You've used your 2 free analyses</h2>
           <p>Create a free account to keep analyzing contracts and save all your results in your private dashboard.</p>
           <div class="demo-limit-actions">
-            <a href="signup.html" class="btn btn-primary">Create Free Account →</a>
+            <a href="signup.html" class="btn btn-primary">Create Free Account â†’</a>
             <a href="book.html" class="btn btn-secondary">Book a Demo Call</a>
           </div>
         </div>
       </div>
 
-      <!-- ── Upload form (shown when under limit) ── -->
+      <!-- â”€â”€ Upload form (shown when under limit) â”€â”€ -->
       <div id="upload-form-wrap">
         <div class="upload-wrap">
 
@@ -142,8 +142,8 @@
           <div class="file-preview" id="filePreview">
             <div class="file-preview-icon">PDF</div>
             <div class="file-preview-info">
-              <div class="file-preview-name" id="fileName">—</div>
-              <div class="file-preview-size" id="fileSize">—</div>
+              <div class="file-preview-name" id="fileName">â€”</div>
+              <div class="file-preview-size" id="fileSize">â€”</div>
             </div>
             <button class="file-remove" id="removeFile" title="Remove">&times;</button>
           </div>
@@ -160,7 +160,7 @@
               <div class="analyzing-bar-fill" id="barFill"></div>
             </div>
             <div class="analyzing-label">
-              <span id="analyzingStep">Reading document…</span>
+              <span id="analyzingStep">Reading documentâ€¦</span>
             </div>
           </div>
 
@@ -186,7 +186,7 @@
     </div>
   </div>
 
-  <!-- ─── Footer ──────────────────────────────────────────── -->
+  <!-- â”€â”€â”€ Footer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
   <footer>
     <div class="container">
       <div class="footer-grid">
@@ -260,7 +260,7 @@
 
       <div class="footer-bottom">
         <p>&copy; <span id="year"></span> Loop &amp; Convert. All rights reserved.</p>
-        <p>AI contract analysis for forward-thinking law firms.</p>
+        <p>n          <a href='terms.html'>Terms of Service</a> &nbsp;&middot;&nbsp;n        </p>
       </div>
     </div>
   </footer>
@@ -271,7 +271,7 @@
   <script src="js/auth.js"></script>
   <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
 
-  <!-- ─── Footer SVG hover ──────────────────────────────── -->
+  <!-- â”€â”€â”€ Footer SVG hover â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
   <script>
   (function () {
     var svg = document.getElementById('footerHoverSvg');
@@ -308,7 +308,7 @@
   })();
   </script>
 
-  <!-- ─── Demo limit + upload logic ────────────────────── -->
+  <!-- â”€â”€â”€ Demo limit + upload logic â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
   <script>
   (function () {
     var LIMIT_KEY    = 'lc_demo_count';
@@ -422,12 +422,12 @@
       analyzingState.classList.add('show');
 
       var steps = [
-        { label: 'Reading document…',       pct: 20  },
-        { label: 'Extracting key clauses…', pct: 45  },
-        { label: 'Identifying risks…',      pct: 65  },
-        { label: 'Flagging red flags…',     pct: 82  },
-        { label: 'Generating questions…',   pct: 95  },
-        { label: 'Finalising analysis…',    pct: 100 },
+        { label: 'Reading documentâ€¦',       pct: 20  },
+        { label: 'Extracting key clausesâ€¦', pct: 45  },
+        { label: 'Identifying risksâ€¦',      pct: 65  },
+        { label: 'Flagging red flagsâ€¦',     pct: 82  },
+        { label: 'Generating questionsâ€¦',   pct: 95  },
+        { label: 'Finalising analysisâ€¦',    pct: 100 },
       ];
 
       var i = 0;
@@ -464,7 +464,7 @@
           { clause: 'Termination for Convenience', explanation: 'Either party may terminate with 30 days written notice. However, outstanding fees for work already commenced become immediately payable on termination.' },
         ],
         redFlags: riskLevel !== 'Low' ? [
-          'No dispute resolution or mediation step before litigation — any disagreement goes directly to court.',
+          'No dispute resolution or mediation step before litigation â€” any disagreement goes directly to court.',
           'Indemnification clause is one-sided: only one party is required to indemnify the other.',
         ] : [],
         recommendedQuestions: [
@@ -489,3 +489,4 @@
   </script>
 </body>
 </html>
+
