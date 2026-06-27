@@ -1,10 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Contract AI â€” Loop &amp; Convert</title>
-  <meta name="description" content="Upload any contract and get a full AI risk analysis in under 3 minutes. Try it free â€” no account needed." />
+  <title>Contract AI — Loop &amp; Convert</title>
+  <meta name="description" content="Upload any contract and get a full AI risk analysis in under 3 minutes. Try it free — no account needed." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
@@ -85,7 +85,7 @@
     <div class="container">
       <div class="eyebrow"><span class="dot"></span>Free Demo</div>
       <h1>AI Contract Analysis</h1>
-      <p class="lead">Upload any PDF contract and get a full risk analysis in under 3 minutes â€” completely free, no account needed.</p>
+      <p class="lead">Upload any PDF contract and get a full risk analysis in under 3 minutes — completely free, no account needed.</p>
     </div>
   </section>
 
@@ -140,8 +140,8 @@
           <div class="file-preview" id="filePreview">
             <div class="file-preview-icon">PDF</div>
             <div class="file-preview-info">
-              <div class="file-preview-name" id="fileName">â€”</div>
-              <div class="file-preview-size" id="fileSize">â€”</div>
+              <div class="file-preview-name" id="fileName">—</div>
+              <div class="file-preview-size" id="fileSize">—</div>
             </div>
             <button class="file-remove" id="removeFile" title="Remove">&times;</button>
           </div>
@@ -158,7 +158,7 @@
               <div class="analyzing-bar-fill" id="barFill"></div>
             </div>
             <div class="analyzing-label">
-              <span id="analyzingStep">Reading documentâ€¦</span>
+              <span id="analyzingStep">Reading document…</span>
             </div>
           </div>
 
@@ -422,12 +422,12 @@
       analyzingState.classList.add('show');
 
       var steps = [
-        { label: 'Reading documentâ€¦',       pct: 20  },
-        { label: 'Extracting key clausesâ€¦', pct: 45  },
-        { label: 'Identifying risksâ€¦',      pct: 65  },
-        { label: 'Flagging red flagsâ€¦',     pct: 82  },
-        { label: 'Generating questionsâ€¦',   pct: 95  },
-        { label: 'Finalising analysisâ€¦',    pct: 100 },
+        { label: 'Reading document…',       pct: 20  },
+        { label: 'Extracting key clauses…', pct: 45  },
+        { label: 'Identifying risks…',      pct: 65  },
+        { label: 'Flagging red flags…',     pct: 82  },
+        { label: 'Generating questions…',   pct: 95  },
+        { label: 'Finalising analysis…',    pct: 100 },
       ];
 
       var i = 0;
@@ -464,7 +464,7 @@
           { clause: 'Termination for Convenience', explanation: 'Either party may terminate with 30 days written notice. However, outstanding fees for work already commenced become immediately payable on termination.' },
         ],
         redFlags: riskLevel !== 'Low' ? [
-          'No dispute resolution or mediation step before litigation â€” any disagreement goes directly to court.',
+          'No dispute resolution or mediation step before litigation — any disagreement goes directly to court.',
           'Indemnification clause is one-sided: only one party is required to indemnify the other.',
         ] : [],
         recommendedQuestions: [
