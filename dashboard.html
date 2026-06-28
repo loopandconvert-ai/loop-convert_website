@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -192,7 +192,7 @@
         <a href="dashboard.html" class="nav-link active">Dashboard</a>
         <a href="upload-pro.html" class="nav-link">Upload</a>
         <a href="agent.html" class="nav-link">AI Chat</a>
-        <a href="team.html" class="nav-link" id="nav-team" style="display:none;">Team</a>
+        <a href="team.html" class="nav-link" id="nav-team">Team</a>
       </nav>
       <div class="nav-right">
         <span class="nav-user" id="nav-user"></span>
@@ -359,29 +359,6 @@
 
       document.getElementById('welcome-h').textContent = 'Welcome back, ' + firstName;
       document.getElementById('nav-user').textContent  = session.user.email;
-
-      // Check if owner → show Team nav link; auto-recover if workspace missing
-      window.LC_AUTH.getMyWorkspace().then(function (wsRes) {
-        if (!wsRes.error && wsRes.data) {
-          document.getElementById('nav-team').style.display = 'block';
-          return;
-        }
-        // No workspace found — if user has firm_name, try to create it now
-        if (meta.firm_name) {
-          window.LC_AUTH.createWorkspace(meta.firm_name).then(function () {
-            window.LC_AUTH.getMyWorkspace().then(function (r) {
-              if (!r.error && r.data) document.getElementById('nav-team').style.display = 'block';
-            });
-          });
-          return;
-        }
-        // No firm_name — show manual setup card for unrecognised owners
-        window.LC_AUTH.getMyMembership().then(function (mRes) {
-          if (mRes.data) return; // they're a member of someone else's workspace
-          var sw = document.getElementById('setup-ws');
-          if (sw) sw.style.display = 'block';
-        });
-      });
 
       // Load contracts with timeout
       var done = false;

@@ -115,7 +115,7 @@
         <a href="dashboard.html" class="nav-link">Dashboard</a>
         <a href="upload-pro.html" class="nav-link active">Upload</a>
         <a href="agent.html" class="nav-link">AI Chat</a>
-        <a href="team.html" class="nav-link" id="nav-team" style="display:none;">Team</a>
+        <a href="team.html" class="nav-link" id="nav-team">Team</a>
       </nav>
       <div class="nav-right">
         <span class="nav-user" id="nav-user"></span>
@@ -210,14 +210,6 @@
       if (!session) return;
       var navUser = document.getElementById('nav-user');
       if (navUser) navUser.textContent = session.user.email;
-      if (window.LC_AUTH) {
-        window.LC_AUTH.getMyWorkspace().then(function (res) {
-          if (!res.error && res.data) {
-            var t = document.getElementById('nav-team');
-            if (t) t.style.display = '';
-          }
-        });
-      }
     });
   })();
   </script>
