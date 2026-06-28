@@ -253,6 +253,35 @@
     }
     .mob-drawer-footer button:hover { background: rgba(248,113,113,.06); }
 
+    /* ── Setup workspace card ── */
+    .setup-firm-wrap {
+      max-width: 900px; margin: 3rem auto; padding: 0 2rem;
+    }
+    .setup-firm-card {
+      background: rgba(96,165,250,.06); border: 1px solid rgba(96,165,250,.2);
+      border-radius: 16px; padding: 2rem 2rem 2rem;
+    }
+    .setup-firm-card h2 { font-size: 1.2rem; font-weight: 700; color: #fff; margin-bottom: .4rem; }
+    .setup-firm-card p  { font-size: .875rem; color: #555; margin-bottom: 1.4rem; }
+    .setup-firm-row { display: flex; gap: .75rem; flex-wrap: wrap; }
+    .setup-firm-row input {
+      flex: 1; min-width: 220px;
+      background: #111; border: 1px solid #2a2a2a; border-radius: 8px;
+      padding: .65rem 1rem; color: #fff; font-size: .9rem; font-family: inherit;
+      outline: none; transition: border-color .15s;
+    }
+    .setup-firm-row input:focus { border-color: #555; }
+    .setup-firm-row input::placeholder { color: #444; }
+    .setup-firm-btn {
+      padding: .65rem 1.4rem; background: #fff; color: #000;
+      border: none; border-radius: 8px; font-size: .875rem; font-weight: 700;
+      cursor: pointer; font-family: inherit; white-space: nowrap; transition: opacity .15s;
+    }
+    .setup-firm-btn:hover { opacity: .88; }
+    .setup-firm-btn:disabled { opacity: .4; cursor: not-allowed; }
+    .setup-firm-msg { font-size: .82rem; margin-top: .75rem; color: #f87171; }
+    .setup-firm-msg.ok { color: #4ade80; }
+
     @media (max-width: 640px) {
       .team-stats { grid-template-columns: 1fr 1fr; }
       .team-head  { display: none; }
@@ -283,6 +312,19 @@
       </div>
     </div>
   </header>
+
+  <!-- ─── Setup workspace (first time) ────────────── -->
+  <div class="setup-firm-wrap" id="setup-firm-wrap" style="display:none;">
+    <div class="setup-firm-card">
+      <h2>Set up your workspace</h2>
+      <p>Enter your law firm name to create your workspace and start adding team members.</p>
+      <div class="setup-firm-row">
+        <input type="text" id="setup-firm-name" placeholder="e.g. Smith &amp; Associates" autocomplete="off" />
+        <button class="setup-firm-btn" id="setup-firm-btn">Create workspace</button>
+      </div>
+      <div class="setup-firm-msg" id="setup-firm-msg" style="display:none;"></div>
+    </div>
+  </div>
 
   <!-- ─── Content ─────────────────────────────────── -->
   <div class="page-wrap" id="page-wrap" style="display:none;">
@@ -623,6 +665,29 @@
         });
     });
 
+    // Setup workspace form (shown when owner has no workspace yet)
+    document.getElementById('setup-firm-btn').addEventListener('click', function () {
+      var firmName = document.getElementById('setup-firm-name').value.trim();
+      var msgEl    = document.getElementById('setup-firm-msg');
+      if (!firmName) { msgEl.textContent = 'Enter your firm name.'; msgEl.style.display = 'block'; msgEl.className = 'setup-firm-msg'; return; }
+      this.disabled    = true;
+      this.textContent = 'Creating…';
+      window.LC_AUTH.createWorkspace(firmName).then(function (r) {
+        if (r && r.error) {
+          document.getElementById('setup-firm-btn').disabled    = false;
+          document.getElementById('setup-firm-btn').textContent = 'Create workspace';
+          msgEl.textContent    = r.error.message || 'Could not create workspace.';
+          msgEl.className      = 'setup-firm-msg';
+          msgEl.style.display  = 'block';
+        } else {
+          msgEl.textContent   = 'Workspace created! Loading…';
+          msgEl.className     = 'setup-firm-msg ok';
+          msgEl.style.display = 'block';
+          setTimeout(function () { window.location.reload(); }, 800);
+        }
+      });
+    });
+
     // Auth check
     document.addEventListener('lc:session', function (e) {
       var session = e.detail;
@@ -635,7 +700,8 @@
           document.getElementById('page-wrap').style.display = 'block';
           loadMembers();
         } else {
-          window.location.href = 'dashboard.html';
+          // No workspace yet — show the setup card
+          document.getElementById('setup-firm-wrap').style.display = 'block';
         }
       });
     });
