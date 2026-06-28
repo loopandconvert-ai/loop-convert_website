@@ -125,6 +125,33 @@
     }
     .btn-primary:hover { opacity: .85; }
 
+    /* ── Setup workspace card ── */
+    .setup-ws {
+      background: rgba(96,165,250,.06); border: 1px solid rgba(96,165,250,.18);
+      border-radius: 14px; padding: 1.4rem 1.5rem; margin-bottom: 2rem;
+    }
+    .setup-ws h3 { font-size: .95rem; font-weight: 700; color: #fff; margin-bottom: .3rem; }
+    .setup-ws p  { font-size: .83rem; color: #555; margin-bottom: 1rem; }
+    .setup-ws-row { display: flex; gap: .75rem; flex-wrap: wrap; }
+    .setup-ws input {
+      flex: 1; min-width: 200px;
+      background: #111; border: 1px solid #2a2a2a; border-radius: 8px;
+      padding: .6rem .9rem; color: #fff; font-size: .875rem; font-family: inherit;
+      outline: none; transition: border-color .15s;
+    }
+    .setup-ws input:focus { border-color: #444; }
+    .setup-ws input::placeholder { color: #444; }
+    .setup-ws-btn {
+      padding: .6rem 1.25rem; background: #fff; color: #000;
+      border: none; border-radius: 8px; font-size: .875rem; font-weight: 700;
+      cursor: pointer; font-family: inherit; white-space: nowrap; transition: opacity .15s;
+    }
+    .setup-ws-btn:hover { opacity: .88; }
+    .setup-ws-btn:disabled { opacity: .4; cursor: not-allowed; }
+    .setup-ws-msg { font-size: .8rem; margin-top: .6rem; }
+    .setup-ws-msg.ok  { color: #4ade80; }
+    .setup-ws-msg.err { color: #f87171; }
+
     /* ── Quick actions ── */
     .actions { display: flex; gap: .75rem; margin-bottom: 2.5rem; flex-wrap: wrap; }
     .action-card {
@@ -200,6 +227,17 @@
       </div>
     </div>
 
+    <!-- Workspace setup (hidden; shown only when owner has no workspace yet) -->
+    <div class="setup-ws" id="setup-ws" style="display:none;">
+      <h3>Set up your firm workspace</h3>
+      <p>Create a workspace so you can add lawyers and manage your team from the Team page.</p>
+      <div class="setup-ws-row">
+        <input type="text" id="setup-firm-input" placeholder="Law firm name (e.g. Smith & Associates)" />
+        <button class="setup-ws-btn" id="setup-ws-btn">Create workspace</button>
+      </div>
+      <div class="setup-ws-msg" id="setup-ws-msg" style="display:none;"></div>
+    </div>
+
     <!-- Quick actions -->
     <div class="actions">
       <a href="upload-pro.html" class="action-card">
@@ -259,6 +297,25 @@
       if (window.LC_AUTH) window.LC_AUTH.signOut();
     });
 
+    // Workspace setup button
+    document.getElementById('setup-ws-btn').addEventListener('click', function () {
+      var firmName = document.getElementById('setup-firm-input').value.trim();
+      var msgEl    = document.getElementById('setup-ws-msg');
+      if (!firmName) { msgEl.textContent = 'Enter your firm name.'; msgEl.className = 'setup-ws-msg err'; msgEl.style.display = 'block'; return; }
+      var btn = document.getElementById('setup-ws-btn');
+      btn.disabled = true; btn.textContent = 'Creating…';
+      msgEl.style.display = 'none';
+      window.LC_AUTH.createWorkspace(firmName).then(function (res) {
+        btn.disabled = false; btn.textContent = 'Create workspace';
+        if (res && res.error) {
+          msgEl.textContent = 'Error: ' + res.error.message; msgEl.className = 'setup-ws-msg err'; msgEl.style.display = 'block';
+        } else {
+          msgEl.textContent = 'Workspace created! Refreshing…'; msgEl.className = 'setup-ws-msg ok'; msgEl.style.display = 'block';
+          setTimeout(function () { window.location.reload(); }, 1200);
+        }
+      });
+    });
+
     function renderDocs(docs) {
       var recent = docs.slice(0, 5);
       var el = document.getElementById('doc-list');
@@ -303,11 +360,27 @@
       document.getElementById('welcome-h').textContent = 'Welcome back, ' + firstName;
       document.getElementById('nav-user').textContent  = session.user.email;
 
-      // Check if owner → show Team nav link
-      window.LC_AUTH.getMyWorkspace().then(function (res) {
-        if (!res.error && res.data) {
+      // Check if owner → show Team nav link; auto-recover if workspace missing
+      window.LC_AUTH.getMyWorkspace().then(function (wsRes) {
+        if (!wsRes.error && wsRes.data) {
           document.getElementById('nav-team').style.display = 'block';
+          return;
         }
+        // No workspace found — if user has firm_name, try to create it now
+        if (meta.firm_name) {
+          window.LC_AUTH.createWorkspace(meta.firm_name).then(function () {
+            window.LC_AUTH.getMyWorkspace().then(function (r) {
+              if (!r.error && r.data) document.getElementById('nav-team').style.display = 'block';
+            });
+          });
+          return;
+        }
+        // No firm_name — show manual setup card for unrecognised owners
+        window.LC_AUTH.getMyMembership().then(function (mRes) {
+          if (mRes.data) return; // they're a member of someone else's workspace
+          var sw = document.getElementById('setup-ws');
+          if (sw) sw.style.display = 'block';
+        });
       });
 
       // Load contracts with timeout
