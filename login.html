@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Log In — Loop &amp; Convert</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="icon" type="image/png" href="images/logo.png" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #0a0a0a;
+      color: #e0e0e0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 400px;
+      background: #111;
+      border: 1px solid #1e1e1e;
+      border-radius: 18px;
+      padding: 2.5rem 2rem;
+    }
+
+    .logo {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #fff;
+      text-decoration: none;
+      display: block;
+      margin-bottom: 2rem;
+      letter-spacing: -.02em;
+    }
+    .logo span { color: #60a5fa; }
+
+    h1 {
+      font-size: 1.45rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: .3rem;
+    }
+    .sub {
+      font-size: .875rem;
+      color: #555;
+      margin-bottom: 2rem;
+    }
+
+    .field { margin-bottom: 1rem; }
+    .field label {
+      display: block;
+      font-size: .78rem;
+      font-weight: 500;
+      color: #888;
+      margin-bottom: .4rem;
+    }
+    .field input {
+      width: 100%;
+      background: #0e0e0e;
+      border: 1px solid #1e1e1e;
+      border-radius: 9px;
+      padding: .7rem 1rem;
+      color: #fff;
+      font-size: .9rem;
+      font-family: inherit;
+      outline: none;
+      transition: border-color .15s;
+    }
+    .field input:focus { border-color: #3a3a3a; }
+
+    .err {
+      font-size: .82rem;
+      color: #f87171;
+      background: rgba(248,113,113,.06);
+      border: 1px solid rgba(248,113,113,.12);
+      border-radius: 8px;
+      padding: .65rem .9rem;
+      margin-bottom: 1rem;
+      display: none;
+    }
+
+    .btn-login {
+      width: 100%;
+      padding: .75rem;
+      font-size: .9rem;
+      font-weight: 700;
+      background: #fff;
+      color: #000;
+      border: none;
+      border-radius: 9px;
+      cursor: pointer;
+      font-family: inherit;
+      margin-top: .25rem;
+      transition: opacity .15s;
+    }
+    .btn-login:hover { opacity: .88; }
+    .btn-login:disabled { opacity: .4; cursor: not-allowed; }
+
+    .forgot {
+      text-align: center;
+      margin-top: 1.1rem;
+      font-size: .82rem;
+    }
+    .forgot a {
+      color: #555;
+      text-decoration: underline;
+      transition: color .15s;
+    }
+    .forgot a:hover { color: #aaa; }
+  </style>
+</head>
+<body data-page="auth-page">
+
+  <div class="card">
+    <a href="index.html" class="logo">Loop <span>&amp;</span> Convert</a>
+
+    <h1>Welcome back</h1>
+    <p class="sub">Sign in to your account.</p>
+
+    <div class="err" id="err"></div>
+
+    <form id="form" novalidate>
+      <div class="field">
+        <label for="email">Email address</label>
+        <input type="email" id="email" placeholder="you@lawfirm.com" autocomplete="email" required />
+      </div>
+      <div class="field">
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="••••••••" autocomplete="current-password" required />
+      </div>
+      <button type="submit" class="btn-login" id="btn">Log In</button>
+    </form>
+
+    <p class="forgot">
+      <a href="forgot-password.html">Forgot your password?</a>
+    </p>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+  (function () {
+    var form = document.getElementById('form');
+    var err  = document.getElementById('err');
+    var btn  = document.getElementById('btn');
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      err.style.display = 'none';
+
+      var email    = document.getElementById('email').value.trim();
+      var password = document.getElementById('password').value;
+
+      if (!email || !password) {
+        err.textContent = 'Please fill in all fields.';
+        err.style.display = 'block';
+        return;
+      }
+
+      if (!window.LC_AUTH) {
+        err.textContent = 'Auth not configured.';
+        err.style.display = 'block';
+        return;
+      }
+
+      btn.textContent = 'Signing in…';
+      btn.disabled = true;
+
+      window.LC_AUTH.signIn(email, password).then(function (res) {
+        if (res.error) {
+          err.textContent = 'Incorrect email or password. Please try again.';
+          err.style.display = 'block';
+          btn.textContent = 'Log In';
+          btn.disabled = false;
+        } else {
+          window.location.href = 'dashboard.html';
+        }
+      });
+    });
+  })();
+  </script>
+
+</body>
+</html>

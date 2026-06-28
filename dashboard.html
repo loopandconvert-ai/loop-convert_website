@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard — Loop &amp; Convert</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="icon" type="image/png" href="images/logo.png" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: #0a0a0a; color: #e0e0e0; min-height: 100vh; }
+
+    /* ── Navbar ── */
+    .nav {
+      position: sticky; top: 0; z-index: 50;
+      background: rgba(10,10,10,.95); backdrop-filter: blur(10px);
+      border-bottom: 1px solid #1e1e1e; padding: 0 2rem;
+    }
+    .nav-inner {
+      max-width: 1100px; margin: 0 auto;
+      height: 58px; display: flex; align-items: center; gap: .25rem;
+    }
+    .nav-logo {
+      font-size: .95rem; font-weight: 800; color: #fff;
+      text-decoration: none; letter-spacing: -.02em; margin-right: 1.5rem;
+    }
+    .nav-logo span { color: #60a5fa; }
+    .nav-links { display: flex; gap: .15rem; flex: 1; }
+    .nav-link {
+      padding: .38rem .85rem; font-size: .83rem; font-weight: 500;
+      color: #666; text-decoration: none; border-radius: 7px;
+      transition: color .15s, background .15s;
+    }
+    .nav-link:hover { color: #ccc; }
+    .nav-link.active { color: #fff; background: #1a1a1a; }
+    .nav-right { display: flex; align-items: center; gap: .6rem; margin-left: auto; }
+    .nav-user { font-size: .8rem; color: #444; }
+    .btn-out {
+      padding: .38rem .8rem; font-size: .8rem; font-weight: 500;
+      background: none; color: #555; border: 1px solid #222;
+      border-radius: 7px; cursor: pointer; font-family: inherit;
+      transition: color .15s, border-color .15s;
+    }
+    .btn-out:hover { color: #ccc; border-color: #444; }
+
+    /* ── Page ── */
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 2.5rem 2rem 5rem; }
+
+    .welcome { margin-bottom: 2rem; }
+    .welcome h1 { font-size: 1.4rem; font-weight: 700; color: #fff; margin-bottom: .25rem; }
+    .welcome p  { font-size: .875rem; color: #555; }
+
+    /* ── Stats ── */
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 2.5rem; }
+    .stat { background: #111; border: 1px solid #1e1e1e; border-radius: 12px; padding: 1.25rem 1.5rem; }
+    .stat-val { font-size: 1.9rem; font-weight: 800; color: #fff; line-height: 1; margin-bottom: .3rem; }
+    .stat-val.red   { color: #f87171; }
+    .stat-val.green { color: #4ade80; }
+    .stat-lbl { font-size: .78rem; color: #555; font-weight: 500; }
+
+    /* ── Section header ── */
+    .section-hd {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+    .section-hd h2 { font-size: 1rem; font-weight: 700; color: #fff; }
+    .section-hd a  { font-size: .8rem; color: #555; text-decoration: none; transition: color .15s; }
+    .section-hd a:hover { color: #ccc; }
+
+    /* ── Error box ── */
+    .err-box {
+      background: rgba(248,113,113,.06); border: 1px solid rgba(248,113,113,.15);
+      border-radius: 10px; padding: .9rem 1.1rem; margin-bottom: 2rem;
+      font-size: .83rem; color: #f87171; line-height: 1.6; display: none;
+    }
+
+    /* ── Table card ── */
+    .card { background: #111; border: 1px solid #1e1e1e; border-radius: 14px; overflow: hidden; }
+
+    .tbl-head {
+      display: grid; grid-template-columns: 1fr 120px 130px 70px;
+      padding: .6rem 1.25rem; border-bottom: 1px solid #1a1a1a;
+    }
+    .tbl-head span { font-size: .7rem; font-weight: 600; color: #333; text-transform: uppercase; letter-spacing: .08em; }
+
+    .doc-row {
+      display: grid; grid-template-columns: 1fr 120px 130px 70px;
+      align-items: center; padding: .85rem 1.25rem;
+      border-bottom: 1px solid #141414; cursor: pointer;
+      text-decoration: none; transition: background .12s;
+    }
+    .doc-row:last-child { border-bottom: none; }
+    .doc-row:hover { background: #161616; }
+    .doc-name { display: flex; align-items: center; gap: .7rem; min-width: 0; }
+    .doc-icon {
+      width: 34px; height: 34px; border-radius: 8px;
+      background: #1a1a1a; border: 1px solid #242424;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .58rem; font-weight: 700; color: #555; flex-shrink: 0;
+    }
+    .doc-file { font-size: .875rem; font-weight: 500; color: #e0e0e0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .badge {
+      display: inline-flex; align-items: center; gap: .35rem;
+      font-size: .7rem; font-weight: 700; padding: .22rem .6rem;
+      border-radius: 999px; letter-spacing: .04em; text-transform: uppercase;
+    }
+    .badge::before { content:''; width:5px; height:5px; border-radius:50%; background:currentColor; }
+    .b-high   { background: rgba(248,113,113,.12); color: #f87171; }
+    .b-medium { background: rgba(251,191,36,.12);  color: #fbbf24; }
+    .b-low    { background: rgba(74,222,128,.12);  color: #4ade80; }
+    .doc-date { font-size: .78rem; color: #444; }
+    .doc-link { font-size: .78rem; font-weight: 600; color: #555; transition: color .12s; }
+    .doc-row:hover .doc-link { color: #fff; }
+
+    /* ── Empty / loading ── */
+    .state { padding: 3.5rem 2rem; text-align: center; color: #444; }
+    .state h3 { font-size: .95rem; color: #666; margin-bottom: .5rem; }
+    .state p  { font-size: .85rem; margin-bottom: 1.5rem; }
+    .btn-primary {
+      display: inline-block; padding: .65rem 1.4rem;
+      background: #fff; color: #000; font-size: .875rem; font-weight: 700;
+      border-radius: 8px; text-decoration: none; transition: opacity .15s;
+    }
+    .btn-primary:hover { opacity: .85; }
+
+    /* ── Quick actions ── */
+    .actions { display: flex; gap: .75rem; margin-bottom: 2.5rem; flex-wrap: wrap; }
+    .action-card {
+      flex: 1; min-width: 160px;
+      background: #111; border: 1px solid #1e1e1e; border-radius: 12px;
+      padding: 1.1rem 1.25rem; text-decoration: none;
+      transition: border-color .15s, background .15s;
+      display: flex; align-items: center; gap: .75rem;
+    }
+    .action-card:hover { border-color: #333; background: #141414; }
+    .action-icon {
+      width: 36px; height: 36px; border-radius: 9px;
+      background: #1a1a1a; display: flex; align-items: center; justify-content: center;
+      color: #888; flex-shrink: 0;
+    }
+    .action-label { font-size: .85rem; font-weight: 600; color: #ccc; }
+    .action-sub   { font-size: .75rem; color: #555; margin-top: .1rem; }
+
+    @media (max-width: 640px) {
+      .nav { padding: 0 1rem; }
+      .nav-user { display: none; }
+      .wrap { padding: 1.5rem 1rem 4rem; }
+      .stats { grid-template-columns: 1fr 1fr; }
+      .stats .stat:last-child { display: none; }
+      .tbl-head, .doc-row { grid-template-columns: 1fr 90px; }
+      .tbl-head span:nth-child(3), .tbl-head span:nth-child(4),
+      .doc-row > *:nth-child(3), .doc-row > *:nth-child(4) { display: none; }
+    }
+  </style>
+</head>
+<body data-page="auth-required">
+
+  <!-- Navbar -->
+  <header class="nav">
+    <div class="nav-inner">
+      <a href="dashboard.html" class="nav-logo">Loop <span>&amp;</span> Convert</a>
+      <nav class="nav-links">
+        <a href="dashboard.html" class="nav-link active">Dashboard</a>
+        <a href="upload-pro.html" class="nav-link">Upload</a>
+        <a href="agent.html" class="nav-link">AI Chat</a>
+        <a href="team.html" class="nav-link" id="nav-team" style="display:none;">Team</a>
+      </nav>
+      <div class="nav-right">
+        <span class="nav-user" id="nav-user"></span>
+        <button class="btn-out" id="btn-out">Sign out</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <div class="wrap">
+
+    <div class="welcome">
+      <h1 id="welcome-h">Dashboard</h1>
+      <p id="welcome-p">Loading…</p>
+    </div>
+
+    <div class="err-box" id="err-box"></div>
+
+    <!-- Stats -->
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-val" id="s-total">—</div>
+        <div class="stat-lbl">Contracts analyzed</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val red" id="s-high">—</div>
+        <div class="stat-lbl">High risk</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val green" id="s-hours">—</div>
+        <div class="stat-lbl">Hours saved</div>
+      </div>
+    </div>
+
+    <!-- Quick actions -->
+    <div class="actions">
+      <a href="upload-pro.html" class="action-card">
+        <div class="action-icon">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/></svg>
+        </div>
+        <div>
+          <div class="action-label">Upload contract</div>
+          <div class="action-sub">AI analysis in under 3 min</div>
+        </div>
+      </a>
+      <a href="agent.html" class="action-card">
+        <div class="action-icon">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z"/></svg>
+        </div>
+        <div>
+          <div class="action-label">Ask AI</div>
+          <div class="action-sub">Questions about your contracts</div>
+        </div>
+      </a>
+    </div>
+
+    <!-- Recent contracts -->
+    <div class="section-hd">
+      <h2>Recent contracts</h2>
+      <a href="upload-pro.html" id="view-all-link">View all →</a>
+    </div>
+
+    <div class="card">
+      <div class="tbl-head">
+        <span>Document</span><span>Risk</span><span>Date</span><span></span>
+      </div>
+      <div id="doc-list">
+        <div class="state"><p style="color:#444;">Loading…</p></div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/auth.js"></script>
+
+  <script>
+  (function () {
+    function esc(s) {
+      return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+    function fmtDate(iso) {
+      return new Date(iso).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
+    }
+    function badgeClass(r) {
+      return r === 'High' ? 'b-high' : r === 'Medium' ? 'b-medium' : 'b-low';
+    }
+
+    document.getElementById('btn-out').addEventListener('click', function () {
+      if (window.LC_AUTH) window.LC_AUTH.signOut();
+    });
+
+    function renderDocs(docs) {
+      var recent = docs.slice(0, 5);
+      var el = document.getElementById('doc-list');
+
+      if (docs.length === 0) {
+        el.innerHTML =
+          '<div class="state">' +
+          '<h3>No contracts yet</h3>' +
+          '<p>Upload your first contract and get an AI analysis in under 3 minutes.</p>' +
+          '<a href="upload-pro.html" class="btn-primary">Upload a contract</a>' +
+          '</div>';
+        return;
+      }
+
+      el.innerHTML = recent.map(function (d) {
+        return '<a class="doc-row" href="analysis.html?id=' + esc(d.id) + '">' +
+          '<div class="doc-name"><div class="doc-icon">PDF</div>' +
+          '<span class="doc-file">' + esc(d.file_name || 'Untitled') + '</span></div>' +
+          '<div><span class="badge ' + badgeClass(d.risk_level) + '">' + esc(d.risk_level || '—') + '</span></div>' +
+          '<div class="doc-date">' + fmtDate(d.analyzed_at) + '</div>' +
+          '<div class="doc-link">View →</div>' +
+        '</a>';
+      }).join('');
+    }
+
+    function setStats(docs) {
+      var high  = docs.filter(function (d) { return d.risk_level === 'High'; }).length;
+      var hours = (docs.length * 2.5).toFixed(1).replace('.0', '');
+      document.getElementById('s-total').textContent = docs.length;
+      document.getElementById('s-high').textContent  = high;
+      document.getElementById('s-hours').textContent = docs.length > 0 ? hours + 'h' : '0h';
+    }
+
+    document.addEventListener('lc:session', function (e) {
+      var session = e.detail;
+      if (!session) return;
+
+      var meta      = session.user.user_metadata || {};
+      var name      = meta.full_name || session.user.email;
+      var firstName = name.split(' ')[0];
+
+      document.getElementById('welcome-h').textContent = 'Welcome back, ' + firstName;
+      document.getElementById('nav-user').textContent  = session.user.email;
+
+      // Check if owner → show Team nav link
+      window.LC_AUTH.getMyWorkspace().then(function (res) {
+        if (!res.error && res.data) {
+          document.getElementById('nav-team').style.display = 'block';
+        }
+      });
+
+      // Load contracts with timeout
+      var done = false;
+      var timer = setTimeout(function () {
+        if (!done) {
+          var err = document.getElementById('err-box');
+          err.textContent = 'Could not reach the server. Your Supabase project may be paused — log in at supabase.com, resume the project, then refresh this page.';
+          err.style.display = 'block';
+          document.getElementById('doc-list').innerHTML = '<div class="state"><h3>Could not load contracts</h3></div>';
+          setStats([]);
+          document.getElementById('welcome-p').textContent = 'Connection error';
+        }
+      }, 8000);
+
+      window.LC_AUTH.loadAnalyses().then(function (res) {
+        done = true;
+        clearTimeout(timer);
+
+        if (res.error) {
+          var err = document.getElementById('err-box');
+          err.textContent = 'Error: ' + res.error.message;
+          err.style.display = 'block';
+          document.getElementById('doc-list').innerHTML = '<div class="state"><h3>Could not load contracts</h3></div>';
+          setStats([]);
+          document.getElementById('welcome-p').textContent = '—';
+          return;
+        }
+
+        var docs = res.data || [];
+        setStats(docs);
+        renderDocs(docs);
+
+        var label = docs.length + ' contract' + (docs.length === 1 ? '' : 's') + ' analyzed';
+        document.getElementById('welcome-p').textContent = label;
+        if (meta.firm_name) {
+          document.getElementById('welcome-p').textContent = meta.firm_name + ' · ' + label;
+        }
+      });
+    });
+  })();
+  </script>
+
+</body>
+</html>
