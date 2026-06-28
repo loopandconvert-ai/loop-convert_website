@@ -3,6 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script>
+    // If Supabase redirects here after a password reset, forward immediately to reset-password.html
+    if (window.location.hash.indexOf('type=recovery') !== -1) {
+      window.location.replace('reset-password.html' + window.location.hash);
+    }
+  </script>
   <title>Loop &amp; Convert — AI Contract Analysis for Law Firms</title>
   <meta name="description" content="Upload any contract and get a full AI risk analysis in under 3 minutes. Key clauses, red flags, and recommended questions — instantly." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
