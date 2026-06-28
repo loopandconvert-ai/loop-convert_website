@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -12,64 +12,19 @@
   <style>
     body { background: #0a0a0a; }
 
-    /* ── App navbar ── */
-    .app-navbar {
-      position: sticky; top: 0; z-index: 50;
-      background: rgba(10,10,10,.85);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid #1e1e1e;
-      padding: 0 2rem;
-    }
-    .app-navbar-inner {
-      max-width: 1200px; margin: 0 auto; height: 64px;
-      display: flex; align-items: center; justify-content: space-between; gap: 1.5rem;
-    }
-    .app-nav-logo {
-      font-size: 1.1rem; font-weight: 800; color: #fff;
-      text-decoration: none; letter-spacing: -.02em; flex-shrink: 0;
-    }
-    .app-nav-links { display: flex; gap: .25rem; list-style: none; padding: 0; margin: 0; }
-    .app-nav-links a {
-      padding: .4rem .85rem; font-size: .85rem; font-weight: 500;
-      color: #888; text-decoration: none; border-radius: 6px;
-      transition: color .15s, background .15s;
-    }
-    .app-nav-links a:hover,
-    .app-nav-links a.active { color: #fff; background: #1a1a1a; }
-
-    /* ── User pill ── */
-    .user-pill {
-      display: flex; align-items: center; gap: .55rem;
-      background: #141414; border: 1px solid #222;
-      border-radius: 999px; padding: .3rem .7rem .3rem .35rem;
-      font-size: .82rem; color: #ccc; cursor: pointer; position: relative; flex-shrink: 0;
-    }
-    .user-avatar {
-      width: 26px; height: 26px; border-radius: 50%;
-      background: #fff; color: #000; font-weight: 700; font-size: .72rem;
-      display: flex; align-items: center; justify-content: center;
-    }
-    .user-menu {
-      position: absolute; top: calc(100% + .5rem); right: 0;
-      background: #141414; border: 1px solid #222;
-      border-radius: 8px; min-width: 180px; overflow: hidden;
-      display: none; z-index: 100; box-shadow: 0 8px 32px rgba(0,0,0,.5);
-    }
-    .user-menu.open { display: block; }
-    .user-menu-header { padding: .75rem 1rem; border-bottom: 1px solid #1e1e1e; }
-    .user-menu-name  { font-size: .85rem; font-weight: 600; color: #fff; }
-    .user-menu-email { font-size: .75rem; color: #555; margin-top: .1rem; }
-    .user-menu a, .user-menu button {
-      display: flex; align-items: center; gap: .5rem;
-      width: 100%; text-align: left;
-      padding: .6rem 1rem; font-size: .82rem; color: #aaa;
-      text-decoration: none; background: none; border: none;
-      cursor: pointer; font-family: inherit;
-      border-top: 1px solid #1e1e1e; transition: background .15s, color .15s;
-    }
-    .user-menu a:hover { background: #1e1e1e; color: #fff; }
-    .user-menu button { color: #f87171; }
-    .user-menu button:hover { background: #1e1e1e; }
+    /* ── Navbar ── */
+    .nav { position: sticky; top: 0; z-index: 50; background: rgba(10,10,10,.95); backdrop-filter: blur(10px); border-bottom: 1px solid #1e1e1e; padding: 0 2rem; }
+    .nav-inner { max-width: 1100px; margin: 0 auto; height: 58px; display: flex; align-items: center; gap: .25rem; }
+    .nav-logo { font-size: .95rem; font-weight: 800; color: #fff; text-decoration: none; letter-spacing: -.02em; margin-right: 1.5rem; }
+    .nav-logo span { color: #60a5fa; }
+    .nav-links { display: flex; gap: .15rem; flex: 1; }
+    .nav-link { padding: .38rem .85rem; font-size: .83rem; font-weight: 500; color: #666; text-decoration: none; border-radius: 7px; transition: color .15s, background .15s; }
+    .nav-link:hover { color: #ccc; }
+    .nav-link.active { color: #fff; background: #1a1a1a; }
+    .nav-right { display: flex; align-items: center; gap: .6rem; margin-left: auto; }
+    .nav-user { font-size: .8rem; color: #444; }
+    .btn-out { padding: .38rem .8rem; font-size: .8rem; font-weight: 500; background: none; color: #555; border: 1px solid #222; border-radius: 7px; cursor: pointer; font-family: inherit; transition: color .15s, border-color .15s; }
+    .btn-out:hover { color: #ccc; border-color: #444; }
 
     /* ── Page ── */
     .page-wrap { max-width: 900px; margin: 0 auto; padding: 2.5rem 2rem 5rem; }
@@ -313,37 +268,18 @@
 <body data-page="auth-required">
 
   <!-- ─── App Navbar ───────────────────────────────── -->
-  <header class="app-navbar">
-    <div class="app-navbar-inner">
-      <div style="display:flex;align-items:center;gap:.5rem;">
-        <button class="mob-hamburger" id="mob-hamburger" title="Menu">
-          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5M3.75 17.25h16.5"/>
-          </svg>
-        </button>
-        <a href="dashboard.html" class="app-nav-logo">Loop <span class="accent">&amp;</span> Convert</a>
-      </div>
-      <ul class="app-nav-links">
-        <li><a href="dashboard.html">Dashboard</a></li>
-        <li><a href="agent.html">Lex AI</a></li>
-        <li><a href="team.html" class="active">Team</a></li>
-        <li><a href="upload-pro.html">+ Upload</a></li>
-      </ul>
-      <div class="user-pill" id="user-pill" style="display:none;">
-        <div class="user-avatar" id="user-avatar">?</div>
-        <span id="user-label">…</span>
-        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
-        <div class="user-menu" id="user-menu">
-          <div class="user-menu-header">
-            <div class="user-menu-name" id="menu-name">—</div>
-            <div class="user-menu-email" id="menu-email">—</div>
-          </div>
-          <a href="dashboard.html">Dashboard</a>
-          <a href="team.html" style="color:#fff;">Team</a>
-          <a href="account.html">Account settings</a>
-          <a href="upload-pro.html">Upload contract</a>
-          <button id="sign-out-btn">Sign out</button>
-        </div>
+  <header class="nav">
+    <div class="nav-inner">
+      <a href="dashboard.html" class="nav-logo">Loop <span>&amp;</span> Convert</a>
+      <nav class="nav-links">
+        <a href="dashboard.html" class="nav-link">Dashboard</a>
+        <a href="upload-pro.html" class="nav-link">Upload</a>
+        <a href="agent.html" class="nav-link">AI Chat</a>
+        <a href="team.html" class="nav-link active" id="nav-team">Team</a>
+      </nav>
+      <div class="nav-right">
+        <span class="nav-user" id="nav-user"></span>
+        <button class="btn-out" id="btn-out">Sign out</button>
       </div>
     </div>
   </header>
@@ -408,23 +344,20 @@
       </div>
     </div>
 
-    <!-- Add member -->
+    <!-- Add lawyer account -->
     <div class="add-section">
-      <div class="add-section-title">Add team member</div>
-      <div class="add-form">
-        <input type="email" class="add-input" id="add-email" placeholder="colleague@lawfirm.com" autocomplete="off" />
-        <button class="add-btn" id="add-btn">Send invite</button>
+      <div class="add-section-title">Add lawyer account</div>
+      <div class="add-form" style="flex-direction:column;gap:.65rem;">
+        <div style="display:flex;gap:.65rem;flex-wrap:wrap;">
+          <input type="text" class="add-input" id="add-name" placeholder="Full name" autocomplete="off" style="flex:1;min-width:150px;" />
+          <input type="email" class="add-input" id="add-email" placeholder="email@lawfirm.com" autocomplete="off" style="flex:1;min-width:200px;" />
+        </div>
+        <div style="display:flex;gap:.65rem;flex-wrap:wrap;">
+          <input type="password" class="add-input" id="add-password" placeholder="Password (min. 6 characters)" autocomplete="new-password" style="flex:1;min-width:200px;" />
+          <button class="add-btn" id="add-btn">Create account</button>
+        </div>
       </div>
       <div class="add-msg" id="add-msg" style="display:none;"></div>
-      <div class="invite-box" id="invite-box">
-        <div class="invite-box-label">
-          Share this link with <strong id="invite-email-label"></strong> — they sign up with the same email and automatically join your workspace.
-        </div>
-        <div class="invite-row">
-          <input id="invite-url" type="text" class="invite-url" readonly />
-          <button class="invite-copy" id="invite-copy">Copy link</button>
-        </div>
-      </div>
     </div>
 
   </div>
@@ -494,38 +427,25 @@
     var mobSignOut = document.getElementById('mob-sign-out');
     function openDrawer()  { drawer.classList.add('open'); overlay.classList.add('open'); document.body.style.overflow = 'hidden'; }
     function closeDrawer() { drawer.classList.remove('open'); overlay.classList.remove('open'); document.body.style.overflow = ''; }
-    hamburger.addEventListener('click', openDrawer);
+    if (hamburger) hamburger.addEventListener('click', openDrawer);
     closeBtn.addEventListener('click', closeDrawer);
     overlay.addEventListener('click', closeDrawer);
     mobSignOut.addEventListener('click', function () { closeDrawer(); if (window.LC_AUTH) window.LC_AUTH.signOut(); });
   })();
   </script>
 
-  <!-- User pill -->
+  <!-- Nav handlers -->
   <script>
   (function () {
-    var pill    = document.getElementById('user-pill');
-    var avatar  = document.getElementById('user-avatar');
-    var label   = document.getElementById('user-label');
-    var menu    = document.getElementById('user-menu');
-    var signOut = document.getElementById('sign-out-btn');
-
+    document.getElementById('btn-out').addEventListener('click', function () {
+      if (window.LC_AUTH) window.LC_AUTH.signOut();
+    });
     document.addEventListener('lc:session', function (e) {
       var session = e.detail;
       if (!session) return;
-      var meta      = session.user.user_metadata || {};
-      var name      = meta.full_name || session.user.email;
-      var firstName = name.split(' ')[0];
-      avatar.textContent = firstName.charAt(0).toUpperCase();
-      label.textContent  = firstName;
-      pill.style.display = 'flex';
-      document.getElementById('menu-name').textContent  = name;
-      document.getElementById('menu-email').textContent = session.user.email;
+      var navUser = document.getElementById('nav-user');
+      if (navUser) navUser.textContent = session.user.email;
     });
-
-    pill.addEventListener('click', function (e) { e.stopPropagation(); menu.classList.toggle('open'); });
-    document.addEventListener('click', function () { menu.classList.remove('open'); });
-    signOut.addEventListener('click', function () { if (window.LC_AUTH) window.LC_AUTH.signOut(); });
   })();
   </script>
 
@@ -657,48 +577,50 @@
       });
     });
 
-    // Add member
-    var addEmailEl = document.getElementById('add-email');
-    var addBtn     = document.getElementById('add-btn');
+    // Add lawyer
+    var addNameEl     = document.getElementById('add-name');
+    var addEmailEl    = document.getElementById('add-email');
+    var addPasswordEl = document.getElementById('add-password');
+    var addBtn        = document.getElementById('add-btn');
 
     addBtn.addEventListener('click', function () {
-      var email = addEmailEl.value.trim().toLowerCase();
+      var name     = addNameEl.value.trim();
+      var email    = addEmailEl.value.trim().toLowerCase();
+      var password = addPasswordEl.value;
+      if (!name)                          { showAddMsg("Enter the lawyer's full name.", 'err'); return; }
       if (!email || !email.includes('@')) { showAddMsg('Enter a valid email address.', 'err'); return; }
-      if (!currentWsId) { showAddMsg('No workspace found.', 'err'); return; }
+      if (password.length < 6)           { showAddMsg('Password must be at least 6 characters.', 'err'); return; }
+      if (!currentWsId)                  { showAddMsg('No workspace found.', 'err'); return; }
       addBtn.disabled    = true;
-      addBtn.textContent = 'Sending…';
-      window.LC_AUTH.addWorkspaceMember(email, currentWsId).then(function (res) {
-        addBtn.disabled    = false;
-        addBtn.textContent = 'Send invite';
-        if (res.error) {
-          showAddMsg(res.error.message || 'Could not add member.', 'err');
-        } else {
-          var invited = email;
-          addEmailEl.value = '';
-          document.getElementById('invite-box').style.display = 'none';
-          loadMembers();
-          showAddMsg('Invite sent!', 'ok');
-          showInviteLink(invited);
-        }
+      addBtn.textContent = 'Creating…';
+      var SB_URL = window.LC_CONFIG.supabaseUrl;
+      var SB_KEY = window.LC_CONFIG.supabaseKey;
+      var tmp = window.supabase.createClient(SB_URL, SB_KEY, {
+        auth: { persistSession: false, autoRefreshToken: false, storageKey: 'lc-tmp-' + Date.now() }
       });
-    });
-
-    addEmailEl.addEventListener('keydown', function (e) {
-      if (e.key === 'Enter') addBtn.click();
-    });
-
-    // Copy link
-    document.getElementById('invite-copy').addEventListener('click', function () {
-      var inp = document.getElementById('invite-url');
-      inp.select();
-      navigator.clipboard.writeText(inp.value).then(function () {
-        document.getElementById('invite-copy').textContent = 'Copied!';
-        setTimeout(function () { document.getElementById('invite-copy').textContent = 'Copy link'; }, 2000);
-      }).catch(function () {
-        document.execCommand('copy');
-        document.getElementById('invite-copy').textContent = 'Copied!';
-        setTimeout(function () { document.getElementById('invite-copy').textContent = 'Copy link'; }, 2000);
-      });
+      tmp.auth.signUp({ email: email, password: password, options: { data: { full_name: name } } })
+        .then(function (r) {
+          if (r.error) {
+            addBtn.disabled = false; addBtn.textContent = 'Create account';
+            showAddMsg(r.error.message || 'Could not create account.', 'err');
+            return;
+          }
+          var userId = r.data && r.data.user ? r.data.user.id : null;
+          var row = { workspace_id: currentWsId, email: email, role: 'member', status: 'active', joined_at: new Date().toISOString() };
+          if (userId) row.user_id = userId;
+          window.supabase.createClient(SB_URL, SB_KEY, { auth: { persistSession: false, storageKey: 'lc-ins-' + Date.now() } })
+            .from('workspace_members').insert(row)
+            .then(function (ins) {
+              addBtn.disabled = false; addBtn.textContent = 'Create account';
+              if (ins.error && ins.error.code !== '23505') {
+                showAddMsg('Account created but workspace insert failed: ' + ins.error.message, 'err');
+              } else {
+                addNameEl.value = ''; addEmailEl.value = ''; addPasswordEl.value = '';
+                loadMembers();
+                showAddMsg(name + ' can now log in with their email and password.', 'ok');
+              }
+            });
+        });
     });
 
     // Auth check
