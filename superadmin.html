@@ -240,7 +240,8 @@
         +' <button class="btn btn-secondary btn-sm" onclick="openInviteToFirm(\''+f.id+'\',\''+esc(f.name)+'\')">Invite</button>'
         +(f.status==='active'
           ? ' <button class="btn btn-danger btn-sm" onclick="toggleFirmStatus(\''+f.id+'\',\'suspended\',\''+esc(f.name)+'\')">Suspend</button>'
-          : ' <button class="btn btn-secondary btn-sm" onclick="toggleFirmStatus(\''+f.id+'\',\'active\',\''+esc(f.name)+'\')">Reactivate</button>')
+          : ' <button class="btn btn-secondary btn-sm" onclick="toggleFirmStatus(\''+f.id+'\',\'active\',\''+esc(f.name)+'\')">Reactivate</button>'
+            +' <button class="btn btn-danger btn-sm" onclick="deleteFirm(\''+f.id+'\',\''+esc(f.name)+'\')">Delete</button>')
         +'</td>'
         +'</tr>';
     }).join('');
@@ -257,6 +258,22 @@
     if (res.error) { alert('Error: ' + res.error.message); return; }
     await LC_AUTH.logAudit('firm_status_changed', 'firms', firmId, null, { status: newStatus, name: name });
     loadFirms();
+  };
+
+  window.deleteFirm = async function(firmId, name) {
+    var typed = prompt(
+      'This will permanently delete "' + name + '" and ALL its data\n'
+      + '(members, contracts, analyses). This cannot be undone.\n\n'
+      + 'Type the firm name to confirm:'
+    );
+    if (typed === null) return; // cancelled
+    if (typed.trim() !== name) {
+      alert('Firm name did not match. Deletion cancelled.');
+      return;
+    }
+    var res = await sb.from('firms').delete().eq('id', firmId);
+    if (res.error) { alert('Error: ' + res.error.message); return; }
+    await Promise.all([loadFirms(), loadStats(), loadActivity()]);
   };
 
   // ── Activity ─────────────────────────────────────
