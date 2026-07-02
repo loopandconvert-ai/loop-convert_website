@@ -413,8 +413,7 @@ tr.contract-row:hover td { background: rgba(255,255,255,.018); cursor: pointer; 
 /* ── Chat ────────────────────────────────────────── */
 .chat-wrap {
   display: flex; flex-direction: column;
-  height: calc(100vh - 64px); /* subtract nav height */
-  overflow: hidden;
+  flex: 1; min-height: 0; overflow: hidden;
 }
 .chat-bar {
   display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;

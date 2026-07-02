@@ -9,10 +9,10 @@
   <link rel="icon" type="image/png" href="images/logo.png" />
   <link rel="stylesheet" href="css/dashboard.css" />
   <style>
-    /* Override body/html to be full height for chat layout */
-    html, body { height: 100%; overflow: hidden; }
-    body { display: flex; flex-direction: column; }
-    .dash-nav { flex-shrink: 0; }
+    /* Full-height chat layout */
+    html { height: 100%; }
+    body { height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+    .dash-nav { flex-shrink: 0; position: static; } /* disable sticky so flex layout works */
   </style>
 </head>
 <body data-page="auth-required">
