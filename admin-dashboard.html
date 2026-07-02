@@ -473,6 +473,36 @@
     });
   });
 
+  // ── PDF.js text extraction ───────────────────────
+  var pdfJsLoaded = false;
+  function loadPdfJs() {
+    if (pdfJsLoaded || window.pdfjsLib) { pdfJsLoaded = true; return Promise.resolve(); }
+    return new Promise(function(resolve, reject) {
+      var s = document.createElement('script');
+      s.src = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js';
+      s.onload = function() {
+        window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+          'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
+        pdfJsLoaded = true; resolve();
+      };
+      s.onerror = reject;
+      document.head.appendChild(s);
+    });
+  }
+  async function extractPdfText(file) {
+    await loadPdfJs();
+    var buf = await file.arrayBuffer();
+    var pdf = await window.pdfjsLib.getDocument({ data: buf }).promise;
+    var out = '';
+    for (var i = 1; i <= pdf.numPages; i++) {
+      var page = await pdf.getPage(i);
+      var content = await page.getTextContent();
+      var line = content.items.map(function(it) { return it.str; }).join(' ').trim();
+      if (line) out += 'Page ' + i + ':\n' + line + '\n\n';
+    }
+    return out.trim();
+  }
+
   // ── Upload (same as lawyer dashboard) ────────────
   var selectedFile = null;
   var uploadZone   = document.getElementById('upload-zone');
@@ -507,31 +537,82 @@
   });
 
   document.getElementById('upload-btn').addEventListener('click', async function(){
-    if(!selectedFile) return;
-    var btn=this; btn.disabled=true;
-    document.getElementById('upload-btn-text').textContent='Uploading…'; hideUploadAlert();
+    if (!selectedFile) return;
+    var btn     = this;
+    var btnText = document.getElementById('upload-btn-text');
+    btn.disabled = true;
+    hideUploadAlert();
+
     try {
-      var contractId=crypto.randomUUID();
-      var safeName=selectedFile.name.replace(/[^a-zA-Z0-9._-]/g,'_');
-      var path=profile.firm_id+'/'+contractId+'/'+safeName;
-      var upRes=await sb.storage.from('contracts').upload(path,selectedFile,{upsert:false});
-      if(upRes.error) throw upRes.error;
-      var ctype=document.getElementById('contract-type').value||null;
-      var insRes=await sb.from('contracts').insert({
-        id:contractId, firm_id:profile.firm_id, uploaded_by:profile.id,
-        file_name:selectedFile.name, storage_path:path, contract_type:ctype, status:'uploaded'
+      // 1. Extract text first
+      btnText.textContent = 'Reading PDF…';
+      var pdfText = '';
+      try { pdfText = await extractPdfText(selectedFile); } catch(e) {
+        throw new Error('Could not read the PDF file. Please make sure it is a valid PDF.');
+      }
+      if (!pdfText || pdfText.length < 100) {
+        throw new Error('This appears to be a scanned (image-only) PDF. Text extraction requires a text-based PDF.');
+      }
+
+      // 2. Upload to storage
+      btnText.textContent = 'Uploading…';
+      var contractId = crypto.randomUUID();
+      var safeName   = selectedFile.name.replace(/[^a-zA-Z0-9._-]/g,'_');
+      var path       = profile.firm_id+'/'+contractId+'/'+safeName;
+      var upRes = await sb.storage.from('contracts').upload(path, selectedFile, { upsert: false });
+      if (upRes.error) throw upRes.error;
+
+      // 3. Insert contract row
+      var ctype = document.getElementById('contract-type').value || null;
+      var insRes = await sb.from('contracts').insert({
+        id: contractId, firm_id: profile.firm_id, uploaded_by: profile.id,
+        file_name: selectedFile.name, storage_path: path, contract_type: ctype, status: 'uploaded'
       }).select('id, file_name, contract_type, status, created_at, profiles(full_name, email), analyses(overall_risk_score, risk_level)').single();
-      if(insRes.error) throw insRes.error;
+      if (insRes.error) throw insRes.error;
+
       await LC_AUTH.logAudit('contract_uploaded','contracts',contractId,null,{file_name:selectedFile.name});
       allContracts.unshift(insRes.data);
       computeStats(allContracts, allMembers, profile.firms);
       applyFilters();
-      showUploadAlert('Contract uploaded. Analysis will begin shortly.','success');
+
       document.getElementById('file-clear-btn').click();
-      document.getElementById('contract-type').value='';
-    } catch(err) { showUploadAlert('Upload failed: '+(err.message||'Unknown error'),'error'); }
-    btn.disabled=false; document.getElementById('upload-btn-text').textContent='Upload & Analyze';
+      document.getElementById('contract-type').value = '';
+
+      // 4. Trigger AI analysis
+      showUploadAlert('Analyzing your contract with AI… this may take up to 60 seconds.', 'info');
+      updateContractInList(contractId, 'processing', null, null);
+
+      var session = await sb.auth.getSession();
+      var token   = session.data.session.access_token;
+
+      var resp = await fetch('/api/analyze.js', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        body: JSON.stringify({ contract_id: contractId, text: pdfText })
+      });
+      var result = await resp.json();
+      if (!resp.ok) throw new Error(result.error || 'Analysis failed');
+
+      await loadContracts();
+      showUploadAlert('Analysis complete! Click "View Report" to see the results.', 'success');
+
+    } catch(err) {
+      showUploadAlert(err.message || 'Unknown error', 'error');
+      await loadContracts();
+    }
+
+    btn.disabled = false;
+    btnText.textContent = 'Upload & Analyze';
   });
+
+  function updateContractInList(contractId, status, score, level) {
+    var c = allContracts.find(function(x){ return x.id === contractId; });
+    if (!c) return;
+    c.status = status;
+    if (score !== null) c.analyses = [{ overall_risk_score: score, risk_level: level }];
+    computeStats(allContracts, allMembers, profile.firms);
+    applyFilters();
+  }
 
   // Filter wiring
   document.getElementById('search-input').addEventListener('input', applyFilters);
