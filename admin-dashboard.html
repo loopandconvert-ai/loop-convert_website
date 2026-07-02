@@ -87,6 +87,7 @@
     <button class="tab-btn active" data-tab="contracts">Contracts</button>
     <button class="tab-btn" data-tab="team">Team</button>
     <button class="tab-btn" data-tab="activity">Activity</button>
+    <button class="tab-btn" data-tab="chat">AI Chat</button>
   </div>
 
   <!-- ── Contracts tab ──────────────────────────── -->
@@ -185,6 +186,25 @@
       </div>
     </div>
   </div>
+
+  <!-- ── AI Chat tab ──────────────────────────────── -->
+  <div class="tab-panel" id="tab-chat">
+    <div class="card" style="overflow:hidden">
+      <div class="card-header" style="flex-wrap:wrap;gap:.75rem;align-items:center">
+        <span class="card-title">AI Contract Chat</span>
+        <select class="filter-sel" id="chat-contract-sel" style="min-width:200px;max-width:380px">
+          <option value="">Select a completed contract…</option>
+        </select>
+      </div>
+      <div style="display:flex;flex-direction:column;height:480px">
+        <div class="chat-msgs" id="tab-chat-msgs" style="flex:1;min-height:0;border-top:1px solid var(--border);padding:1rem 1.25rem"></div>
+        <div class="chat-foot">
+          <textarea class="chat-input" id="tab-chat-input" rows="1" placeholder="Select a contract above to start chatting…" disabled></textarea>
+          <button class="chat-send" id="tab-send-btn" disabled>Send</button>
+        </div>
+      </div>
+    </div>
+  </div><!-- /tab-chat -->
 
 </main>
 
@@ -455,7 +475,7 @@
   }
 
   // ── Tabs ─────────────────────────────────────────
-  var tabsLoaded = { contracts: false, team: false, activity: false };
+  var tabsLoaded = { contracts: false, team: false, activity: false, chat: false };
 
   document.querySelectorAll('.tab-btn').forEach(function(btn) {
     btn.addEventListener('click', async function() {
@@ -473,8 +493,131 @@
         tabsLoaded.activity = true;
         await loadActivity();
       }
+      if (this.dataset.tab === 'chat') populateChatSelector();
     });
   });
+
+  // ── Embedded AI Chat ──────────────────────────────
+  var chatContractId = null;
+  var chatMessages   = [];
+  var chatStreaming   = false;
+
+  function populateChatSelector() {
+    var sel       = document.getElementById('chat-contract-sel');
+    var completed = allContracts.filter(function(c){ return c.status === 'completed'; });
+    while (sel.options.length > 1) sel.remove(1);
+    if (!completed.length) {
+      var o = document.createElement('option');
+      o.textContent = 'No analyzed contracts yet'; o.disabled = true;
+      sel.appendChild(o);
+    }
+    completed.forEach(function(c) {
+      var o = document.createElement('option'); o.value = c.id;
+      var score = c.analyses && c.analyses[0] ? ' — ' + c.analyses[0].overall_risk_score + '/100' : '';
+      o.textContent = c.file_name + score;
+      sel.appendChild(o);
+    });
+  }
+
+  function addChatBubble(role, content) {
+    var msgsEl = document.getElementById('tab-chat-msgs');
+    var wrap   = document.createElement('div');
+    wrap.className = 'chat-msg ' + role;
+    var av = document.createElement('div');
+    av.className = 'chat-avatar'; av.textContent = role === 'user' ? 'You' : 'AI';
+    var bub = document.createElement('div'); bub.className = 'chat-bubble';
+    if (content === '__typing__') {
+      bub.innerHTML = '<div class="chat-typing"><span></span><span></span><span></span></div>';
+    } else { bub.textContent = content; }
+    wrap.appendChild(av); wrap.appendChild(bub);
+    msgsEl.appendChild(wrap);
+    msgsEl.scrollTop = msgsEl.scrollHeight;
+    return bub;
+  }
+
+  function resetChat(id, name, score) {
+    chatContractId = id; chatMessages = []; chatStreaming = false;
+    document.getElementById('tab-chat-msgs').innerHTML = '';
+    addChatBubble('assistant', 'Hi! I\'ve analyzed "' + name + '"'
+      + (score != null ? ' — risk score ' + score + '/100' : '')
+      + '. Ask me anything about its terms, risks, or clauses.');
+    var inp = document.getElementById('tab-chat-input');
+    inp.placeholder = 'Ask about ' + name + '…'; inp.disabled = false;
+    document.getElementById('tab-send-btn').disabled = false;
+  }
+
+  document.getElementById('chat-contract-sel').addEventListener('change', function() {
+    var id = this.value; if (!id) return;
+    var c = allContracts.find(function(x){ return x.id === id; });
+    if (!c) return;
+    var score = c.analyses && c.analyses[0] ? c.analyses[0].overall_risk_score : null;
+    resetChat(id, c.file_name, score);
+  });
+
+  document.getElementById('tab-chat-input').addEventListener('input', function() {
+    this.style.height = 'auto';
+    this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+    document.getElementById('tab-send-btn').disabled = !this.value.trim() || chatStreaming;
+  });
+
+  document.getElementById('tab-chat-input').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      if (!document.getElementById('tab-send-btn').disabled) sendTabChat();
+    }
+  });
+
+  document.getElementById('tab-send-btn').addEventListener('click', sendTabChat);
+
+  async function sendTabChat() {
+    var inputEl = document.getElementById('tab-chat-input');
+    var text = inputEl.value.trim();
+    if (!text || chatStreaming || !chatContractId) return;
+    chatStreaming = true;
+    document.getElementById('tab-send-btn').disabled = true;
+    inputEl.value = ''; inputEl.style.height = 'auto';
+    chatMessages.push({ role: 'user', content: text });
+    addChatBubble('user', text);
+    var aiBubble = addChatBubble('assistant', '__typing__');
+    try {
+      var session = await sb.auth.getSession();
+      var token   = session.data.session.access_token;
+      var resp    = await fetch('/api/chat.js', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        body: JSON.stringify({ contract_id: chatContractId, messages: chatMessages })
+      });
+      if (!resp.ok) {
+        var e2 = await resp.json().catch(function(){ return {}; });
+        throw new Error(e2.error || 'Request failed');
+      }
+      var reader = resp.body.getReader(); var decoder = new TextDecoder();
+      var aiText = ''; var buf = ''; var started = false;
+      while (true) {
+        var ch = await reader.read(); if (ch.done) break;
+        buf += decoder.decode(ch.value, { stream: true });
+        var parts = buf.split('\n\n'); buf = parts.pop();
+        for (var i = 0; i < parts.length; i++) {
+          var line = parts[i].trim();
+          if (!line.startsWith('data: ')) continue;
+          try {
+            var json = JSON.parse(line.slice(6));
+            if (json.done) break;
+            if (json.error) throw new Error(json.error);
+            if (json.text) {
+              if (!started) { aiBubble.textContent = ''; started = true; }
+              aiText += json.text; aiBubble.textContent = aiText;
+              document.getElementById('tab-chat-msgs').scrollTop = 999999;
+            }
+          } catch(pe) { if (pe.message !== 'Unexpected end of JSON input') throw pe; }
+        }
+      }
+      chatMessages.push({ role: 'assistant', content: aiText || '(No response)' });
+    } catch(err) { aiBubble.textContent = 'Error: ' + err.message; }
+    chatStreaming = false;
+    document.getElementById('tab-send-btn').disabled = !inputEl.value.trim();
+    inputEl.focus();
+  }
 
   // ── PDF.js text extraction ───────────────────────
   var pdfJsLoaded = false;
