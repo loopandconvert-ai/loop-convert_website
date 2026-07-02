@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contract Chat — Loop &amp; Convert</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="icon" type="image/png" href="images/logo.png" />
+  <link rel="stylesheet" href="css/dashboard.css" />
+  <style>
+    /* Override body/html to be full height for chat layout */
+    html, body { height: 100%; overflow: hidden; }
+    body { display: flex; flex-direction: column; }
+    .dash-nav { flex-shrink: 0; }
+  </style>
+</head>
+<body data-page="auth-required">
+
+<!-- ── Nav ──────────────────────────────────────── -->
+<nav class="dash-nav">
+  <div class="dash-nav-inner">
+    <a href="index.html" class="nav-logo">Loop <span>&</span> Convert</a>
+    <div class="nav-links"></div>
+    <div class="nav-right">
+      <div>
+        <div class="nav-user-name" id="nav-name"></div>
+        <div class="nav-user-firm" id="nav-firm"></div>
+      </div>
+      <button class="btn-sign-out" id="sign-out-btn">Sign out</button>
+    </div>
+  </div>
+</nav>
+
+<!-- ── Chat Layout ───────────────────────────────── -->
+<div class="chat-wrap" id="chat-wrap">
+
+  <!-- Contract info bar -->
+  <div class="chat-bar">
+    <a href="#" class="chat-bar-back" id="back-link">← Back to Report</a>
+    <span class="chat-bar-sep">|</span>
+    <span class="chat-bar-title" id="contract-name">Loading…</span>
+    <span id="risk-badge"></span>
+  </div>
+
+  <!-- Messages -->
+  <div class="chat-msgs" id="chat-msgs">
+    <!-- Welcome bubble injected by JS -->
+  </div>
+
+  <!-- Suggested questions (shown once, before first message) -->
+  <div class="chat-suggestions" id="suggestions"></div>
+
+  <!-- Input -->
+  <div class="chat-foot">
+    <textarea
+      class="chat-input" id="chat-input"
+      placeholder="Ask anything about this contract…"
+      rows="1"
+    ></textarea>
+    <button class="chat-send" id="send-btn" disabled>Send</button>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/config.js"></script>
+<script src="js/auth.js"></script>
+<script>
+(function () {
+  var sb         = window.LC_AUTH.supabase;
+  var contractId = new URLSearchParams(window.location.search).get('id');
+  var messages   = [];
+  var isStreaming = false;
+
+  var msgsEl   = document.getElementById('chat-msgs');
+  var inputEl  = document.getElementById('chat-input');
+  var sendBtn  = document.getElementById('send-btn');
+  var suggestEl = document.getElementById('suggestions');
+
+  var RISK_COLORS = { low: '#22c55e', medium: '#eab308', high: '#f97316', critical: '#ef4444' };
+
+  function esc(s) {
+    var d = document.createElement('div');
+    d.textContent = s || '';
+    return d.innerHTML;
+  }
+
+  function scrollBottom() {
+    msgsEl.scrollTop = msgsEl.scrollHeight;
+  }
+
+  // ── Build a message bubble ────────────────────────
+  function addBubble(role, content) {
+    var isUser = role === 'user';
+    var wrap   = document.createElement('div');
+    wrap.className = 'chat-msg ' + role;
+
+    var avatarEl = document.createElement('div');
+    avatarEl.className = 'chat-avatar';
+    avatarEl.textContent = isUser ? 'You' : 'AI';
+
+    var bubbleEl = document.createElement('div');
+    bubbleEl.className = 'chat-bubble';
+
+    if (content === '__typing__') {
+      bubbleEl.innerHTML = '<div class="chat-typing"><span></span><span></span><span></span></div>';
+    } else {
+      bubbleEl.textContent = content;
+    }
+
+    wrap.appendChild(avatarEl);
+    wrap.appendChild(bubbleEl);
+    msgsEl.appendChild(wrap);
+    scrollBottom();
+    return bubbleEl;
+  }
+
+  // ── Auto-resize textarea ──────────────────────────
+  inputEl.addEventListener('input', function() {
+    this.style.height = 'auto';
+    this.style.height = Math.min(this.scrollHeight, 140) + 'px';
+    sendBtn.disabled = !this.value.trim() || isStreaming;
+  });
+
+  // ── Send on Enter (Shift+Enter = newline) ─────────
+  inputEl.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      if (!sendBtn.disabled) sendMessage();
+    }
+  });
+
+  sendBtn.addEventListener('click', sendMessage);
+
+  // ── Suggested questions ───────────────────────────
+  var SUGGESTIONS = [
+    'What are the biggest risks in this contract?',
+    'Summarize the payment and termination terms.',
+    'Is there an auto-renewal clause?',
+    'What does the liability cap cover?',
+    'Which clauses should I try to negotiate?'
+  ];
+
+  function showSuggestions() {
+    suggestEl.innerHTML = SUGGESTIONS.map(function(q) {
+      return '<button class="chat-chip" data-q="' + esc(q) + '">' + esc(q) + '</button>';
+    }).join('');
+    suggestEl.querySelectorAll('.chat-chip').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        inputEl.value = this.dataset.q;
+        inputEl.dispatchEvent(new Event('input'));
+        hideSuggestions();
+        sendMessage();
+      });
+    });
+  }
+
+  function hideSuggestions() {
+    suggestEl.innerHTML = '';
+  }
+
+  // ── Send a message ────────────────────────────────
+  async function sendMessage() {
+    var text = inputEl.value.trim();
+    if (!text || isStreaming) return;
+
+    hideSuggestions();
+    isStreaming = true;
+    sendBtn.disabled = true;
+    inputEl.value = '';
+    inputEl.style.height = 'auto';
+
+    messages.push({ role: 'user', content: text });
+    addBubble('user', text);
+
+    // Typing indicator
+    var aiBubble = addBubble('assistant', '__typing__');
+
+    try {
+      var session = await sb.auth.getSession();
+      var token   = session.data.session.access_token;
+
+      var resp = await fetch('/api/chat.js', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + token
+        },
+        body: JSON.stringify({ contract_id: contractId, messages: messages })
+      });
+
+      if (!resp.ok) {
+        var errData = await resp.json().catch(function() { return {}; });
+        throw new Error(errData.error || 'Request failed (' + resp.status + ')');
+      }
+
+      // Stream the response
+      var reader  = resp.body.getReader();
+      var decoder = new TextDecoder();
+      var aiText  = '';
+      var buf     = '';
+      var started = false;
+
+      while (true) {
+        var chunk = await reader.read();
+        if (chunk.done) break;
+
+        buf += decoder.decode(chunk.value, { stream: true });
+        var parts = buf.split('\n\n');
+        buf = parts.pop(); // keep incomplete line
+
+        for (var i = 0; i < parts.length; i++) {
+          var line = parts[i].trim();
+          if (!line.startsWith('data: ')) continue;
+          var payload = line.slice(6);
+          try {
+            var json = JSON.parse(payload);
+            if (json.done) break;
+            if (json.error) throw new Error(json.error);
+            if (json.text) {
+              if (!started) {
+                // Replace typing indicator with real content
+                aiBubble.textContent = '';
+                started = true;
+              }
+              aiText += json.text;
+              aiBubble.textContent = aiText;
+              scrollBottom();
+            }
+          } catch (parseErr) {
+            if (parseErr.message !== 'Unexpected end of JSON input') throw parseErr;
+          }
+        }
+      }
+
+      if (!aiText) aiText = '(No response received)';
+      messages.push({ role: 'assistant', content: aiText });
+
+    } catch (err) {
+      aiBubble.textContent = 'Sorry, something went wrong: ' + err.message;
+    }
+
+    isStreaming = false;
+    sendBtn.disabled = !inputEl.value.trim();
+    inputEl.focus();
+  }
+
+  // ── Init ─────────────────────────────────────────
+  document.getElementById('sign-out-btn').addEventListener('click', function() { LC_AUTH.signOut(); });
+
+  (async function init() {
+    var session = await LC_AUTH.requireAuth();
+    if (!session) return;
+    var profile = await LC_AUTH.getProfile();
+    if (!profile) return LC_AUTH.signOut();
+    if (profile.status === 'disabled') { LC_AUTH.signOut(); return; }
+
+    document.getElementById('nav-name').textContent = profile.full_name || profile.email;
+    document.getElementById('nav-firm').textContent = profile.firms ? profile.firms.name : '';
+
+    if (!contractId) {
+      msgsEl.innerHTML = '<div class="state-empty" style="margin:2rem auto"><h3>No contract selected</h3><p>Please open this page from an analysis report.</p></div>';
+      return;
+    }
+
+    // Set back link
+    document.getElementById('back-link').href = 'analysis-report.html?id=' + contractId;
+
+    // Load contract + analysis metadata for the header
+    var cRes = await sb.from('contracts')
+      .select('id, file_name, contract_type, status, analyses(overall_risk_score, risk_level)')
+      .eq('id', contractId)
+      .maybeSingle();
+
+    if (cRes.error || !cRes.data) {
+      msgsEl.innerHTML = '<div class="state-empty" style="margin:2rem auto"><h3>Contract not found</h3></div>';
+      return;
+    }
+
+    var c = cRes.data;
+    document.title = esc(c.file_name) + ' — Chat · Loop & Convert';
+    document.getElementById('contract-name').textContent = c.file_name;
+
+    var analysis = c.analyses && c.analyses[0];
+    if (analysis) {
+      var level = analysis.risk_level || 'medium';
+      var score = analysis.overall_risk_score;
+      var badgeEl = document.getElementById('risk-badge');
+      badgeEl.className = 'badge badge-' + level;
+      badgeEl.textContent = 'Risk: ' + score + '/100';
+    }
+
+    // Welcome message
+    var hasAnalysis = c.status === 'completed' && analysis;
+    var welcome = hasAnalysis
+      ? 'Hi! I\'ve fully analyzed "' + c.file_name + '" — risk score ' + analysis.overall_risk_score + '/100. Ask me anything about its terms, risks, or clauses.'
+      : 'Hi! I\'m here to help with "' + c.file_name + '". Note: the analysis may still be in progress, so my answers are based on whatever data is available so far.';
+
+    addBubble('assistant', welcome);
+    showSuggestions();
+
+    // Enable input
+    sendBtn.disabled = false;
+    inputEl.disabled = false;
+    inputEl.focus();
+  })();
+})();
+</script>
+</body>
+</html>

@@ -233,6 +233,7 @@
       var level = analysis ? analysis.risk_level : null;
       var viewBtn = c.status === 'completed'
         ? '<a href="analysis-report.html?id=' + c.id + '" class="btn btn-secondary btn-sm" onclick="event.stopPropagation()">View Report</a>'
+          + ' <a href="contract-chat.html?id=' + c.id + '" class="btn btn-ghost btn-sm" onclick="event.stopPropagation()" style="color:var(--accent)">Chat</a>'
         : '<span style="font-size:.75rem;color:var(--text-4)">—</span>';
       var typeLabel = c.contract_type || '<span style="color:var(--text-4)">—</span>';
 

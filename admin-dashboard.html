@@ -278,7 +278,10 @@
         +'<td>'+statusBadge(c.status)+'</td>'
         +'<td>'+riskBadge(a?a.risk_level:null)+'</td>'
         +'<td class="td-muted">'+fmtDate(c.created_at)+'</td>'
-        +'<td class="td-actions">'+(c.status==='completed'?'<a href="analysis-report.html?id='+c.id+'" class="btn btn-secondary btn-sm">View Report</a>':'<span style="color:var(--text-4);font-size:.78rem">—</span>')+'</td>'
+        +'<td class="td-actions">'+(c.status==='completed'
+          ?'<a href="analysis-report.html?id='+c.id+'" class="btn btn-secondary btn-sm">View Report</a>'
+           +' <a href="contract-chat.html?id='+c.id+'" class="btn btn-ghost btn-sm" style="color:var(--accent)">Chat</a>'
+          :'<span style="color:var(--text-4);font-size:.78rem">—</span>')+'</td>'
         +'</tr>';
     }).join('');
     body.innerHTML = '<div class="table-wrap"><table>'

@@ -1,99 +1,153 @@
+import Anthropic from '@anthropic-ai/sdk';
+import { createClient } from '@supabase/supabase-js';
+
+const MAX_HISTORY    = 20;    // keep last 10 turns (20 messages)
+const MAX_TEXT_CHARS = 60000; // ~15k tokens — fits in Sonnet context easily
+
+function buildSystemPrompt(contract, analysis, riskItems, missingClauses, contractText) {
+  var lines = [
+    'You are Lex, an expert AI legal assistant embedded in Loop & Convert.',
+    'You help lawyers and legal professionals understand contracts clearly and concisely.',
+    'You speak like a trusted senior attorney — direct, precise, and practical.',
+    '',
+    '=== CONTRACT BEING DISCUSSED ===',
+    'File: ' + contract.file_name,
+    contract.contract_type ? 'Type: ' + contract.contract_type : '',
+    '',
+  ];
+
+  if (analysis) {
+    lines.push('=== RISK ASSESSMENT ===');
+    lines.push('Risk Score: ' + analysis.overall_risk_score + '/100');
+    lines.push('Risk Level: ' + analysis.risk_level.toUpperCase());
+    if (analysis.executive_summary) {
+      lines.push('');
+      lines.push('Executive Summary:');
+      lines.push(analysis.executive_summary);
+    }
+    lines.push('');
+  }
+
+  if (riskItems && riskItems.length) {
+    lines.push('=== IDENTIFIED RISK ITEMS ===');
+    riskItems.forEach(function(r, i) {
+      lines.push((i + 1) + '. [' + r.severity.toUpperCase() + '] ' + r.category);
+      if (r.clause_excerpt) lines.push('   Excerpt: "' + r.clause_excerpt + '"');
+      if (r.explanation)    lines.push('   Issue: '    + r.explanation);
+      if (r.recommendation) lines.push('   Fix: '      + r.recommendation);
+    });
+    lines.push('');
+  }
+
+  if (missingClauses && missingClauses.length) {
+    lines.push('=== MISSING CLAUSES ===');
+    lines.push(missingClauses.join(', '));
+    lines.push('');
+  }
+
+  if (contractText && contractText.length > 50) {
+    var truncated = contractText.length > MAX_TEXT_CHARS;
+    lines.push('=== FULL CONTRACT TEXT' + (truncated ? ' (first ' + MAX_TEXT_CHARS + ' chars)' : '') + ' ===');
+    lines.push(truncated ? contractText.slice(0, MAX_TEXT_CHARS) + '\n\n[... document truncated ...]' : contractText);
+    lines.push('');
+  }
+
+  lines.push('INSTRUCTIONS:');
+  lines.push('- Answer questions about THIS specific contract only.');
+  lines.push('- Cite exact clause text or page numbers when available.');
+  lines.push('- Use plain language — explain legal terms clearly.');
+  lines.push('- Be concise and direct. Bullet points for multiple items.');
+  lines.push('- If something is not in the contract, say so honestly.');
+  lines.push('- For binding legal decisions, recommend consulting qualified counsel.');
+
+  return lines.filter(function(l, i) {
+    return !(l === '' && lines[i - 1] === '');
+  }).join('\n');
+}
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   if (req.method === 'OPTIONS') return res.status(200).end();
-  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+  if (req.method !== 'POST')   return res.status(405).json({ error: 'Method not allowed' });
 
-  const { messages, contracts } = req.body;
+  const { contract_id, messages } = req.body || {};
+  if (!contract_id)                             return res.status(400).json({ error: 'contract_id is required' });
+  if (!Array.isArray(messages) || !messages.length) return res.status(400).json({ error: 'messages is required' });
 
-  if (!Array.isArray(messages) || messages.length === 0) {
-    return res.status(400).json({ error: 'messages array required' });
+  const adminClient = createClient(
+    process.env.SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_ROLE_KEY
+  );
+
+  // Validate JWT
+  const token = (req.headers.authorization || '').replace('Bearer ', '').trim();
+  if (!token) return res.status(401).json({ error: 'Authorization header missing' });
+
+  const { data: { user }, error: authErr } = await adminClient.auth.getUser(token);
+  if (authErr || !user) return res.status(401).json({ error: 'Invalid or expired token' });
+
+  const { data: requester } = await adminClient
+    .from('profiles').select('firm_id, role').eq('id', user.id).single();
+  if (!requester) return res.status(403).json({ error: 'Profile not found' });
+
+  // Load contract (includes extracted_text)
+  const { data: contract } = await adminClient
+    .from('contracts')
+    .select('id, firm_id, file_name, contract_type, status, extracted_text')
+    .eq('id', contract_id).single();
+  if (!contract) return res.status(404).json({ error: 'Contract not found' });
+
+  const owns = requester.role === 'super_admin' || contract.firm_id === requester.firm_id;
+  if (!owns) return res.status(403).json({ error: 'Access denied' });
+
+  // Load analysis + risk items
+  const { data: analysis } = await adminClient
+    .from('analyses').select('*').eq('contract_id', contract_id).maybeSingle();
+
+  var riskItems      = [];
+  var missingClauses = [];
+  if (analysis) {
+    const rRes = await adminClient
+      .from('risk_items').select('*').eq('analysis_id', analysis.id);
+    riskItems      = rRes.data || [];
+    missingClauses = (analysis.raw_json || {}).missing_clauses || [];
   }
 
-  // Build contract context from analysis data
-  let contractCtx = '';
-  if (contracts && contracts.length > 0) {
-    contractCtx = '\n\n---\nUSER\'S ANALYZED CONTRACTS:\n\n';
-    contracts.forEach((c, idx) => {
-      const name = c.file_name || c.fileName || 'Unnamed';
-      const risk = c.risk_level || c.riskLevel || 'Unknown';
-      const date = c.analyzed_at || c.analyzedAt || '';
-      const data = c.analysis_data || c;
+  const systemPrompt = buildSystemPrompt(
+    contract, analysis, riskItems, missingClauses, contract.extracted_text
+  );
 
-      contractCtx += `CONTRACT ${idx + 1}: "${name}"\n`;
-      contractCtx += `Risk Level: ${risk}\n`;
-      if (date) {
-        contractCtx += `Analyzed: ${new Date(date).toLocaleDateString('en-GB', {
-          day: 'numeric', month: 'short', year: 'numeric'
-        })}\n`;
-      }
-
-      if (data.riskSummary && data.riskSummary.length) {
-        contractCtx += 'Risk Summary:\n' + data.riskSummary.map(r => `  - ${r}`).join('\n') + '\n';
-      }
-      if (data.keyClauses && data.keyClauses.length) {
-        contractCtx += 'Key Clauses:\n' + data.keyClauses.map(kc => `  - ${kc.clause}: ${kc.explanation}`).join('\n') + '\n';
-      }
-      if (data.redFlags && data.redFlags.length) {
-        contractCtx += 'Red Flags:\n' + data.redFlags.map(rf => `  - ${rf}`).join('\n') + '\n';
-      }
-      if (data.recommendedQuestions && data.recommendedQuestions.length) {
-        contractCtx += 'Recommended Questions:\n' + data.recommendedQuestions.map(q => `  - ${q}`).join('\n') + '\n';
-      }
-      contractCtx += '\n';
-    });
-  } else {
-    contractCtx = '\n\nThe user has not analyzed any contracts yet. Encourage them to upload their first contract using the "+ Upload" button.';
-  }
-
-  const system = `You are Lex, an expert AI legal counsel embedded in Loop & Convert — a contract risk analysis platform used by legal professionals and law firms.
-
-Your personality: Sharp, concise, and authoritative. You speak like a trusted senior attorney — direct and precise, not academic. You cut through legal complexity and tell people what actually matters.
-
-Your capabilities:
-- Answer questions about the user's analyzed contracts
-- Explain specific clauses, risks, and red flags in plain language
-- Compare clauses or risk levels across multiple contracts
-- Suggest negotiation tactics and questions to raise with counterparties
-- Help prioritize which contracts need urgent attention
-- Explain legal terminology without unnecessary jargon
-
-Rules:
-- Always reference contracts by their exact file name when discussing them
-- Keep responses concise — use bullet points when listing multiple items
-- Be direct and professional
-- If something genuinely requires a qualified lawyer's review, say so honestly
-- Never fabricate clause details — only reference what is in the provided contract data
-${contractCtx}`;
+  const trimmed = messages.slice(-MAX_HISTORY);
 
   try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'x-api-key': process.env.ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01',
-        'content-type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 1024,
-        system,
-        messages: messages.map(m => ({ role: m.role, content: m.content })),
-      }),
+    const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+
+    const stream = anthropic.messages.stream({
+      model:      'claude-sonnet-4-6',
+      max_tokens: 2048,
+      system:     systemPrompt,
+      messages:   trimmed
     });
 
-    if (!response.ok) {
-      const err = await response.json().catch(() => ({}));
-      console.error('Anthropic API error:', err);
-      return res.status(502).json({ error: 'AI service unavailable' });
+    for await (const text of stream.textStream) {
+      res.write('data: ' + JSON.stringify({ text }) + '\n\n');
     }
 
-    const data = await response.json();
-    res.json({ content: data.content[0].text });
+    res.write('data: ' + JSON.stringify({ done: true }) + '\n\n');
+    res.end();
+
   } catch (err) {
-    console.error('Handler error:', err);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error('Chat error:', err.message);
+    if (!res.headersSent) {
+      return res.status(500).json({ error: 'Chat failed: ' + (err.message || 'Unknown error') });
+    }
+    res.write('data: ' + JSON.stringify({ error: err.message }) + '\n\n');
+    res.end();
   }
 }

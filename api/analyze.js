@@ -98,8 +98,10 @@ export default async function handler(req, res) {
   if (contract.status === 'processing') return res.status(409).json({ error: 'Already being analyzed' });
   if (contract.status === 'completed')  return res.status(409).json({ error: 'Already analyzed' });
 
-  // Mark as processing immediately so the UI shows the right state
-  await adminClient.from('contracts').update({ status: 'processing' }).eq('id', contract_id);
+  // Mark as processing and store extracted text for chat feature
+  await adminClient.from('contracts')
+    .update({ status: 'processing', extracted_text: text.slice(0, 200000) })
+    .eq('id', contract_id);
 
   const startMs     = Date.now();
   const contractText = text.length > MAX_TEXT_CHARS
