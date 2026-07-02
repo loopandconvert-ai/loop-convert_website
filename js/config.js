@@ -1,4 +1,4 @@
 window.LC_CONFIG = {
-  supabaseUrl: 'https://mjaqdjqlssxpymelugvq.supabase.co',
-  supabaseKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1qYXFkanFsc3N4cHltZWx1Z3ZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY0MzU4ODUsImV4cCI6MjA5MjAxMTg4NX0.IqAgySH7NLmiwD_VPC_qhegoTgARevYEN3hJstYo19Q'
+  supabaseUrl: 'https://skhdaapolslmobmplpdk.supabase.co',
+  supabaseKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNraGRhYXBvbHNsbW9ibXBscGRrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI5ODQ4MTMsImV4cCI6MjA5ODU2MDgxM30.09Jn5u8v71rcSOlu1Ys6QF4gHp6f3rQxoSY03aRIRwM'
 };

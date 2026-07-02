@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Analysis Report — Loop &amp; Convert</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="icon" type="image/png" href="images/logo.png" />
+  <link rel="stylesheet" href="css/dashboard.css" />
+  <style>
+    .back-link { display:inline-flex; align-items:center; gap:.4rem; font-size:.82rem; color:var(--text-3); text-decoration:none; margin-bottom:1.5rem; transition:color .15s; }
+    .back-link:hover { color:var(--text); }
+    .exec-summary { font-size:.9rem; color:var(--text-2); line-height:1.7; white-space:pre-line; }
+    .print-only   { display:none; }
+    @media print { .print-only { display:block; } .dash-main { padding-top:1rem; } }
+  </style>
+</head>
+<body data-page="auth-required">
+
+<!-- ── Nav ──────────────────────────────────────── -->
+<nav class="dash-nav no-print">
+  <div class="dash-nav-inner">
+    <a href="index.html" class="nav-logo">Loop <span>&</span> Convert</a>
+    <div class="nav-links">
+      <a href="javascript:history.back()" class="nav-link">← Back</a>
+    </div>
+    <div class="nav-right">
+      <div>
+        <div class="nav-user-name" id="nav-name"></div>
+        <div class="nav-user-firm" id="nav-firm"></div>
+      </div>
+      <button class="btn-sign-out" id="sign-out-btn">Sign out</button>
+    </div>
+  </div>
+</nav>
+
+<!-- ── Main ─────────────────────────────────────── -->
+<main class="dash-main" id="report-main">
+  <div class="state-loading"><div class="spinner"></div> Loading report…</div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/config.js"></script>
+<script src="js/auth.js"></script>
+<script>
+(function () {
+  var sb = window.LC_AUTH.supabase;
+
+  var SEV_ORDER = { critical: 0, high: 1, medium: 2, low: 3 };
+  var SEV_LABELS = { critical: 'Critical', high: 'High', medium: 'Medium', low: 'Low' };
+  var RISK_LABELS = { low: 'Low Risk', medium: 'Medium Risk', high: 'High Risk', critical: 'Critical Risk' };
+
+  function fmtDate(iso) {
+    return new Date(iso).toLocaleDateString('en-GB', { day:'numeric', month:'long', year:'numeric' });
+  }
+  function esc(str) {
+    var d = document.createElement('div');
+    d.textContent = str || '';
+    return d.innerHTML;
+  }
+
+  function riskScoreClass(level) {
+    return level || 'medium';
+  }
+
+  function renderEmpty(main) {
+    main.innerHTML = '<a href="javascript:history.back()" class="back-link">← Back to Contracts</a>'
+      + '<div class="state-empty" style="margin-top:3rem">'
+      + '<h3>Contract not found</h3><p>This contract may not exist or you may not have access.</p></div>';
+  }
+
+  function renderPending(main, contract) {
+    main.innerHTML = '<a href="javascript:history.back()" class="back-link">← Back to Contracts</a>'
+      + '<div class="card"><div class="card-body" style="text-align:center;padding:3rem">'
+      + '<div style="font-size:2.5rem;margin-bottom:1rem">⏳</div>'
+      + '<h2 style="font-size:1.1rem;font-weight:700;margin-bottom:.5rem">' + esc(contract.file_name) + '</h2>'
+      + '<p style="color:var(--text-3);margin-bottom:1.5rem">'
+      + (contract.status === 'processing'
+        ? 'Analysis is in progress. This page will refresh automatically.'
+        : 'This contract has been uploaded and is waiting to be analyzed.')
+      + '</p>'
+      + '<span class="badge badge-' + contract.status + '" style="font-size:.8rem;padding:.35rem .8rem">'
+      + (contract.status === 'processing' ? 'Processing…' : 'Awaiting Analysis') + '</span>'
+      + '</div></div>';
+
+    if (contract.status === 'processing') {
+      setTimeout(function() { window.location.reload(); }, 8000);
+    }
+  }
+
+  function renderFailed(main, contract) {
+    main.innerHTML = '<a href="javascript:history.back()" class="back-link">← Back to Contracts</a>'
+      + '<div class="card"><div class="card-body" style="text-align:center;padding:3rem">'
+      + '<div style="font-size:2.5rem;margin-bottom:1rem">❌</div>'
+      + '<h2 style="font-size:1.1rem;font-weight:700;margin-bottom:.5rem">' + esc(contract.file_name) + '</h2>'
+      + '<p style="color:var(--text-3)">Analysis failed for this contract. Please re-upload the document or contact support.</p>'
+      + '</div></div>';
+  }
+
+  function renderSeverityGroups(items) {
+    var groups = ['critical', 'high', 'medium', 'low'];
+    return groups.map(function(sev) {
+      var sevItems = items.filter(function(r){ return r.severity === sev; });
+      if (!sevItems.length) return '';
+
+      var itemsHtml = sevItems.map(function(r) {
+        return '<div class="risk-item">'
+          + '<div class="risk-item-top"><span class="risk-category">' + esc(r.category || 'General') + '</span></div>'
+          + (r.clause_excerpt
+            ? '<div class="risk-excerpt">"' + esc(r.clause_excerpt) + '"</div>'
+            : '')
+          + (r.page_number
+            ? '<div class="risk-page">Page ' + r.page_number + '</div>'
+            : '')
+          + '<div class="risk-label">Why this matters</div>'
+          + '<div class="risk-text">' + esc(r.explanation) + '</div>'
+          + (r.recommendation
+            ? '<div class="risk-rec"><div class="risk-label">Recommendation</div><div class="risk-text">' + esc(r.recommendation) + '</div></div>'
+            : '')
+          + '</div>';
+      }).join('');
+
+      return '<div class="severity-group">'
+        + '<div class="severity-heading"><span class="sev-dot ' + sev + '"></span>' + SEV_LABELS[sev] + ' (' + sevItems.length + ')</div>'
+        + itemsHtml
+        + '</div>';
+    }).join('');
+  }
+
+  function renderReport(main, contract, analysis, riskItems) {
+    var level = analysis.risk_level || 'medium';
+    var score = analysis.overall_risk_score;
+    var uploader = contract.profiles ? (contract.profiles.full_name || contract.profiles.email) : 'Unknown';
+
+    var rawJson = analysis.raw_json || {};
+    var missingClauses = rawJson.missing_clauses || [];
+
+    var missingHtml = missingClauses.length
+      ? '<div class="card no-print" style="margin-top:0">'
+        + '<div class="card-header"><span class="card-title">Missing Clauses (' + missingClauses.length + ')</span></div>'
+        + '<div class="card-body">'
+        + '<ul class="missing-list">' + missingClauses.map(function(m){ return '<li>' + esc(m) + '</li>'; }).join('') + '</ul>'
+        + '</div></div>'
+      : '';
+
+    main.innerHTML =
+      '<div class="print-only" style="margin-bottom:1.5rem"><strong style="font-size:1.3rem">Loop &amp; Convert — Analysis Report</strong><br>'
+      + '<span style="font-size:.85rem;color:#666">Generated ' + new Date().toLocaleDateString('en-GB') + '</span></div>'
+
+      + '<a href="javascript:history.back()" class="back-link no-print">← Back to Contracts</a>'
+
+      // Header card
+      + '<div class="card">'
+      + '<div class="report-header">'
+      + '<div class="risk-score-ring ' + riskScoreClass(level) + '">'
+      + '<span class="num">' + (score != null ? score : '—') + '</span>'
+      + '<span class="denom">/100</span>'
+      + '</div>'
+      + '<div class="report-meta" style="flex:1;min-width:0">'
+      + '<h2>' + esc(contract.file_name) + '</h2>'
+      + '<div class="report-meta-sub">'
+      + (contract.contract_type ? esc(contract.contract_type) + ' · ' : '')
+      + fmtDate(contract.created_at)
+      + ' · Uploaded by ' + esc(uploader)
+      + '</div>'
+      + '<div class="report-level ' + level + '">' + (RISK_LABELS[level] || level) + '</div>'
+      + '<button class="btn btn-secondary btn-sm no-print" onclick="window.print()" style="margin-top:.5rem">Export PDF</button>'
+      + '</div>'
+      + '</div></div>'
+
+      // Executive summary
+      + (analysis.executive_summary
+        ? '<div class="card"><div class="card-header"><span class="card-title">Executive Summary</span></div>'
+          + '<div class="card-body"><p class="exec-summary">' + esc(analysis.executive_summary) + '</p></div></div>'
+        : '')
+
+      // Risk items
+      + (riskItems.length
+        ? '<div class="card">'
+          + '<div class="card-header"><span class="card-title">Risk Items (' + riskItems.length + ')</span></div>'
+          + '<div class="card-body">' + renderSeverityGroups(riskItems) + '</div></div>'
+        : '<div class="card"><div class="card-body"><div class="state-empty" style="padding:2.5rem 0">'
+          + '<h3>No risk items found</h3><p>The analysis did not identify specific risk items in this contract.</p>'
+          + '</div></div></div>')
+
+      // Missing clauses
+      + missingHtml;
+  }
+
+  // ── Init ─────────────────────────────────────────
+  document.getElementById('sign-out-btn').addEventListener('click', function() { LC_AUTH.signOut(); });
+
+  (async function init() {
+    var session = await LC_AUTH.requireAuth();
+    if (!session) return;
+    var profile = await LC_AUTH.getProfile();
+    if (!profile) return LC_AUTH.signOut();
+    document.getElementById('nav-name').textContent = profile.full_name || profile.email;
+    document.getElementById('nav-firm').textContent = profile.firms ? profile.firms.name : '';
+
+    var main = document.getElementById('report-main');
+    var contractId = new URLSearchParams(window.location.search).get('id');
+
+    if (!contractId) { renderEmpty(main); return; }
+
+    // Fetch contract
+    var cRes = await sb.from('contracts')
+      .select('id, file_name, contract_type, status, created_at, profiles(full_name, email)')
+      .eq('id', contractId)
+      .maybeSingle();
+
+    if (cRes.error || !cRes.data) { renderEmpty(main); return; }
+    var contract = cRes.data;
+
+    if (contract.status === 'failed')  { renderFailed(main, contract); return; }
+    if (contract.status !== 'completed') { renderPending(main, contract); return; }
+
+    // Fetch analysis
+    var aRes = await sb.from('analyses')
+      .select('*')
+      .eq('contract_id', contractId)
+      .maybeSingle();
+
+    if (aRes.error || !aRes.data) { renderPending(main, contract); return; }
+    var analysis = aRes.data;
+
+    // Fetch risk items
+    var rRes = await sb.from('risk_items')
+      .select('*')
+      .eq('analysis_id', analysis.id);
+
+    var riskItems = (rRes.data || []).slice().sort(function(a,b) {
+      return (SEV_ORDER[a.severity] ?? 99) - (SEV_ORDER[b.severity] ?? 99);
+    });
+
+    renderReport(main, contract, analysis, riskItems);
+  })();
+})();
+</script>
+</body>
+</html>

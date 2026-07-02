@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Accept Invitation — Loop &amp; Convert</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="icon" type="image/png" href="images/logo.png" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #0a0a0a;
+      color: #e0e0e0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
+    }
+    .card { width: 100%; max-width: 440px; background: #111; border: 1px solid #1e1e1e; border-radius: 20px; padding: 2.5rem 2rem; }
+    .logo { font-size: 1rem; font-weight: 800; color: #fff; text-decoration: none; letter-spacing: -.02em; display: block; margin-bottom: 2rem; }
+    .logo span { color: #3b82f6; }
+    h1 { font-size: 1.4rem; font-weight: 700; color: #fff; margin-bottom: .35rem; letter-spacing: -.02em; }
+    .sub { font-size: .875rem; color: #666; margin-bottom: 2rem; line-height: 1.5; }
+    .firm-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      background: rgba(59,130,246,.1);
+      border: 1px solid rgba(59,130,246,.2);
+      border-radius: 8px;
+      padding: .5rem .85rem;
+      font-size: .8rem;
+      font-weight: 600;
+      color: #93c5fd;
+      margin-bottom: 1.75rem;
+    }
+    .field { margin-bottom: 1.1rem; }
+    label { display: block; font-size: .75rem; font-weight: 600; color: #666; margin-bottom: .4rem; text-transform: uppercase; letter-spacing: .08em; }
+    input { width: 100%; background: #0a0a0a; border: 1px solid #2a2a2a; border-radius: 10px; padding: .75rem 1rem; font-size: .9rem; color: #fff; font-family: inherit; outline: none; transition: border-color .15s; }
+    input:focus { border-color: #3b82f6; }
+    input::placeholder { color: #333; }
+    .hint { font-size: .75rem; color: #444; margin-top: .35rem; }
+    .btn { width: 100%; padding: .82rem; border-radius: 10px; font-size: .9rem; font-weight: 600; cursor: pointer; border: none; font-family: inherit; transition: opacity .15s; }
+    .btn:disabled { opacity: .45; cursor: not-allowed; }
+    .btn-primary { background: #fff; color: #000; }
+    .btn-primary:hover:not(:disabled) { opacity: .88; }
+    .error-box, .success-box, .loading-box {
+      border-radius: 9px;
+      padding: .75rem 1rem;
+      font-size: .85rem;
+      margin-bottom: 1.1rem;
+      display: none;
+    }
+    .error-box   { background: rgba(239,68,68,.08);  border: 1px solid rgba(239,68,68,.25);  color: #f87171; }
+    .success-box { background: rgba(34,197,94,.08);  border: 1px solid rgba(34,197,94,.25);  color: #4ade80; }
+    .loading-box { background: rgba(59,130,246,.06); border: 1px solid rgba(59,130,246,.2);  color: #93c5fd; }
+    .expired { text-align: center; padding: .5rem 0; }
+    .expired p { color: #666; font-size: .9rem; line-height: 1.6; }
+    .expired a { color: #3b82f6; }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <a href="index.html" class="logo">Loop <span>&amp;</span> Convert</a>
+
+    <div id="loading-state">
+      <div class="loading-box" style="display:block;">Verifying your invitation…</div>
+    </div>
+
+    <div id="expired-state" style="display:none;" class="expired">
+      <h1 style="margin-bottom:.75rem;">Invitation expired</h1>
+      <p>This invitation link is no longer valid.<br>Ask your firm admin to send a new one.</p>
+    </div>
+
+    <div id="form-state" style="display:none;">
+      <h1>You're invited!</h1>
+      <p class="sub">Set up your account to access your firm's contract dashboard.</p>
+
+      <div class="firm-badge" id="firm-badge">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-2 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+        </svg>
+        <span id="firm-name">Loading…</span>
+      </div>
+
+      <div class="error-box"   id="err"></div>
+      <div class="success-box" id="ok"></div>
+
+      <form id="accept-form" novalidate>
+        <div class="field">
+          <label for="full-name">Your full name</label>
+          <input type="text" id="full-name" placeholder="Jane Smith" autocomplete="name" required />
+        </div>
+        <div class="field">
+          <label for="password">Create a password</label>
+          <input type="password" id="password" placeholder="••••••••" autocomplete="new-password" required />
+          <p class="hint">At least 8 characters.</p>
+        </div>
+        <div class="field">
+          <label for="confirm">Confirm password</label>
+          <input type="password" id="confirm" placeholder="••••••••" autocomplete="new-password" required />
+        </div>
+        <button type="submit" class="btn btn-primary" id="submit-btn">Create Account</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    var loadingState = document.getElementById('loading-state');
+    var expiredState = document.getElementById('expired-state');
+    var formState    = document.getElementById('form-state');
+    var errBox       = document.getElementById('err');
+    var okBox        = document.getElementById('ok');
+    var btn          = document.getElementById('submit-btn');
+    var sb           = LC_AUTH.supabase;
+
+    function showForm(firmName) {
+      document.getElementById('firm-name').textContent = firmName;
+      loadingState.style.display = 'none';
+      formState.style.display    = 'block';
+    }
+
+    function showExpired() {
+      loadingState.style.display = 'none';
+      expiredState.style.display = 'block';
+    }
+
+    // Supabase automatically processes the invite hash on page load
+    sb.auth.onAuthStateChange(async function (event, session) {
+      if ((event === 'SIGNED_IN' || event === 'USER_UPDATED') && session) {
+        // Load profile to get firm name
+        var p = await sb
+          .from('profiles')
+          .select('*, firms(name)')
+          .eq('id', session.user.id)
+          .single();
+
+        var firmName = (p.data && p.data.firms && p.data.firms.name) || 'Your Firm';
+        showForm(firmName);
+      }
+    });
+
+    // Fallback: if no hash token, show expired
+    setTimeout(function () {
+      if (loadingState.style.display !== 'none') {
+        if (!window.location.hash.includes('access_token')) showExpired();
+      }
+    }, 3000);
+
+    document.getElementById('accept-form').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      errBox.style.display = 'none';
+      okBox.style.display  = 'none';
+
+      var fullName = document.getElementById('full-name').value.trim();
+      var pw       = document.getElementById('password').value;
+      var pw2      = document.getElementById('confirm').value;
+
+      if (!fullName) {
+        errBox.textContent = 'Please enter your full name.';
+        errBox.style.display = 'block';
+        return;
+      }
+      if (pw.length < 8) {
+        errBox.textContent = 'Password must be at least 8 characters.';
+        errBox.style.display = 'block';
+        return;
+      }
+      if (pw !== pw2) {
+        errBox.textContent = 'Passwords do not match.';
+        errBox.style.display = 'block';
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Creating account…';
+
+      // Set password and user metadata
+      var res = await sb.auth.updateUser({
+        password: pw,
+        data: { full_name: fullName }
+      });
+
+      if (res.error) {
+        btn.disabled = false;
+        btn.textContent = 'Create Account';
+        errBox.textContent = res.error.message;
+        errBox.style.display = 'block';
+        return;
+      }
+
+      // Update profile full_name in our profiles table
+      await LC_AUTH.updateProfile({ full_name: fullName });
+
+      okBox.textContent = 'Account created! Taking you to your dashboard…';
+      okBox.style.display = 'block';
+
+      setTimeout(async function () {
+        var profile = await LC_AUTH.getProfile();
+        window.location.href = LC_AUTH.dashboardUrl(profile && profile.role);
+      }, 1500);
+    });
+  </script>
+</body>
+</html>

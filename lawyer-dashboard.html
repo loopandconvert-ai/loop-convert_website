@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard — Loop &amp; Convert</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="icon" type="image/png" href="images/logo.png" />
+  <link rel="stylesheet" href="css/dashboard.css" />
+</head>
+<body data-page="auth-required">
+
+<!-- ── Nav ──────────────────────────────────────── -->
+<nav class="dash-nav">
+  <div class="dash-nav-inner">
+    <a href="index.html" class="nav-logo">Loop <span>&</span> Convert</a>
+    <div class="nav-links">
+      <a href="lawyer-dashboard.html" class="nav-link active">Contracts</a>
+    </div>
+    <div class="nav-right">
+      <div>
+        <div class="nav-user-name" id="nav-name"></div>
+        <div class="nav-user-firm" id="nav-firm"></div>
+      </div>
+      <span class="role-pill lawyer">Lawyer</span>
+      <button class="btn-sign-out" id="sign-out-btn">Sign out</button>
+    </div>
+  </div>
+</nav>
+
+<!-- ── Main ─────────────────────────────────────── -->
+<main class="dash-main">
+
+  <!-- Stats -->
+  <div class="stats-grid" id="stats-grid">
+    <div class="stat-card"><div class="stat-label">Total Contracts</div><div class="stat-value" id="stat-total">—</div></div>
+    <div class="stat-card"><div class="stat-label">Analyses Complete</div><div class="stat-value low" id="stat-done">—</div></div>
+    <div class="stat-card"><div class="stat-label">Avg Risk Score</div><div class="stat-value" id="stat-avg">—</div></div>
+    <div class="stat-card"><div class="stat-label">Processing</div><div class="stat-value accent" id="stat-proc">—</div></div>
+  </div>
+
+  <!-- Upload card -->
+  <div class="card" id="upload-card">
+    <div class="card-header">
+      <span class="card-title">Analyze a Contract</span>
+    </div>
+    <div class="card-body">
+      <div id="global-alert" class="alert"></div>
+      <div class="upload-zone" id="upload-zone">
+        <input type="file" id="file-input" accept=".pdf,application/pdf" />
+        <div class="upload-zone-icon">📄</div>
+        <h3>Drop a PDF here, or click to select</h3>
+        <p>Maximum 50 MB · PDF files only</p>
+      </div>
+      <div class="upload-file-info" id="file-info" style="display:none">
+        <span style="font-size:1.1rem">📎</span>
+        <span class="upload-file-name" id="file-name-display"></span>
+        <span class="upload-file-size" id="file-size-display"></span>
+        <button class="btn btn-ghost btn-sm" id="file-clear-btn" style="padding:.25rem .5rem">✕</button>
+      </div>
+      <div class="upload-controls" id="upload-controls" style="display:none">
+        <div class="form-group">
+          <label class="form-label">Contract Type (optional)</label>
+          <select class="form-select" id="contract-type">
+            <option value="">Select type…</option>
+            <option value="NDA">Non-Disclosure Agreement (NDA)</option>
+            <option value="Service Agreement">Service Agreement</option>
+            <option value="Employment Contract">Employment Contract</option>
+            <option value="Lease Agreement">Lease Agreement</option>
+            <option value="Partnership Agreement">Partnership Agreement</option>
+            <option value="M&A Document">M&amp;A Document</option>
+            <option value="Consulting Agreement">Consulting Agreement</option>
+            <option value="License Agreement">License Agreement</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" id="upload-btn" style="flex-shrink:0;margin-bottom:0;height:42px;align-self:flex-end">
+          <span id="upload-btn-text">Upload &amp; Analyze</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contracts table card -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title" id="contracts-title">Contracts</span>
+      <div class="filters-row">
+        <input type="search" class="search-box" id="search-input" placeholder="Search by file name…" />
+        <select class="filter-sel" id="filter-status">
+          <option value="">All statuses</option>
+          <option value="uploaded">Uploaded</option>
+          <option value="processing">Processing</option>
+          <option value="completed">Completed</option>
+          <option value="failed">Failed</option>
+        </select>
+        <select class="filter-sel" id="filter-risk">
+          <option value="">All risk levels</option>
+          <option value="low">Low</option>
+          <option value="medium">Medium</option>
+          <option value="high">High</option>
+          <option value="critical">Critical</option>
+        </select>
+      </div>
+    </div>
+    <div id="contracts-body">
+      <div class="state-loading"><div class="spinner"></div> Loading contracts…</div>
+    </div>
+  </div>
+
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/config.js"></script>
+<script src="js/auth.js"></script>
+<script>
+(function () {
+  var sb = window.LC_AUTH.supabase;
+  var profile = null;
+  var allContracts = [];
+  var pollingTimer = null;
+  var selectedFile = null;
+
+  // ── Utils ────────────────────────────────────────
+  function fmtDate(iso) {
+    return new Date(iso).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
+  }
+  function fmtSize(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / 1048576).toFixed(1) + ' MB';
+  }
+  function initials(name) {
+    if (!name) return '?';
+    return name.split(' ').map(function(w){return w[0];}).join('').toUpperCase().slice(0,2);
+  }
+  function showAlert(msg, type) {
+    var el = document.getElementById('global-alert');
+    el.className = 'alert alert-' + (type||'error') + ' show';
+    el.textContent = msg;
+  }
+  function hideAlert() {
+    document.getElementById('global-alert').className = 'alert';
+  }
+
+  // ── Status badge ─────────────────────────────────
+  function statusBadge(status) {
+    var labels = { uploaded:'Uploaded', processing:'Processing', completed:'Completed', failed:'Failed' };
+    return '<span class="badge badge-' + status + '">' + (labels[status] || status) + '</span>';
+  }
+  function riskBadge(level) {
+    if (!level) return '<span style="color:var(--text-4);font-size:.8rem">—</span>';
+    var labels = { low:'Low', medium:'Medium', high:'High', critical:'Critical' };
+    return '<span class="badge badge-' + level + '">' + (labels[level] || level) + '</span>';
+  }
+  function riskScoreDisplay(score, level) {
+    if (score == null) return '<span style="color:var(--text-4);font-size:.8rem">—</span>';
+    var colors = { low:'var(--low)', medium:'var(--medium)', high:'var(--high)', critical:'var(--critical)' };
+    var c = colors[level] || 'var(--text-2)';
+    return '<span style="font-weight:700;color:' + c + '">' + score + '</span>';
+  }
+
+  // ── Stats ────────────────────────────────────────
+  function computeStats(contracts) {
+    var total = contracts.length;
+    var done  = contracts.filter(function(c){return c.status==='completed';}).length;
+    var proc  = contracts.filter(function(c){return c.status==='processing';}).length;
+    var scores = contracts
+      .filter(function(c){ return c.analyses && c.analyses.length > 0 && c.analyses[0].overall_risk_score != null; })
+      .map(function(c){ return c.analyses[0].overall_risk_score; });
+    var avg = scores.length ? Math.round(scores.reduce(function(a,b){return a+b;},0)/scores.length) : null;
+
+    document.getElementById('stat-total').textContent = total;
+    document.getElementById('stat-done').textContent  = done;
+    document.getElementById('stat-proc').textContent  = proc;
+    if (avg != null) {
+      var avgEl = document.getElementById('stat-avg');
+      avgEl.textContent = avg;
+      avgEl.className = 'stat-value ' + (avg>=75?'critical':avg>=50?'high':avg>=25?'medium':'low');
+    } else {
+      document.getElementById('stat-avg').textContent = '—';
+    }
+  }
+
+  // ── Render table ─────────────────────────────────
+  function renderTable(contracts) {
+    var body = document.getElementById('contracts-body');
+    document.getElementById('contracts-title').textContent = 'Contracts (' + contracts.length + ')';
+
+    if (contracts.length === 0) {
+      body.innerHTML = '<div class="state-empty">'
+        + '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>'
+        + '<h3>No contracts yet</h3><p>Upload your first PDF contract above to get started.</p></div>';
+      return;
+    }
+
+    var rows = contracts.map(function(c) {
+      var analysis = c.analyses && c.analyses[0];
+      var score = analysis ? analysis.overall_risk_score : null;
+      var level = analysis ? analysis.risk_level : null;
+      var viewBtn = c.status === 'completed'
+        ? '<a href="analysis-report.html?id=' + c.id + '" class="btn btn-secondary btn-sm" onclick="event.stopPropagation()">View Report</a>'
+        : '<span style="font-size:.75rem;color:var(--text-4)">—</span>';
+      var typeLabel = c.contract_type || '<span style="color:var(--text-4)">—</span>';
+
+      return '<tr class="contract-row" data-status="' + c.status + '" data-risk="' + (level||'') + '" data-id="' + c.id + '">'
+        + '<td><div class="td-name" title="' + c.file_name + '">' + c.file_name + '</div></td>'
+        + '<td class="td-muted">' + typeLabel + '</td>'
+        + '<td>' + statusBadge(c.status) + '</td>'
+        + '<td>' + riskScoreDisplay(score, level) + '</td>'
+        + '<td>' + riskBadge(level) + '</td>'
+        + '<td class="td-muted">' + fmtDate(c.created_at) + '</td>'
+        + '<td class="td-actions">' + viewBtn + '</td>'
+        + '</tr>';
+    }).join('');
+
+    body.innerHTML = '<div class="table-wrap"><table>'
+      + '<thead><tr>'
+      + '<th>File Name</th><th>Type</th><th>Status</th><th>Score</th><th>Risk Level</th><th>Date</th><th></th>'
+      + '</tr></thead><tbody>' + rows + '</tbody></table></div>';
+
+    // Row click → go to report (if completed)
+    body.querySelectorAll('.contract-row').forEach(function(row) {
+      row.addEventListener('click', function() {
+        if (this.dataset.status === 'completed') {
+          window.location.href = 'analysis-report.html?id=' + this.dataset.id;
+        }
+      });
+    });
+  }
+
+  // ── Filters ──────────────────────────────────────
+  function applyFilters() {
+    var q      = document.getElementById('search-input').value.toLowerCase();
+    var status = document.getElementById('filter-status').value;
+    var risk   = document.getElementById('filter-risk').value;
+
+    var filtered = allContracts.filter(function(c) {
+      var nameMatch   = !q || c.file_name.toLowerCase().includes(q);
+      var statMatch   = !status || c.status === status;
+      var riskLevel   = c.analyses && c.analyses[0] ? c.analyses[0].risk_level : '';
+      var riskMatch   = !risk || riskLevel === risk;
+      return nameMatch && statMatch && riskMatch;
+    });
+
+    renderTable(filtered);
+  }
+
+  // ── Load contracts ───────────────────────────────
+  async function loadContracts() {
+    var res = await sb.from('contracts')
+      .select('id, file_name, contract_type, status, created_at, analyses(overall_risk_score, risk_level)')
+      .eq('firm_id', profile.firm_id)
+      .order('created_at', { ascending: false });
+
+    if (res.error) {
+      document.getElementById('contracts-body').innerHTML =
+        '<div class="state-empty"><h3>Could not load contracts</h3><p>' + res.error.message + '</p></div>';
+      return;
+    }
+
+    allContracts = res.data || [];
+    computeStats(allContracts);
+    applyFilters();
+
+    // Start polling if any contracts are processing
+    var processingIds = allContracts.filter(function(c){return c.status==='processing';}).map(function(c){return c.id;});
+    if (processingIds.length > 0) startPolling(processingIds);
+  }
+
+  // ── Polling ──────────────────────────────────────
+  function startPolling(ids) {
+    if (pollingTimer) return;
+    pollingTimer = setInterval(async function() {
+      var res = await sb.from('contracts')
+        .select('id, status, analyses(overall_risk_score, risk_level)')
+        .in('id', ids);
+
+      if (!res.data) return;
+
+      var stillProcessing = false;
+      res.data.forEach(function(updated) {
+        var idx = allContracts.findIndex(function(c){return c.id === updated.id;});
+        if (idx >= 0) {
+          allContracts[idx].status  = updated.status;
+          allContracts[idx].analyses = updated.analyses;
+        }
+        if (updated.status === 'processing') stillProcessing = true;
+      });
+
+      computeStats(allContracts);
+      applyFilters();
+
+      if (!stillProcessing) {
+        clearInterval(pollingTimer);
+        pollingTimer = null;
+      }
+    }, 5000);
+  }
+
+  // ── Upload ───────────────────────────────────────
+  var uploadZone = document.getElementById('upload-zone');
+  var fileInput  = document.getElementById('file-input');
+
+  uploadZone.addEventListener('click', function() { fileInput.click(); });
+  fileInput.addEventListener('change', function() {
+    if (this.files[0]) setFile(this.files[0]);
+  });
+
+  uploadZone.addEventListener('dragover', function(e) {
+    e.preventDefault(); this.classList.add('drag-over');
+  });
+  uploadZone.addEventListener('dragleave', function() {
+    this.classList.remove('drag-over');
+  });
+  uploadZone.addEventListener('drop', function(e) {
+    e.preventDefault(); this.classList.remove('drag-over');
+    if (e.dataTransfer.files[0]) setFile(e.dataTransfer.files[0]);
+  });
+
+  function setFile(f) {
+    if (f.type !== 'application/pdf') { showAlert('Please upload a PDF file.', 'error'); return; }
+    if (f.size > 50 * 1024 * 1024)   { showAlert('File must be under 50 MB.', 'error'); return; }
+    hideAlert();
+    selectedFile = f;
+    document.getElementById('file-name-display').textContent = f.name;
+    document.getElementById('file-size-display').textContent = fmtSize(f.size);
+    document.getElementById('file-info').style.display    = 'flex';
+    document.getElementById('upload-controls').style.display = 'flex';
+    uploadZone.style.display = 'none';
+  }
+
+  document.getElementById('file-clear-btn').addEventListener('click', function() {
+    selectedFile = null;
+    fileInput.value = '';
+    document.getElementById('file-info').style.display     = 'none';
+    document.getElementById('upload-controls').style.display = 'none';
+    uploadZone.style.display = 'block';
+    hideAlert();
+  });
+
+  document.getElementById('upload-btn').addEventListener('click', async function() {
+    if (!selectedFile) return;
+    var btn  = this;
+    var text = document.getElementById('upload-btn-text');
+    btn.disabled = true;
+    text.textContent = 'Uploading…';
+    hideAlert();
+
+    try {
+      var contractId = crypto.randomUUID();
+      var ext        = selectedFile.name.split('.').pop();
+      var safeName   = selectedFile.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+      var path       = profile.firm_id + '/' + contractId + '/' + safeName;
+
+      // 1. Upload to storage
+      var upRes = await sb.storage.from('contracts').upload(path, selectedFile, { upsert: false });
+      if (upRes.error) throw upRes.error;
+
+      // 2. Insert contract row
+      var ctype = document.getElementById('contract-type').value || null;
+      var insRes = await sb.from('contracts').insert({
+        id: contractId,
+        firm_id: profile.firm_id,
+        uploaded_by: profile.id,
+        file_name: selectedFile.name,
+        storage_path: path,
+        contract_type: ctype,
+        status: 'uploaded'
+      }).select('id, file_name, contract_type, status, created_at, analyses(overall_risk_score, risk_level)').single();
+
+      if (insRes.error) throw insRes.error;
+
+      await LC_AUTH.logAudit('contract_uploaded', 'contracts', contractId, null, { file_name: selectedFile.name });
+
+      // Prepend to list and refresh
+      allContracts.unshift(insRes.data);
+      computeStats(allContracts);
+      applyFilters();
+
+      showAlert('Contract uploaded. Analysis will begin shortly.', 'success');
+
+      // Reset upload area
+      document.getElementById('file-clear-btn').click();
+      document.getElementById('contract-type').value = '';
+
+      // Phase 4: trigger edge function here
+      // triggerAnalysis(contractId);
+
+    } catch (err) {
+      showAlert('Upload failed: ' + (err.message || 'Unknown error'), 'error');
+    }
+
+    btn.disabled = false;
+    text.textContent = 'Upload & Analyze';
+  });
+
+  // ── Filters wiring ───────────────────────────────
+  document.getElementById('search-input').addEventListener('input', applyFilters);
+  document.getElementById('filter-status').addEventListener('change', applyFilters);
+  document.getElementById('filter-risk').addEventListener('change', applyFilters);
+
+  // ── Init ─────────────────────────────────────────
+  document.getElementById('sign-out-btn').addEventListener('click', function() { LC_AUTH.signOut(); });
+
+  (async function init() {
+    var session = await LC_AUTH.requireAuth();
+    if (!session) return;
+    profile = await LC_AUTH.getProfile();
+    if (!profile) return LC_AUTH.signOut();
+    if (profile.status === 'disabled') {
+      showAlert('Your account has been disabled. Contact your firm admin.', 'error');
+      setTimeout(LC_AUTH.signOut, 2500);
+      return;
+    }
+    if (profile.role !== 'lawyer') {
+      window.location.href = LC_AUTH.dashboardUrl(profile.role);
+      return;
+    }
+    document.getElementById('nav-name').textContent = profile.full_name || profile.email;
+    document.getElementById('nav-firm').textContent = profile.firms ? profile.firms.name : '';
+    await loadContracts();
+  })();
+})();
+</script>
+</body>
+</html>

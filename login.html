@@ -24,97 +24,97 @@
 
     .card {
       width: 100%;
-      max-width: 400px;
+      max-width: 420px;
       background: #111;
       border: 1px solid #1e1e1e;
-      border-radius: 18px;
+      border-radius: 20px;
       padding: 2.5rem 2rem;
     }
 
     .logo {
-      font-size: 1.05rem;
+      font-size: 1rem;
       font-weight: 800;
       color: #fff;
       text-decoration: none;
-      display: block;
-      margin-bottom: 2rem;
       letter-spacing: -.02em;
-    }
-    .logo span { color: #60a5fa; }
-
-    h1 {
-      font-size: 1.45rem;
-      font-weight: 700;
-      color: #fff;
-      margin-bottom: .3rem;
-    }
-    .sub {
-      font-size: .875rem;
-      color: #555;
+      display: block;
       margin-bottom: 2rem;
     }
+    .logo span { color: #3b82f6; }
 
-    .field { margin-bottom: 1rem; }
-    .field label {
+    h1 { font-size: 1.5rem; font-weight: 700; color: #fff; margin-bottom: .35rem; letter-spacing: -.02em; }
+    .sub { font-size: .875rem; color: #666; margin-bottom: 2rem; }
+
+    .field { margin-bottom: 1.1rem; }
+
+    label {
       display: block;
-      font-size: .78rem;
-      font-weight: 500;
-      color: #888;
+      font-size: .75rem;
+      font-weight: 600;
+      color: #666;
       margin-bottom: .4rem;
+      text-transform: uppercase;
+      letter-spacing: .08em;
     }
-    .field input {
+
+    input[type="email"],
+    input[type="password"] {
       width: 100%;
-      background: #0e0e0e;
-      border: 1px solid #1e1e1e;
-      border-radius: 9px;
-      padding: .7rem 1rem;
-      color: #fff;
+      background: #0a0a0a;
+      border: 1px solid #2a2a2a;
+      border-radius: 10px;
+      padding: .75rem 1rem;
       font-size: .9rem;
+      color: #fff;
       font-family: inherit;
       outline: none;
       transition: border-color .15s;
     }
-    .field input:focus { border-color: #3a3a3a; }
+    input:focus { border-color: #3b82f6; }
+    input::placeholder { color: #333; }
 
-    .err {
-      font-size: .82rem;
-      color: #f87171;
-      background: rgba(248,113,113,.06);
-      border: 1px solid rgba(248,113,113,.12);
-      border-radius: 8px;
-      padding: .65rem .9rem;
-      margin-bottom: 1rem;
-      display: none;
-    }
-
-    .btn-login {
+    .btn {
       width: 100%;
-      padding: .75rem;
+      padding: .82rem;
+      border-radius: 10px;
       font-size: .9rem;
-      font-weight: 700;
-      background: #fff;
-      color: #000;
-      border: none;
-      border-radius: 9px;
+      font-weight: 600;
       cursor: pointer;
+      border: none;
       font-family: inherit;
       margin-top: .25rem;
       transition: opacity .15s;
     }
-    .btn-login:hover { opacity: .88; }
-    .btn-login:disabled { opacity: .4; cursor: not-allowed; }
+    .btn:disabled { opacity: .45; cursor: not-allowed; }
+    .btn-primary { background: #fff; color: #000; }
+    .btn-primary:hover:not(:disabled) { opacity: .88; }
 
     .forgot {
+      text-align: right;
+      margin-top: .5rem;
+      margin-bottom: 1.5rem;
+    }
+    .forgot a { font-size: .8rem; color: #555; text-decoration: none; }
+    .forgot a:hover { color: #888; }
+
+    .error-box, .info-box {
+      border-radius: 9px;
+      padding: .75rem 1rem;
+      font-size: .85rem;
+      margin-bottom: 1.1rem;
+      display: none;
+    }
+    .error-box { background: rgba(239,68,68,.08); border: 1px solid rgba(239,68,68,.25); color: #f87171; }
+    .info-box  { background: rgba(59,130,246,.08); border: 1px solid rgba(59,130,246,.25); color: #93c5fd; }
+
+    .footer-links {
+      margin-top: 1.75rem;
       text-align: center;
-      margin-top: 1.1rem;
-      font-size: .82rem;
+      font-size: .8rem;
+      color: #444;
     }
-    .forgot a {
-      color: #555;
-      text-decoration: underline;
-      transition: color .15s;
-    }
-    .forgot a:hover { color: #aaa; }
+    .footer-links a { color: #555; text-decoration: none; }
+    .footer-links a:hover { color: #888; }
   </style>
 </head>
 <body data-page="auth-page">
@@ -123,71 +123,85 @@
     <a href="index.html" class="logo">Loop <span>&amp;</span> Convert</a>
 
     <h1>Welcome back</h1>
-    <p class="sub">Sign in to your account.</p>
+    <p class="sub">Sign in to your firm's account</p>
 
-    <div class="err" id="err"></div>
+    <div class="error-box" id="err"></div>
+    <div class="info-box"  id="info"></div>
 
-    <form id="form" novalidate>
+    <form id="login-form" novalidate>
       <div class="field">
         <label for="email">Email address</label>
-        <input type="email" id="email" placeholder="you@lawfirm.com" autocomplete="email" required />
+        <input type="email" id="email" name="email" placeholder="you@yourfirm.com" autocomplete="email" required />
       </div>
+
       <div class="field">
         <label for="password">Password</label>
-        <input type="password" id="password" placeholder="••••••••" autocomplete="current-password" required />
+        <input type="password" id="password" name="password" placeholder="••••••••" autocomplete="current-password" required />
       </div>
-      <button type="submit" class="btn-login" id="btn">Log In</button>
+
+      <div class="forgot"><a href="forgot-password.html">Forgot password?</a></div>
+
+      <button type="submit" class="btn btn-primary" id="submit-btn">Sign In</button>
     </form>
 
-    <p class="forgot">
-      <a href="forgot-password.html">Forgot your password?</a>
-    </p>
+    <div class="footer-links">
+      Don't have an account? Contact your firm admin.
+    </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="js/config.js"></script>
   <script src="js/auth.js"></script>
   <script>
-  (function () {
-    var form = document.getElementById('form');
-    var err  = document.getElementById('err');
-    var btn  = document.getElementById('btn');
+    var form    = document.getElementById('login-form');
+    var errBox  = document.getElementById('err');
+    var infoBox = document.getElementById('info');
+    var btn     = document.getElementById('submit-btn');
 
-    form.addEventListener('submit', function (e) {
+    function showError(msg) {
+      errBox.textContent = msg;
+      errBox.style.display = 'block';
+      infoBox.style.display = 'none';
+    }
+
+    function showInfo(msg) {
+      infoBox.textContent = msg;
+      infoBox.style.display = 'block';
+      errBox.style.display = 'none';
+    }
+
+    form.addEventListener('submit', async function (e) {
       e.preventDefault();
-      err.style.display = 'none';
+      errBox.style.display = 'none';
 
       var email    = document.getElementById('email').value.trim();
       var password = document.getElementById('password').value;
+      if (!email || !password) return showError('Please enter your email and password.');
 
-      if (!email || !password) {
-        err.textContent = 'Please fill in all fields.';
-        err.style.display = 'block';
-        return;
-      }
-
-      if (!window.LC_AUTH) {
-        err.textContent = 'Auth not configured.';
-        err.style.display = 'block';
-        return;
-      }
-
-      btn.textContent = 'Signing in…';
       btn.disabled = true;
+      btn.textContent = 'Signing in…';
 
-      window.LC_AUTH.signIn(email, password).then(function (res) {
-        if (res.error) {
-          err.textContent = 'Incorrect email or password. Please try again.';
-          err.style.display = 'block';
-          btn.textContent = 'Log In';
-          btn.disabled = false;
-        } else {
-          window.location.href = 'dashboard.html';
-        }
-      });
+      var res = await LC_AUTH.signIn(email, password);
+
+      if (res.error) {
+        btn.disabled = false;
+        btn.textContent = 'Sign In';
+        var msg = res.error.message;
+        if (msg.includes('Invalid login credentials')) msg = 'Incorrect email or password.';
+        if (msg.includes('Email not confirmed'))       msg = 'Please check your email to confirm your account first.';
+        return showError(msg);
+      }
+
+      // Check profile exists (no profile = no invitation)
+      showInfo('Signing in…');
+      var profile = await LC_AUTH.getProfile();
+      if (!profile) {
+        await LC_AUTH.supabase.auth.signOut();
+        return showError('No account found for this email. Ask your firm admin to invite you.');
+      }
+
+      window.location.href = LC_AUTH.dashboardUrl(profile.role);
     });
-  })();
   </script>
-
 </body>
 </html>

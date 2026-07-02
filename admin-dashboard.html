@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Firm Admin — Loop &amp; Convert</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="icon" type="image/png" href="images/logo.png" />
+  <link rel="stylesheet" href="css/dashboard.css" />
+</head>
+<body data-page="auth-required">
+
+<!-- ── Nav ──────────────────────────────────────── -->
+<nav class="dash-nav">
+  <div class="dash-nav-inner">
+    <a href="index.html" class="nav-logo">Loop <span>&</span> Convert</a>
+    <div class="nav-links">
+      <a href="admin-dashboard.html" class="nav-link active">Overview</a>
+    </div>
+    <div class="nav-right">
+      <div>
+        <div class="nav-user-name" id="nav-name"></div>
+        <div class="nav-user-firm" id="nav-firm"></div>
+      </div>
+      <span class="role-pill firm-admin">Firm Admin</span>
+      <button class="btn-sign-out" id="sign-out-btn">Sign out</button>
+    </div>
+  </div>
+</nav>
+
+<!-- ── Invite modal ──────────────────────────────── -->
+<div class="modal-overlay hidden" id="invite-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Invite Team Member</span>
+      <button class="modal-close" id="modal-close">✕</button>
+    </div>
+    <div id="invite-alert" class="alert"></div>
+    <div class="form-group">
+      <label class="form-label">Email Address</label>
+      <input class="form-input" type="email" id="invite-email" placeholder="jane@smithlaw.com" autocomplete="off" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Role</label>
+      <select class="form-select" id="invite-role">
+        <option value="lawyer">Lawyer</option>
+        <option value="firm_admin">Firm Admin</option>
+      </select>
+    </div>
+    <button class="btn btn-primary" id="invite-submit-btn" style="width:100%;justify-content:center;margin-top:.5rem">
+      <span id="invite-btn-text">Send Invitation</span>
+    </button>
+  </div>
+</div>
+
+<!-- ── Main ─────────────────────────────────────── -->
+<main class="dash-main">
+
+  <!-- Stats -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-label">Team Members</div>
+      <div class="stat-value" id="stat-members">—</div>
+      <div class="stat-sub" id="stat-seats"></div>
+      <div class="seat-bar-track" id="seat-bar-wrap" style="display:none">
+        <div class="seat-bar-fill" id="seat-bar-fill" style="width:0%"></div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Contracts Analyzed</div>
+      <div class="stat-value" id="stat-contracts">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Avg Risk Score</div>
+      <div class="stat-value" id="stat-avg">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">This Month</div>
+      <div class="stat-value accent" id="stat-month">—</div>
+      <div class="stat-sub">contracts uploaded</div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="contracts">Contracts</button>
+    <button class="tab-btn" data-tab="team">Team</button>
+    <button class="tab-btn" data-tab="activity">Activity</button>
+  </div>
+
+  <!-- ── Contracts tab ──────────────────────────── -->
+  <div class="tab-panel active" id="tab-contracts">
+    <!-- Upload card -->
+    <div class="card" id="upload-card">
+      <div class="card-header">
+        <span class="card-title">Analyze a Contract</span>
+      </div>
+      <div class="card-body">
+        <div id="upload-alert" class="alert"></div>
+        <div class="upload-zone" id="upload-zone">
+          <input type="file" id="file-input" accept=".pdf,application/pdf" />
+          <div class="upload-zone-icon">📄</div>
+          <h3>Drop a PDF here, or click to select</h3>
+          <p>Maximum 50 MB · PDF files only</p>
+        </div>
+        <div class="upload-file-info" id="file-info" style="display:none">
+          <span style="font-size:1.1rem">📎</span>
+          <span class="upload-file-name" id="file-name-display"></span>
+          <span class="upload-file-size" id="file-size-display"></span>
+          <button class="btn btn-ghost btn-sm" id="file-clear-btn" style="padding:.25rem .5rem">✕</button>
+        </div>
+        <div class="upload-controls" id="upload-controls" style="display:none">
+          <div class="form-group">
+            <label class="form-label">Contract Type (optional)</label>
+            <select class="form-select" id="contract-type">
+              <option value="">Select type…</option>
+              <option value="NDA">Non-Disclosure Agreement (NDA)</option>
+              <option value="Service Agreement">Service Agreement</option>
+              <option value="Employment Contract">Employment Contract</option>
+              <option value="Lease Agreement">Lease Agreement</option>
+              <option value="Partnership Agreement">Partnership Agreement</option>
+              <option value="M&A Document">M&amp;A Document</option>
+              <option value="Consulting Agreement">Consulting Agreement</option>
+              <option value="License Agreement">License Agreement</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" id="upload-btn" style="flex-shrink:0;margin-bottom:0;height:42px;align-self:flex-end">
+            <span id="upload-btn-text">Upload &amp; Analyze</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contracts list card -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title" id="contracts-title">Contracts</span>
+        <div class="filters-row">
+          <input type="search" class="search-box" id="search-input" placeholder="Search by file name…" />
+          <select class="filter-sel" id="filter-status">
+            <option value="">All statuses</option>
+            <option value="uploaded">Uploaded</option>
+            <option value="processing">Processing</option>
+            <option value="completed">Completed</option>
+            <option value="failed">Failed</option>
+          </select>
+          <select class="filter-sel" id="filter-risk">
+            <option value="">All risk levels</option>
+            <option value="low">Low</option>
+            <option value="medium">Medium</option>
+            <option value="high">High</option>
+            <option value="critical">Critical</option>
+          </select>
+        </div>
+      </div>
+      <div id="contracts-body">
+        <div class="state-loading"><div class="spinner"></div> Loading contracts…</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Team tab ───────────────────────────────── -->
+  <div class="tab-panel" id="tab-team">
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Team Members</span>
+        <button class="btn btn-primary btn-sm" id="invite-btn">+ Invite Member</button>
+      </div>
+      <div id="team-body">
+        <div class="state-loading"><div class="spinner"></div> Loading team…</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Activity tab ───────────────────────────── -->
+  <div class="tab-panel" id="tab-activity">
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Recent Activity</span>
+      </div>
+      <div id="activity-body">
+        <div class="state-loading"><div class="spinner"></div> Loading activity…</div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/config.js"></script>
+<script src="js/auth.js"></script>
+<script>
+(function () {
+  var sb      = window.LC_AUTH.supabase;
+  var profile = null;
+  var allContracts = [];
+  var allMembers   = [];
+
+  // ── Utils ────────────────────────────────────────
+  function fmtDate(iso) {
+    return new Date(iso).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
+  }
+  function fmtDateTime(iso) {
+    return new Date(iso).toLocaleString('en-GB', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' });
+  }
+  function esc(s) { var d=document.createElement('div'); d.textContent=s||''; return d.innerHTML; }
+  function initials(name) {
+    if (!name) return '?';
+    return name.trim().split(/\s+/).map(function(w){return w[0];}).join('').toUpperCase().slice(0,2);
+  }
+  function statusBadge(s) {
+    var l={uploaded:'Uploaded',processing:'Processing',completed:'Completed',failed:'Failed'};
+    return '<span class="badge badge-'+s+'">'+(l[s]||s)+'</span>';
+  }
+  function riskBadge(l) {
+    if(!l) return '<span style="color:var(--text-4)">—</span>';
+    return '<span class="badge badge-'+l+'">'+(l.charAt(0).toUpperCase()+l.slice(1))+'</span>';
+  }
+
+  // ── Stats ────────────────────────────────────────
+  function computeStats(contracts, members, firm) {
+    var total = contracts.length;
+    var done  = contracts.filter(function(c){return c.status==='completed';}).length;
+    var scores = contracts
+      .filter(function(c){return c.analyses&&c.analyses.length&&c.analyses[0].overall_risk_score!=null;})
+      .map(function(c){return c.analyses[0].overall_risk_score;});
+    var avg = scores.length ? Math.round(scores.reduce(function(a,b){return a+b;},0)/scores.length) : null;
+
+    var now = new Date();
+    var monthContracts = contracts.filter(function(c) {
+      var d = new Date(c.created_at);
+      return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+    }).length;
+
+    var active = members.filter(function(m){return m.status==='active';}).length;
+    var seats  = firm ? firm.seat_limit : 0;
+    var pct    = seats ? Math.min(100, Math.round(active / seats * 100)) : 0;
+
+    document.getElementById('stat-members').textContent   = active;
+    document.getElementById('stat-contracts').textContent = done;
+    document.getElementById('stat-month').textContent     = monthContracts;
+
+    if (avg != null) {
+      var el = document.getElementById('stat-avg');
+      el.textContent = avg;
+      el.className = 'stat-value ' + (avg>=75?'critical':avg>=50?'high':avg>=25?'medium':'low');
+    } else {
+      document.getElementById('stat-avg').textContent = '—';
+    }
+
+    if (seats) {
+      document.getElementById('stat-seats').textContent = active + ' / ' + seats + ' seats used';
+      var bar = document.getElementById('seat-bar-fill');
+      bar.style.width = pct + '%';
+      bar.className = 'seat-bar-fill' + (pct >= 100 ? ' full' : pct >= 80 ? ' warn' : '');
+      document.getElementById('seat-bar-wrap').style.display = 'block';
+    }
+  }
+
+  // ── Contracts tab ────────────────────────────────
+  function renderContracts(contracts) {
+    var body = document.getElementById('contracts-body');
+    document.getElementById('contracts-title').textContent = 'Contracts (' + contracts.length + ')';
+
+    if (!contracts.length) {
+      body.innerHTML = '<div class="state-empty"><h3>No contracts yet</h3><p>Team members can upload contracts from their dashboards.</p></div>';
+      return;
+    }
+    var rows = contracts.map(function(c) {
+      var a = c.analyses && c.analyses[0];
+      var uploader = c.profiles ? (c.profiles.full_name || c.profiles.email || '—') : '—';
+      return '<tr>'
+        +'<td><div class="td-name" title="'+esc(c.file_name)+'">'+esc(c.file_name)+'</div></td>'
+        +'<td class="td-muted">'+esc(uploader)+'</td>'
+        +'<td>'+(c.contract_type?esc(c.contract_type):'<span style="color:var(--text-4)">—</span>')+'</td>'
+        +'<td>'+statusBadge(c.status)+'</td>'
+        +'<td>'+riskBadge(a?a.risk_level:null)+'</td>'
+        +'<td class="td-muted">'+fmtDate(c.created_at)+'</td>'
+        +'<td class="td-actions">'+(c.status==='completed'?'<a href="analysis-report.html?id='+c.id+'" class="btn btn-secondary btn-sm">View Report</a>':'<span style="color:var(--text-4);font-size:.78rem">—</span>')+'</td>'
+        +'</tr>';
+    }).join('');
+    body.innerHTML = '<div class="table-wrap"><table>'
+      +'<thead><tr><th>File</th><th>Uploaded by</th><th>Type</th><th>Status</th><th>Risk</th><th>Date</th><th></th></tr></thead>'
+      +'<tbody>'+rows+'</tbody></table></div>';
+  }
+
+  function applyFilters() {
+    var q = document.getElementById('search-input').value.toLowerCase();
+    var s = document.getElementById('filter-status').value;
+    var r = document.getElementById('filter-risk').value;
+    var filtered = allContracts.filter(function(c) {
+      var rl = c.analyses&&c.analyses[0] ? c.analyses[0].risk_level : '';
+      return (!q || c.file_name.toLowerCase().includes(q))
+          && (!s || c.status === s)
+          && (!r || rl === r);
+    });
+    renderContracts(filtered);
+  }
+
+  // ── Team tab ─────────────────────────────────────
+  function renderTeam(members) {
+    var body = document.getElementById('team-body');
+    if (!members.length) {
+      body.innerHTML = '<div class="state-empty"><h3>No team members yet</h3><p>Invite your first lawyer using the button above.</p></div>';
+      return;
+    }
+    var rows = members.map(function(m) {
+      var name   = m.full_name || m.email || 'Unknown';
+      var roleLabel = m.role === 'firm_admin' ? 'Firm Admin' : 'Lawyer';
+      var isYou  = profile && m.id === profile.id;
+      var statusEl = m.status === 'disabled'
+        ? '<span class="badge" style="background:rgba(239,68,68,.1);color:#f87171">Disabled</span>'
+        : '<span class="badge badge-completed">Active</span>';
+
+      var actions = '';
+      if (!isYou) {
+        if (m.status === 'active') {
+          actions = '<button class="btn btn-danger btn-sm" onclick="disableMember(\''+m.id+'\',\''+esc(name)+'\')">Disable</button>';
+        } else {
+          actions = '<button class="btn btn-secondary btn-sm" onclick="enableMember(\''+m.id+'\',\''+esc(name)+'\')">Re-enable</button>';
+        }
+      } else {
+        actions = '<span style="font-size:.75rem;color:var(--text-4)">You</span>';
+      }
+
+      return '<div class="member-row">'
+        +'<div class="member-avatar">'+initials(name)+'</div>'
+        +'<div class="member-info"><div class="member-name">'+esc(name)+(isYou?' <span style="font-size:.7rem;color:var(--text-3)">(you)</span>':'')+'</div>'
+        +'<div class="member-email">'+esc(m.email)+'</div></div>'
+        +'<span class="badge" style="background:rgba(100,116,139,.12);color:var(--text-2)">'+roleLabel+'</span>'
+        +statusEl
+        +'<div class="member-actions">'+actions+'</div>'
+        +'</div>';
+    }).join('');
+    body.innerHTML = rows;
+  }
+
+  window.disableMember = async function(memberId, name) {
+    if (!confirm('Disable access for ' + name + '? They will not be able to log in.')) return;
+    var res = await sb.from('profiles').update({ status: 'disabled' }).eq('id', memberId).eq('firm_id', profile.firm_id);
+    if (res.error) { alert('Error: ' + res.error.message); return; }
+    await LC_AUTH.logAudit('member_disabled', 'profiles', memberId, null, { name: name });
+    var m = allMembers.find(function(x){return x.id===memberId;});
+    if (m) m.status = 'disabled';
+    renderTeam(allMembers);
+  };
+
+  window.enableMember = async function(memberId, name) {
+    var res = await sb.from('profiles').update({ status: 'active' }).eq('id', memberId).eq('firm_id', profile.firm_id);
+    if (res.error) { alert('Error: ' + res.error.message); return; }
+    await LC_AUTH.logAudit('member_enabled', 'profiles', memberId, null, { name: name });
+    var m = allMembers.find(function(x){return x.id===memberId;});
+    if (m) m.status = 'active';
+    renderTeam(allMembers);
+  };
+
+  // ── Activity tab ──────────────────────────────────
+  async function loadActivity() {
+    var res = await sb.from('audit_log')
+      .select('id, action, resource_type, created_at, profiles(full_name, email)')
+      .eq('firm_id', profile.firm_id)
+      .order('created_at', { ascending: false })
+      .limit(50);
+
+    var body = document.getElementById('activity-body');
+    if (res.error || !res.data || !res.data.length) {
+      body.innerHTML = '<div class="state-empty"><h3>No activity yet</h3><p>Actions taken by your team will appear here.</p></div>';
+      return;
+    }
+    var icons = { contract_uploaded:'📄', member_invited:'✉️', member_disabled:'🚫', member_enabled:'✅', contract_analyzed:'🔍' };
+    var rows = res.data.map(function(a) {
+      var actor = a.profiles ? (a.profiles.full_name || a.profiles.email || 'Unknown') : 'System';
+      var icon  = icons[a.action] || '•';
+      var action = a.action.replace(/_/g,' ');
+      return '<div class="activity-row">'
+        +'<div class="activity-icon">'+icon+'</div>'
+        +'<div><span class="activity-action">'+esc(actor)+'</span> '
+        +'<span class="activity-target">'+esc(action)+'</span></div>'
+        +'<span class="activity-time">'+fmtDateTime(a.created_at)+'</span>'
+        +'</div>';
+    }).join('');
+    body.innerHTML = rows;
+  }
+
+  // ── Invite modal ──────────────────────────────────
+  function showInviteAlert(msg, type) {
+    var el = document.getElementById('invite-alert');
+    el.className = 'alert alert-' + type + ' show';
+    el.textContent = msg;
+  }
+  function hideInviteAlert() { document.getElementById('invite-alert').className = 'alert'; }
+
+  document.getElementById('invite-btn').addEventListener('click', function() {
+    document.getElementById('invite-modal').classList.remove('hidden');
+    document.getElementById('invite-email').focus();
+    hideInviteAlert();
+  });
+  document.getElementById('modal-close').addEventListener('click', function() {
+    document.getElementById('invite-modal').classList.add('hidden');
+    document.getElementById('invite-email').value = '';
+    hideInviteAlert();
+  });
+  document.getElementById('invite-modal').addEventListener('click', function(e) {
+    if (e.target === this) document.getElementById('modal-close').click();
+  });
+
+  document.getElementById('invite-submit-btn').addEventListener('click', async function() {
+    var email = document.getElementById('invite-email').value.trim();
+    var role  = document.getElementById('invite-role').value;
+    if (!email) { showInviteAlert('Please enter an email address.', 'error'); return; }
+
+    this.disabled = true;
+    document.getElementById('invite-btn-text').textContent = 'Sending…';
+    hideInviteAlert();
+
+    var res = await LC_AUTH.sendInvite(email, role);
+    if (res && res.error) {
+      showInviteAlert(res.error, 'error');
+    } else {
+      showInviteAlert('Invitation sent to ' + email, 'success');
+      document.getElementById('invite-email').value = '';
+      setTimeout(function() {
+        document.getElementById('modal-close').click();
+        loadTeam();
+      }, 1800);
+    }
+
+    this.disabled = false;
+    document.getElementById('invite-btn-text').textContent = 'Send Invitation';
+  });
+
+  // ── Load data ─────────────────────────────────────
+  async function loadContracts() {
+    var res = await sb.from('contracts')
+      .select('id, file_name, contract_type, status, created_at, profiles(full_name, email), analyses(overall_risk_score, risk_level)')
+      .eq('firm_id', profile.firm_id)
+      .order('created_at', { ascending: false });
+    allContracts = res.data || [];
+    applyFilters();
+  }
+
+  async function loadTeam() {
+    var res = await sb.from('profiles')
+      .select('id, full_name, email, role, status, created_at')
+      .eq('firm_id', profile.firm_id)
+      .order('created_at', { ascending: true });
+    allMembers = res.data || [];
+    renderTeam(allMembers);
+    return allMembers;
+  }
+
+  // ── Tabs ─────────────────────────────────────────
+  var tabsLoaded = { contracts: false, team: false, activity: false };
+
+  document.querySelectorAll('.tab-btn').forEach(function(btn) {
+    btn.addEventListener('click', async function() {
+      document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active'); });
+      document.querySelectorAll('.tab-panel').forEach(function(p){ p.classList.remove('active'); });
+      this.classList.add('active');
+      var id = 'tab-' + this.dataset.tab;
+      document.getElementById(id).classList.add('active');
+
+      if (this.dataset.tab === 'team' && !tabsLoaded.team) {
+        tabsLoaded.team = true;
+        await loadTeam();
+      }
+      if (this.dataset.tab === 'activity' && !tabsLoaded.activity) {
+        tabsLoaded.activity = true;
+        await loadActivity();
+      }
+    });
+  });
+
+  // ── Upload (same as lawyer dashboard) ────────────
+  var selectedFile = null;
+  var uploadZone   = document.getElementById('upload-zone');
+  var fileInput    = document.getElementById('file-input');
+
+  function fmtSize(b) { if(b<1048576) return (b/1024).toFixed(1)+' KB'; return (b/1048576).toFixed(1)+' MB'; }
+  function showUploadAlert(msg, type) { var e=document.getElementById('upload-alert'); e.className='alert alert-'+type+' show'; e.textContent=msg; }
+  function hideUploadAlert() { document.getElementById('upload-alert').className='alert'; }
+
+  uploadZone.addEventListener('click', function() { fileInput.click(); });
+  fileInput.addEventListener('change', function() { if(this.files[0]) setFile(this.files[0]); });
+  uploadZone.addEventListener('dragover', function(e){ e.preventDefault(); this.classList.add('drag-over'); });
+  uploadZone.addEventListener('dragleave', function(){ this.classList.remove('drag-over'); });
+  uploadZone.addEventListener('drop', function(e){ e.preventDefault(); this.classList.remove('drag-over'); if(e.dataTransfer.files[0]) setFile(e.dataTransfer.files[0]); });
+
+  function setFile(f) {
+    if(f.type!=='application/pdf'){ showUploadAlert('Please upload a PDF file.','error'); return; }
+    if(f.size>50*1024*1024){ showUploadAlert('File must be under 50 MB.','error'); return; }
+    hideUploadAlert(); selectedFile=f;
+    document.getElementById('file-name-display').textContent=f.name;
+    document.getElementById('file-size-display').textContent=fmtSize(f.size);
+    document.getElementById('file-info').style.display='flex';
+    document.getElementById('upload-controls').style.display='flex';
+    uploadZone.style.display='none';
+  }
+
+  document.getElementById('file-clear-btn').addEventListener('click', function(){
+    selectedFile=null; fileInput.value='';
+    document.getElementById('file-info').style.display='none';
+    document.getElementById('upload-controls').style.display='none';
+    uploadZone.style.display='block'; hideUploadAlert();
+  });
+
+  document.getElementById('upload-btn').addEventListener('click', async function(){
+    if(!selectedFile) return;
+    var btn=this; btn.disabled=true;
+    document.getElementById('upload-btn-text').textContent='Uploading…'; hideUploadAlert();
+    try {
+      var contractId=crypto.randomUUID();
+      var safeName=selectedFile.name.replace(/[^a-zA-Z0-9._-]/g,'_');
+      var path=profile.firm_id+'/'+contractId+'/'+safeName;
+      var upRes=await sb.storage.from('contracts').upload(path,selectedFile,{upsert:false});
+      if(upRes.error) throw upRes.error;
+      var ctype=document.getElementById('contract-type').value||null;
+      var insRes=await sb.from('contracts').insert({
+        id:contractId, firm_id:profile.firm_id, uploaded_by:profile.id,
+        file_name:selectedFile.name, storage_path:path, contract_type:ctype, status:'uploaded'
+      }).select('id, file_name, contract_type, status, created_at, profiles(full_name, email), analyses(overall_risk_score, risk_level)').single();
+      if(insRes.error) throw insRes.error;
+      await LC_AUTH.logAudit('contract_uploaded','contracts',contractId,null,{file_name:selectedFile.name});
+      allContracts.unshift(insRes.data);
+      computeStats(allContracts, allMembers, profile.firms);
+      applyFilters();
+      showUploadAlert('Contract uploaded. Analysis will begin shortly.','success');
+      document.getElementById('file-clear-btn').click();
+      document.getElementById('contract-type').value='';
+    } catch(err) { showUploadAlert('Upload failed: '+(err.message||'Unknown error'),'error'); }
+    btn.disabled=false; document.getElementById('upload-btn-text').textContent='Upload & Analyze';
+  });
+
+  // Filter wiring
+  document.getElementById('search-input').addEventListener('input', applyFilters);
+  document.getElementById('filter-status').addEventListener('change', applyFilters);
+  document.getElementById('filter-risk').addEventListener('change', applyFilters);
+
+  // ── Init ─────────────────────────────────────────
+  document.getElementById('sign-out-btn').addEventListener('click', function() { LC_AUTH.signOut(); });
+
+  (async function init() {
+    var session = await LC_AUTH.requireAuth();
+    if (!session) return;
+    profile = await LC_AUTH.getProfile();
+    if (!profile) return LC_AUTH.signOut();
+    if (profile.status === 'disabled') { LC_AUTH.signOut(); return; }
+    if (profile.role !== 'firm_admin') {
+      window.location.href = LC_AUTH.dashboardUrl(profile.role);
+      return;
+    }
+    document.getElementById('nav-name').textContent = profile.full_name || profile.email;
+    document.getElementById('nav-firm').textContent = profile.firms ? profile.firms.name : '';
+
+    // Load contracts + team in parallel
+    var [contracts, members] = await Promise.all([
+      sb.from('contracts')
+        .select('id, file_name, contract_type, status, created_at, profiles(full_name, email), analyses(overall_risk_score, risk_level)')
+        .eq('firm_id', profile.firm_id)
+        .order('created_at', { ascending: false })
+        .then(function(r){ return r.data || []; }),
+      sb.from('profiles')
+        .select('id, full_name, email, role, status, created_at')
+        .eq('firm_id', profile.firm_id)
+        .order('created_at', { ascending: true })
+        .then(function(r){ return r.data || []; })
+    ]);
+
+    allContracts = contracts;
+    allMembers   = members;
+    tabsLoaded.contracts = true;
+    tabsLoaded.team      = true;
+
+    computeStats(allContracts, allMembers, profile.firms);
+    renderContracts(allContracts);
+    // Team rendered on tab click (lazy)
+  })();
+})();
+</script>
+</body>
+</html>

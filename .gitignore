@@ -2,3 +2,5 @@ agent/
 dashboard/
 .claude/
 *.env
+.env.local
+.env.*.local

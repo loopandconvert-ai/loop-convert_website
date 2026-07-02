@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Platform Console — Loop &amp; Convert</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="icon" type="image/png" href="images/logo.png" />
+  <link rel="stylesheet" href="css/dashboard.css" />
+</head>
+<body data-page="auth-required">
+
+<!-- ── Nav ──────────────────────────────────────── -->
+<nav class="dash-nav">
+  <div class="dash-nav-inner">
+    <a href="index.html" class="nav-logo">Loop <span>&</span> Convert</a>
+    <div class="nav-links">
+      <a href="superadmin.html" class="nav-link active">Firms</a>
+    </div>
+    <div class="nav-right">
+      <div>
+        <div class="nav-user-name" id="nav-name"></div>
+        <div class="nav-user-firm" style="font-size:.72rem;color:var(--text-3)">Platform Console</div>
+      </div>
+      <span class="role-pill super-admin">Super Admin</span>
+      <button class="btn-sign-out" id="sign-out-btn">Sign out</button>
+    </div>
+  </div>
+</nav>
+
+<!-- ── Create Firm Modal ─────────────────────────── -->
+<div class="modal-overlay hidden" id="create-firm-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Create New Firm</span>
+      <button class="modal-close" id="firm-modal-close">✕</button>
+    </div>
+    <div id="firm-alert" class="alert"></div>
+    <div class="form-group">
+      <label class="form-label">Firm Name</label>
+      <input class="form-input" type="text" id="firm-name-input" placeholder="Smith & Partners LLP" autocomplete="off" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Subscription Tier</label>
+      <select class="form-select" id="firm-tier">
+        <option value="solo">Solo (1–4 lawyers)</option>
+        <option value="small" selected>Small (5–19 lawyers)</option>
+        <option value="mid">Mid (20–99 lawyers)</option>
+        <option value="large">Large (100–499 lawyers)</option>
+        <option value="enterprise">Enterprise (500+ lawyers)</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Seat Limit</label>
+      <input class="form-input" type="number" id="firm-seats" value="10" min="1" max="2000" />
+    </div>
+    <button class="btn btn-primary" id="create-firm-btn" style="width:100%;justify-content:center;margin-top:.5rem">
+      <span id="create-firm-btn-text">Create Firm</span>
+    </button>
+  </div>
+</div>
+
+<!-- ── Invite to Firm Modal ──────────────────────── -->
+<div class="modal-overlay hidden" id="invite-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Invite Firm Admin</span>
+      <button class="modal-close" id="invite-modal-close">✕</button>
+    </div>
+    <div id="invite-alert" class="alert"></div>
+    <div class="form-group">
+      <label class="form-label">Firm</label>
+      <input class="form-input" id="invite-firm-display" readonly style="opacity:.6;cursor:not-allowed" />
+      <input type="hidden" id="invite-firm-id" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Email Address</label>
+      <input class="form-input" type="email" id="invite-email" placeholder="admin@smithlaw.com" autocomplete="off" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Role</label>
+      <select class="form-select" id="invite-role">
+        <option value="firm_admin">Firm Admin</option>
+        <option value="lawyer">Lawyer</option>
+      </select>
+    </div>
+    <button class="btn btn-primary" id="invite-submit-btn" style="width:100%;justify-content:center;margin-top:.5rem">
+      <span id="invite-btn-text">Send Invitation</span>
+    </button>
+  </div>
+</div>
+
+<!-- ── Main ─────────────────────────────────────── -->
+<main class="dash-main">
+
+  <!-- Platform stats -->
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-label">Total Firms</div><div class="stat-value" id="stat-firms">—</div></div>
+    <div class="stat-card"><div class="stat-label">Total Users</div><div class="stat-value" id="stat-users">—</div></div>
+    <div class="stat-card"><div class="stat-label">Contracts Analyzed</div><div class="stat-value" id="stat-contracts">—</div></div>
+    <div class="stat-card"><div class="stat-label">Active Firms</div><div class="stat-value low" id="stat-active">—</div></div>
+  </div>
+
+  <!-- Firms card -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title" id="firms-title">Firms</span>
+      <button class="btn btn-primary btn-sm" id="new-firm-btn">+ New Firm</button>
+    </div>
+    <div id="firms-body">
+      <div class="state-loading"><div class="spinner"></div> Loading firms…</div>
+    </div>
+  </div>
+
+  <!-- Recent activity card -->
+  <div class="card">
+    <div class="card-header"><span class="card-title">Recent Platform Activity</span></div>
+    <div id="activity-body">
+      <div class="state-loading"><div class="spinner"></div> Loading activity…</div>
+    </div>
+  </div>
+
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/config.js"></script>
+<script src="js/auth.js"></script>
+<script>
+(function () {
+  var sb = window.LC_AUTH.supabase;
+  var profile = null;
+  var allFirms = [];
+
+  // ── Utils ────────────────────────────────────────
+  function fmtDate(iso) {
+    return new Date(iso).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
+  }
+  function fmtDateTime(iso) {
+    return new Date(iso).toLocaleString('en-GB', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' });
+  }
+  function esc(s) { var d=document.createElement('div'); d.textContent=s||''; return d.innerHTML; }
+  function tierLabel(t) {
+    var m={solo:'Solo',small:'Small',mid:'Mid-size',large:'Large',enterprise:'Enterprise'};
+    return m[t] || t || '—';
+  }
+
+  // ── Load platform stats ──────────────────────────
+  async function loadStats() {
+    var [firmsRes, usersRes, contractsRes] = await Promise.all([
+      sb.from('firms').select('id, status', { count:'exact', head:false }),
+      sb.from('profiles').select('id', { count:'exact', head:true }),
+      sb.from('analyses').select('id', { count:'exact', head:true })
+    ]);
+
+    var firms     = firmsRes.data || [];
+    var activeFirms = firms.filter(function(f){ return f.status === 'active'; }).length;
+
+    document.getElementById('stat-firms').textContent     = firms.length;
+    document.getElementById('stat-users').textContent     = usersRes.count || 0;
+    document.getElementById('stat-contracts').textContent = contractsRes.count || 0;
+    document.getElementById('stat-active').textContent    = activeFirms;
+  }
+
+  // ── Load firms ───────────────────────────────────
+  async function loadFirms() {
+    var res = await sb.from('firms')
+      .select('id, name, subscription_tier, seat_limit, status, created_at')
+      .order('created_at', { ascending: false });
+
+    if (res.error) {
+      document.getElementById('firms-body').innerHTML =
+        '<div class="state-empty"><h3>Could not load firms</h3><p>' + esc(res.error.message) + '</p></div>';
+      return;
+    }
+
+    allFirms = res.data || [];
+
+    // Load member + contract counts for each firm
+    var [membersRes, contractsRes] = await Promise.all([
+      sb.from('profiles').select('firm_id').in('firm_id', allFirms.map(function(f){return f.id;})),
+      sb.from('contracts').select('firm_id, status').in('firm_id', allFirms.map(function(f){return f.id;}))
+    ]);
+
+    var memberCounts   = {};
+    var contractCounts = {};
+    (membersRes.data || []).forEach(function(p) {
+      memberCounts[p.firm_id] = (memberCounts[p.firm_id] || 0) + 1;
+    });
+    (contractsRes.data || []).forEach(function(c) {
+      if (c.status === 'completed') contractCounts[c.firm_id] = (contractCounts[c.firm_id] || 0) + 1;
+    });
+
+    renderFirms(allFirms, memberCounts, contractCounts);
+    document.getElementById('firms-title').textContent = 'Firms (' + allFirms.length + ')';
+  }
+
+  function renderFirms(firms, memberCounts, contractCounts) {
+    var body = document.getElementById('firms-body');
+    if (!firms.length) {
+      body.innerHTML = '<div class="state-empty"><h3>No firms yet</h3><p>Create your first firm to get started.</p></div>';
+      return;
+    }
+    var rows = firms.map(function(f) {
+      var members   = memberCounts[f.id]   || 0;
+      var contracts = contractCounts[f.id] || 0;
+      var statusBadge = f.status === 'active'
+        ? '<span class="badge badge-completed">Active</span>'
+        : '<span class="badge badge-failed">'+esc(f.status)+'</span>';
+      var seatPct = f.seat_limit ? Math.min(100, Math.round(members/f.seat_limit*100)) : 0;
+      var barClass = seatPct >= 100 ? 'full' : seatPct >= 80 ? 'warn' : '';
+
+      return '<tr>'
+        +'<td><div class="td-name">'+esc(f.name)+'</div></td>'
+        +'<td><span class="badge" style="background:rgba(100,116,139,.1);color:var(--text-2)">'+tierLabel(f.subscription_tier)+'</span></td>'
+        +'<td>'
+        + '<div style="font-size:.85rem;color:var(--text)">'+members+' / '+f.seat_limit+'</div>'
+        + '<div class="seat-bar-track" style="margin-top:.3rem;width:80px"><div class="seat-bar-fill '+barClass+'" style="width:'+seatPct+'%"></div></div>'
+        +'</td>'
+        +'<td style="color:var(--text-2)">'+contracts+'</td>'
+        +statusBadge.replace('<td>', '<td>')
+        +'<td>'+statusBadge+'</td>'
+        +'<td class="td-muted">'+fmtDate(f.created_at)+'</td>'
+        +'<td class="td-actions">'
+        +'<button class="btn btn-secondary btn-sm" onclick="openInviteToFirm(\''+f.id+'\',\''+esc(f.name)+'\')">Invite Admin</button>'
+        +(f.status==='active'
+          ? '<button class="btn btn-danger btn-sm" style="margin-left:.4rem" onclick="toggleFirmStatus(\''+f.id+'\',\'suspended\',\''+esc(f.name)+'\')">Suspend</button>'
+          : '<button class="btn btn-secondary btn-sm" style="margin-left:.4rem" onclick="toggleFirmStatus(\''+f.id+'\',\'active\',\''+esc(f.name)+'\')">Reactivate</button>')
+        +'</td>'
+        +'</tr>';
+    }).join('');
+
+    body.innerHTML = '<div class="table-wrap"><table>'
+      +'<thead><tr><th>Firm</th><th>Tier</th><th>Seats Used</th><th>Analyses</th><th>Status</th><th>Created</th><th></th></tr></thead>'
+      +'<tbody>'+rows+'</tbody></table></div>';
+  }
+
+  window.toggleFirmStatus = async function(firmId, newStatus, name) {
+    var verb = newStatus === 'suspended' ? 'Suspend' : 'Reactivate';
+    if (!confirm(verb + ' ' + name + '?')) return;
+    var res = await sb.from('firms').update({ status: newStatus }).eq('id', firmId);
+    if (res.error) { alert('Error: ' + res.error.message); return; }
+    await LC_AUTH.logAudit('firm_status_changed', 'firms', firmId, null, { status: newStatus, name: name });
+    loadFirms();
+  };
+
+  // ── Activity ─────────────────────────────────────
+  async function loadActivity() {
+    var res = await sb.from('audit_log')
+      .select('id, action, resource_type, firm_id, created_at, profiles(full_name, email), firms(name)')
+      .order('created_at', { ascending: false })
+      .limit(30);
+
+    var body = document.getElementById('activity-body');
+    if (res.error || !res.data || !res.data.length) {
+      body.innerHTML = '<div class="state-empty"><h3>No activity yet</h3></div>';
+      return;
+    }
+    var icons = { contract_uploaded:'📄', member_invited:'✉️', member_disabled:'🚫', member_enabled:'✅', contract_analyzed:'🔍', firm_status_changed:'🔧' };
+    var rows = res.data.map(function(a) {
+      var actor    = a.profiles ? (a.profiles.full_name || a.profiles.email) : 'System';
+      var firmName = a.firms ? a.firms.name : '';
+      var icon     = icons[a.action] || '•';
+      var action   = a.action.replace(/_/g,' ');
+      return '<div class="activity-row">'
+        +'<div class="activity-icon">'+icon+'</div>'
+        +'<div><span class="activity-action">'+esc(actor)+'</span> '
+        +'<span class="activity-target">'+esc(action)+(firmName?' · '+esc(firmName):'')+'</span></div>'
+        +'<span class="activity-time">'+fmtDateTime(a.created_at)+'</span>'
+        +'</div>';
+    }).join('');
+    body.innerHTML = rows;
+  }
+
+  // ── Create firm modal ─────────────────────────────
+  function showFirmAlert(msg, type) {
+    var el = document.getElementById('firm-alert');
+    el.className = 'alert alert-' + type + ' show';
+    el.textContent = msg;
+  }
+
+  document.getElementById('new-firm-btn').addEventListener('click', function() {
+    document.getElementById('create-firm-modal').classList.remove('hidden');
+    document.getElementById('firm-name-input').focus();
+    document.getElementById('firm-alert').className = 'alert';
+  });
+  document.getElementById('firm-modal-close').addEventListener('click', function() {
+    document.getElementById('create-firm-modal').classList.add('hidden');
+    document.getElementById('firm-name-input').value = '';
+  });
+  document.getElementById('create-firm-modal').addEventListener('click', function(e) {
+    if (e.target === this) document.getElementById('firm-modal-close').click();
+  });
+
+  document.getElementById('create-firm-btn').addEventListener('click', async function() {
+    var name  = document.getElementById('firm-name-input').value.trim();
+    var tier  = document.getElementById('firm-tier').value;
+    var seats = parseInt(document.getElementById('firm-seats').value) || 10;
+    if (!name) { showFirmAlert('Please enter a firm name.', 'error'); return; }
+
+    this.disabled = true;
+    document.getElementById('create-firm-btn-text').textContent = 'Creating…';
+
+    var res = await sb.from('firms').insert({
+      name: name,
+      subscription_tier: tier,
+      seat_limit: seats,
+      status: 'active'
+    }).select().single();
+
+    if (res.error) {
+      showFirmAlert('Error: ' + res.error.message, 'error');
+    } else {
+      await LC_AUTH.logAudit('firm_created', 'firms', res.data.id, null, { name: name, tier: tier });
+      document.getElementById('firm-modal-close').click();
+      await Promise.all([loadFirms(), loadStats(), loadActivity()]);
+    }
+
+    this.disabled = false;
+    document.getElementById('create-firm-btn-text').textContent = 'Create Firm';
+  });
+
+  // ── Invite to firm modal ──────────────────────────
+  function showInviteAlert(msg, type) {
+    var el = document.getElementById('invite-alert');
+    el.className = 'alert alert-' + type + ' show';
+    el.textContent = msg;
+  }
+
+  window.openInviteToFirm = function(firmId, firmName) {
+    document.getElementById('invite-firm-id').value     = firmId;
+    document.getElementById('invite-firm-display').value = firmName;
+    document.getElementById('invite-email').value       = '';
+    document.getElementById('invite-alert').className   = 'alert';
+    document.getElementById('invite-modal').classList.remove('hidden');
+    document.getElementById('invite-email').focus();
+  };
+
+  document.getElementById('invite-modal-close').addEventListener('click', function() {
+    document.getElementById('invite-modal').classList.add('hidden');
+  });
+  document.getElementById('invite-modal').addEventListener('click', function(e) {
+    if (e.target === this) document.getElementById('invite-modal-close').click();
+  });
+
+  document.getElementById('invite-submit-btn').addEventListener('click', async function() {
+    var email  = document.getElementById('invite-email').value.trim();
+    var role   = document.getElementById('invite-role').value;
+    var firmId = document.getElementById('invite-firm-id').value;
+    if (!email) { showInviteAlert('Please enter an email address.', 'error'); return; }
+
+    this.disabled = true;
+    document.getElementById('invite-btn-text').textContent = 'Sending…';
+
+    var res = await LC_AUTH.sendInvite(email, role, firmId);
+    if (res && res.error) {
+      showInviteAlert(res.error, 'error');
+    } else {
+      showInviteAlert('Invitation sent to ' + email, 'success');
+      setTimeout(function() { document.getElementById('invite-modal-close').click(); }, 1800);
+    }
+
+    this.disabled = false;
+    document.getElementById('invite-btn-text').textContent = 'Send Invitation';
+  });
+
+  // ── Init ─────────────────────────────────────────
+  document.getElementById('sign-out-btn').addEventListener('click', function() { LC_AUTH.signOut(); });
+
+  (async function init() {
+    var session = await LC_AUTH.requireAuth();
+    if (!session) return;
+    profile = await LC_AUTH.getProfile();
+    if (!profile) return LC_AUTH.signOut();
+    if (profile.role !== 'super_admin') {
+      window.location.href = LC_AUTH.dashboardUrl(profile.role);
+      return;
+    }
+    document.getElementById('nav-name').textContent = profile.full_name || profile.email;
+    await Promise.all([loadStats(), loadFirms(), loadActivity()]);
+  })();
+})();
+</script>
+</body>
+</html>
