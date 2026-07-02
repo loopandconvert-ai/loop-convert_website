@@ -9,19 +9,21 @@
   <link rel="icon" type="image/png" href="images/logo.png" />
   <link rel="stylesheet" href="css/dashboard.css" />
   <style>
-    /* Full-height chat layout */
     html { height: 100%; }
     body { height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
-    .dash-nav { flex-shrink: 0; position: static; } /* disable sticky so flex layout works */
+    .dash-nav { flex-shrink: 0; position: static; }
+    .chat-layout { flex: 1; min-height: 0; }
+    .chat-sidebar { width: 240px; }
   </style>
 </head>
 <body data-page="auth-required">
 
-<!-- ── Nav ──────────────────────────────────────── -->
 <nav class="dash-nav">
   <div class="dash-nav-inner">
     <a href="index.html" class="nav-logo">Loop <span>&</span> Convert</a>
-    <div class="nav-links"></div>
+    <div class="nav-links">
+      <a href="#" id="back-link" class="nav-link">← Back to Report</a>
+    </div>
     <div class="nav-right">
       <div>
         <div class="nav-user-name" id="nav-name"></div>
@@ -32,33 +34,39 @@
   </div>
 </nav>
 
-<!-- ── Chat Layout ───────────────────────────────── -->
-<div class="chat-wrap" id="chat-wrap">
+<!-- Contract info bar -->
+<div class="chat-bar">
+  <span class="chat-bar-title" id="contract-name">Loading…</span>
+  <span id="risk-badge"></span>
+</div>
 
-  <!-- Contract info bar -->
-  <div class="chat-bar">
-    <a href="#" class="chat-bar-back" id="back-link">← Back to Report</a>
-    <span class="chat-bar-sep">|</span>
-    <span class="chat-bar-title" id="contract-name">Loading…</span>
-    <span id="risk-badge"></span>
+<!-- Two-panel layout -->
+<div class="chat-layout">
+
+  <!-- Sidebar: conversation history -->
+  <div class="chat-sidebar">
+    <div class="chat-sidebar-new">
+      <button class="chat-new-btn" id="new-chat-btn" disabled>
+        <span style="font-size:.9rem">＋</span> New conversation
+      </button>
+    </div>
+    <div class="chat-session-list" id="session-list">
+      <div class="chat-no-sessions">Loading history…</div>
+    </div>
   </div>
 
-  <!-- Messages -->
-  <div class="chat-msgs" id="chat-msgs">
-    <!-- Welcome bubble injected by JS -->
-  </div>
-
-  <!-- Suggested questions (shown once, before first message) -->
-  <div class="chat-suggestions" id="suggestions"></div>
-
-  <!-- Input -->
-  <div class="chat-foot">
-    <textarea
-      class="chat-input" id="chat-input"
-      placeholder="Ask anything about this contract…"
-      rows="1"
-    ></textarea>
-    <button class="chat-send" id="send-btn" disabled>Send</button>
+  <!-- Main chat area -->
+  <div class="chat-main" id="chat-main">
+    <div class="chat-main-empty" id="chat-empty">
+      <h4>Start a conversation</h4>
+      <p>Click "New conversation" to ask your first question about this contract.</p>
+    </div>
+    <div class="chat-msgs" id="chat-msgs" style="display:none;padding:1.25rem 1.5rem"></div>
+    <div class="chat-suggestions" id="suggestions" style="padding:0 1.5rem"></div>
+    <div class="chat-foot" id="chat-foot" style="display:none">
+      <textarea class="chat-input" id="chat-input" placeholder="Ask anything about this contract…" rows="1"></textarea>
+      <button class="chat-send" id="send-btn" disabled>Send</button>
+    </div>
   </div>
 
 </div>
@@ -68,134 +76,204 @@
 <script src="js/auth.js"></script>
 <script>
 (function () {
-  var sb         = window.LC_AUTH.supabase;
-  var contractId = new URLSearchParams(window.location.search).get('id');
-  var messages   = [];
+  var sb          = window.LC_AUTH.supabase;
+  var contractId  = new URLSearchParams(window.location.search).get('id');
+  var sessionId   = null;
+  var activeItem  = null;
   var isStreaming = false;
 
-  var msgsEl   = document.getElementById('chat-msgs');
-  var inputEl  = document.getElementById('chat-input');
-  var sendBtn  = document.getElementById('send-btn');
+  var msgsEl    = document.getElementById('chat-msgs');
+  var emptyEl   = document.getElementById('chat-empty');
+  var footEl    = document.getElementById('chat-foot');
+  var inputEl   = document.getElementById('chat-input');
+  var sendBtn   = document.getElementById('send-btn');
+  var listEl    = document.getElementById('session-list');
   var suggestEl = document.getElementById('suggestions');
 
-  var RISK_COLORS = { low: '#22c55e', medium: '#eab308', high: '#f97316', critical: '#ef4444' };
+  var SUGGESTIONS = [
+    'What are the biggest risks?',
+    'Summarize the payment terms.',
+    'Is there an auto-renewal clause?',
+    'What is the liability cap?',
+    'Which clauses should I negotiate?'
+  ];
 
-  function esc(s) {
-    var d = document.createElement('div');
-    d.textContent = s || '';
-    return d.innerHTML;
+  function timeAgo(iso) {
+    var d    = new Date(iso);
+    var diff = (Date.now() - d) / 1000;
+    if (diff < 60)     return 'just now';
+    if (diff < 3600)   return Math.floor(diff / 60) + 'm ago';
+    if (diff < 86400)  return Math.floor(diff / 3600) + 'h ago';
+    if (diff < 604800) return Math.floor(diff / 86400) + 'd ago';
+    return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
   }
 
   function scrollBottom() {
     msgsEl.scrollTop = msgsEl.scrollHeight;
   }
 
-  // ── Build a message bubble ────────────────────────
+  // ── Bubbles ───────────────────────────────────────
   function addBubble(role, content) {
-    var isUser = role === 'user';
     var wrap   = document.createElement('div');
     wrap.className = 'chat-msg ' + role;
-
-    var avatarEl = document.createElement('div');
-    avatarEl.className = 'chat-avatar';
-    avatarEl.textContent = isUser ? 'You' : 'AI';
-
-    var bubbleEl = document.createElement('div');
-    bubbleEl.className = 'chat-bubble';
-
+    var av  = document.createElement('div');
+    av.className   = 'chat-avatar';
+    av.textContent = role === 'user' ? 'You' : 'AI';
+    var bub = document.createElement('div');
+    bub.className  = 'chat-bubble';
     if (content === '__typing__') {
-      bubbleEl.innerHTML = '<div class="chat-typing"><span></span><span></span><span></span></div>';
+      bub.innerHTML = '<div class="chat-typing"><span></span><span></span><span></span></div>';
     } else {
-      bubbleEl.textContent = content;
+      bub.textContent = content;
     }
-
-    wrap.appendChild(avatarEl);
-    wrap.appendChild(bubbleEl);
+    wrap.appendChild(av); wrap.appendChild(bub);
     msgsEl.appendChild(wrap);
     scrollBottom();
-    return bubbleEl;
+    return bub;
   }
 
-  // ── Auto-resize textarea ──────────────────────────
-  inputEl.addEventListener('input', function() {
-    this.style.height = 'auto';
-    this.style.height = Math.min(this.scrollHeight, 140) + 'px';
-    sendBtn.disabled = !this.value.trim() || isStreaming;
-  });
-
-  // ── Send on Enter (Shift+Enter = newline) ─────────
-  inputEl.addEventListener('keydown', function(e) {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      if (!sendBtn.disabled) sendMessage();
-    }
-  });
-
-  sendBtn.addEventListener('click', sendMessage);
-
-  // ── Suggested questions ───────────────────────────
-  var SUGGESTIONS = [
-    'What are the biggest risks in this contract?',
-    'Summarize the payment and termination terms.',
-    'Is there an auto-renewal clause?',
-    'What does the liability cap cover?',
-    'Which clauses should I try to negotiate?'
-  ];
-
+  // ── Suggestions chips ─────────────────────────────
   function showSuggestions() {
     suggestEl.innerHTML = SUGGESTIONS.map(function(q) {
-      return '<button class="chat-chip" data-q="' + esc(q) + '">' + esc(q) + '</button>';
+      return '<button class="chat-chip" data-q="' + q.replace(/"/g,'&quot;') + '">' + q + '</button>';
     }).join('');
     suggestEl.querySelectorAll('.chat-chip').forEach(function(btn) {
       btn.addEventListener('click', function() {
         inputEl.value = this.dataset.q;
-        inputEl.dispatchEvent(new Event('input'));
-        hideSuggestions();
+        suggestEl.innerHTML = '';
         sendMessage();
       });
     });
   }
 
-  function hideSuggestions() {
-    suggestEl.innerHTML = '';
+  // ── Session list ──────────────────────────────────
+  async function loadSessions() {
+    var token = (await sb.auth.getSession()).data.session.access_token;
+    var resp  = await fetch('/api/chat-history.js?contract_id=' + contractId, {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    var data  = await resp.json();
+    var sessions = data.sessions || [];
+    renderSessions(sessions);
+    return sessions;
   }
 
-  // ── Send a message ────────────────────────────────
+  function renderSessions(sessions) {
+    if (!sessions.length) {
+      listEl.innerHTML = '<div class="chat-no-sessions">No conversations yet.<br>Start one!</div>';
+      return;
+    }
+    listEl.innerHTML = '';
+    sessions.forEach(function(s) {
+      var item = document.createElement('div');
+      item.className = 'chat-session-item' + (s.id === sessionId ? ' active' : '');
+      item.dataset.id = s.id;
+      item.innerHTML = '<div class="chat-session-title">' + escHtml(s.title) + '</div>'
+        + '<div class="chat-session-time">' + timeAgo(s.updated_at) + '</div>';
+      item.addEventListener('click', function() { openSession(s.id, item); });
+      listEl.appendChild(item);
+    });
+  }
+
+  function markActive(item) {
+    if (activeItem) activeItem.classList.remove('active');
+    if (item) item.classList.add('active');
+    activeItem = item;
+  }
+
+  function updateSessionTitle(id, title) {
+    var item = listEl.querySelector('[data-id="' + id + '"]');
+    if (item) item.querySelector('.chat-session-title').textContent = title;
+  }
+
+  // ── Open existing session ─────────────────────────
+  async function openSession(id, itemEl) {
+    if (isStreaming) return;
+    sessionId = id;
+    markActive(itemEl || listEl.querySelector('[data-id="' + id + '"]'));
+
+    msgsEl.innerHTML = '';
+    emptyEl.style.display  = 'none';
+    msgsEl.style.display   = 'flex';
+    msgsEl.style.flexDirection = 'column';
+    footEl.style.display   = 'flex';
+    suggestEl.innerHTML    = '';
+    inputEl.disabled       = false;
+    sendBtn.disabled       = true;
+    inputEl.value          = '';
+
+    // Load messages
+    var token = (await sb.auth.getSession()).data.session.access_token;
+    var resp  = await fetch('/api/chat-history.js?session_id=' + id, {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    var data  = await resp.json();
+    var msgs  = data.messages || [];
+
+    if (!msgs.length) {
+      addBubble('assistant', 'Hi! Ask me anything about this contract — I have the full analysis and contract text.');
+      showSuggestions();
+    } else {
+      msgs.forEach(function(m) { addBubble(m.role, m.content); });
+    }
+    scrollBottom();
+    inputEl.focus();
+  }
+
+  // ── New conversation ──────────────────────────────
+  async function startNewSession() {
+    if (isStreaming) return;
+    var token = (await sb.auth.getSession()).data.session.access_token;
+    var resp  = await fetch('/api/chat-history.js', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ contract_id: contractId })
+    });
+    var data = await resp.json();
+    if (!data.session) return;
+
+    // Prepend to session list
+    var s    = data.session;
+    var item = document.createElement('div');
+    item.className  = 'chat-session-item';
+    item.dataset.id = s.id;
+    item.innerHTML  = '<div class="chat-session-title">New Chat</div>'
+      + '<div class="chat-session-time">just now</div>';
+    item.addEventListener('click', function() { openSession(s.id, item); });
+
+    if (listEl.querySelector('.chat-no-sessions')) listEl.innerHTML = '';
+    listEl.insertBefore(item, listEl.firstChild);
+
+    openSession(s.id, item);
+  }
+
+  // ── Send message ──────────────────────────────────
   async function sendMessage() {
     var text = inputEl.value.trim();
-    if (!text || isStreaming) return;
+    if (!text || isStreaming || !sessionId) return;
 
-    hideSuggestions();
-    isStreaming = true;
+    isStreaming    = true;
     sendBtn.disabled = true;
-    inputEl.value = '';
+    inputEl.value  = '';
     inputEl.style.height = 'auto';
+    suggestEl.innerHTML  = '';
 
-    messages.push({ role: 'user', content: text });
     addBubble('user', text);
-
-    // Typing indicator
     var aiBubble = addBubble('assistant', '__typing__');
 
     try {
-      var session = await sb.auth.getSession();
-      var token   = session.data.session.access_token;
-
-      var resp = await fetch('/api/chat.js', {
+      var token = (await sb.auth.getSession()).data.session.access_token;
+      var resp  = await fetch('/api/chat.js', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + token
-        },
-        body: JSON.stringify({ contract_id: contractId, messages: messages })
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        body: JSON.stringify({ session_id: sessionId, message: text })
       });
 
       if (!resp.ok) {
-        var errData = await resp.json().catch(function() { return {}; });
-        throw new Error(errData.error || 'Request failed (' + resp.status + ')');
+        var e = await resp.json().catch(function(){ return {}; });
+        throw new Error(e.error || 'Request failed');
       }
 
-      // Stream the response
       var reader  = resp.body.getReader();
       var decoder = new TextDecoder();
       var aiText  = '';
@@ -203,47 +281,46 @@
       var started = false;
 
       while (true) {
-        var chunk = await reader.read();
-        if (chunk.done) break;
-
-        buf += decoder.decode(chunk.value, { stream: true });
-        var parts = buf.split('\n\n');
-        buf = parts.pop(); // keep incomplete line
-
+        var ch = await reader.read(); if (ch.done) break;
+        buf += decoder.decode(ch.value, { stream: true });
+        var parts = buf.split('\n\n'); buf = parts.pop();
         for (var i = 0; i < parts.length; i++) {
           var line = parts[i].trim();
           if (!line.startsWith('data: ')) continue;
-          var payload = line.slice(6);
           try {
-            var json = JSON.parse(payload);
-            if (json.done) break;
+            var json = JSON.parse(line.slice(6));
             if (json.error) throw new Error(json.error);
+            if (json.title) updateSessionTitle(sessionId, json.title);
+            if (json.done)  break;
             if (json.text) {
-              if (!started) {
-                // Replace typing indicator with real content
-                aiBubble.textContent = '';
-                started = true;
-              }
-              aiText += json.text;
-              aiBubble.textContent = aiText;
-              scrollBottom();
+              if (!started) { aiBubble.textContent = ''; started = true; }
+              aiText += json.text; aiBubble.textContent = aiText; scrollBottom();
             }
-          } catch (parseErr) {
-            if (parseErr.message !== 'Unexpected end of JSON input') throw parseErr;
-          }
+          } catch(pe) { if (pe.message !== 'Unexpected end of JSON input') throw pe; }
         }
       }
 
-      if (!aiText) aiText = '(No response received)';
-      messages.push({ role: 'assistant', content: aiText });
+    } catch(err) { aiBubble.textContent = 'Error: ' + err.message; }
 
-    } catch (err) {
-      aiBubble.textContent = 'Sorry, something went wrong: ' + err.message;
-    }
-
-    isStreaming = false;
+    isStreaming    = false;
     sendBtn.disabled = !inputEl.value.trim();
     inputEl.focus();
+  }
+
+  // ── Input wiring ──────────────────────────────────
+  inputEl.addEventListener('input', function() {
+    this.style.height = 'auto';
+    this.style.height = Math.min(this.scrollHeight, 140) + 'px';
+    sendBtn.disabled  = !this.value.trim() || isStreaming;
+  });
+  inputEl.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); if (!sendBtn.disabled) sendMessage(); }
+  });
+  sendBtn.addEventListener('click', sendMessage);
+  document.getElementById('new-chat-btn').addEventListener('click', startNewSession);
+
+  function escHtml(s) {
+    var d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML;
   }
 
   // ── Init ─────────────────────────────────────────
@@ -260,50 +337,38 @@
     document.getElementById('nav-firm').textContent = profile.firms ? profile.firms.name : '';
 
     if (!contractId) {
-      msgsEl.innerHTML = '<div class="state-empty" style="margin:2rem auto"><h3>No contract selected</h3><p>Please open this page from an analysis report.</p></div>';
-      return;
+      listEl.innerHTML = '<div class="chat-no-sessions">No contract selected.</div>'; return;
     }
 
-    // Set back link
     document.getElementById('back-link').href = 'analysis-report.html?id=' + contractId;
 
-    // Load contract + analysis metadata for the header
+    // Load contract info for the bar
     var cRes = await sb.from('contracts')
-      .select('id, file_name, contract_type, status, analyses(overall_risk_score, risk_level)')
-      .eq('id', contractId)
-      .maybeSingle();
+      .select('id, file_name, analyses(overall_risk_score, risk_level)')
+      .eq('id', contractId).maybeSingle();
 
-    if (cRes.error || !cRes.data) {
-      msgsEl.innerHTML = '<div class="state-empty" style="margin:2rem auto"><h3>Contract not found</h3></div>';
-      return;
+    if (cRes.data) {
+      var c = cRes.data;
+      document.title = c.file_name + ' — Chat · Loop & Convert';
+      document.getElementById('contract-name').textContent = c.file_name;
+      var a = c.analyses && c.analyses[0];
+      if (a) {
+        var badge = document.getElementById('risk-badge');
+        badge.className   = 'badge badge-' + a.risk_level;
+        badge.textContent = 'Risk: ' + a.overall_risk_score + '/100';
+      }
     }
 
-    var c = cRes.data;
-    document.title = esc(c.file_name) + ' — Chat · Loop & Convert';
-    document.getElementById('contract-name').textContent = c.file_name;
+    document.getElementById('new-chat-btn').disabled = false;
 
-    var analysis = c.analyses && c.analyses[0];
-    if (analysis) {
-      var level = analysis.risk_level || 'medium';
-      var score = analysis.overall_risk_score;
-      var badgeEl = document.getElementById('risk-badge');
-      badgeEl.className = 'badge badge-' + level;
-      badgeEl.textContent = 'Risk: ' + score + '/100';
+    var sessions = await loadSessions();
+
+    // Auto-open most recent session if any
+    if (sessions.length) {
+      openSession(sessions[0].id);
+    } else {
+      emptyEl.style.display = 'flex';
     }
-
-    // Welcome message
-    var hasAnalysis = c.status === 'completed' && analysis;
-    var welcome = hasAnalysis
-      ? 'Hi! I\'ve fully analyzed "' + c.file_name + '" — risk score ' + analysis.overall_risk_score + '/100. Ask me anything about its terms, risks, or clauses.'
-      : 'Hi! I\'m here to help with "' + c.file_name + '". Note: the analysis may still be in progress, so my answers are based on whatever data is available so far.';
-
-    addBubble('assistant', welcome);
-    showSuggestions();
-
-    // Enable input
-    sendBtn.disabled = false;
-    inputEl.disabled = false;
-    inputEl.focus();
   })();
 })();
 </script>

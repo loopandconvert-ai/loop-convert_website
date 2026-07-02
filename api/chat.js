@@ -1,8 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { createClient } from '@supabase/supabase-js';
 
-const MAX_HISTORY    = 20;    // keep last 10 turns (20 messages)
-const MAX_TEXT_CHARS = 60000; // ~15k tokens — fits in Sonnet context easily
+const MAX_TEXT_CHARS = 60000;
 
 function buildSystemPrompt(contract, analysis, riskItems, missingClauses, contractText) {
   var lines = [
@@ -56,7 +55,7 @@ function buildSystemPrompt(contract, analysis, riskItems, missingClauses, contra
   lines.push('- Answer questions about THIS specific contract only.');
   lines.push('- Cite exact clause text or page numbers when available.');
   lines.push('- Use plain language — explain legal terms clearly.');
-  lines.push('- Be concise and direct. Bullet points for multiple items.');
+  lines.push('- Be concise and direct. Use bullet points for multiple items.');
   lines.push('- If something is not in the contract, say so honestly.');
   lines.push('- For binding legal decisions, recommend consulting qualified counsel.');
 
@@ -72,9 +71,9 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST')   return res.status(405).json({ error: 'Method not allowed' });
 
-  const { contract_id, messages } = req.body || {};
-  if (!contract_id)                             return res.status(400).json({ error: 'contract_id is required' });
-  if (!Array.isArray(messages) || !messages.length) return res.status(400).json({ error: 'messages is required' });
+  const { session_id, message } = req.body || {};
+  if (!session_id)              return res.status(400).json({ error: 'session_id is required' });
+  if (!message || !message.trim()) return res.status(400).json({ error: 'message is required' });
 
   const adminClient = createClient(
     process.env.SUPABASE_URL,
@@ -88,38 +87,60 @@ export default async function handler(req, res) {
   const { data: { user }, error: authErr } = await adminClient.auth.getUser(token);
   if (authErr || !user) return res.status(401).json({ error: 'Invalid or expired token' });
 
-  const { data: requester } = await adminClient
-    .from('profiles').select('firm_id, role').eq('id', user.id).single();
-  if (!requester) return res.status(403).json({ error: 'Profile not found' });
+  // Load session + verify ownership
+  const { data: session } = await adminClient
+    .from('chat_sessions').select('id, contract_id, user_id, title').eq('id', session_id).single();
+  if (!session)                  return res.status(404).json({ error: 'Session not found' });
+  if (session.user_id !== user.id) return res.status(403).json({ error: 'Access denied' });
 
-  // Load contract (includes extracted_text)
-  const { data: contract } = await adminClient
-    .from('contracts')
-    .select('id, firm_id, file_name, contract_type, status, extracted_text')
-    .eq('id', contract_id).single();
+  // Load contract + analysis in parallel
+  const [contractRes, analysisRes, historyRes] = await Promise.all([
+    adminClient.from('contracts')
+      .select('id, firm_id, file_name, contract_type, extracted_text')
+      .eq('id', session.contract_id).single(),
+    adminClient.from('analyses').select('*').eq('contract_id', session.contract_id).maybeSingle(),
+    adminClient.from('chat_messages').select('role, content')
+      .eq('session_id', session_id).order('created_at', { ascending: true })
+  ]);
+
+  const contract = contractRes.data;
   if (!contract) return res.status(404).json({ error: 'Contract not found' });
 
-  const owns = requester.role === 'super_admin' || contract.firm_id === requester.firm_id;
-  if (!owns) return res.status(403).json({ error: 'Access denied' });
-
-  // Load analysis + risk items
-  const { data: analysis } = await adminClient
-    .from('analyses').select('*').eq('contract_id', contract_id).maybeSingle();
-
-  var riskItems      = [];
-  var missingClauses = [];
+  const analysis       = analysisRes.data;
+  var riskItems        = [];
+  var missingClauses   = [];
   if (analysis) {
-    const rRes = await adminClient
-      .from('risk_items').select('*').eq('analysis_id', analysis.id);
+    const rRes     = await adminClient.from('risk_items').select('*').eq('analysis_id', analysis.id);
     riskItems      = rRes.data || [];
     missingClauses = (analysis.raw_json || {}).missing_clauses || [];
   }
 
+  const history = historyRes.data || [];
+  const isFirst = history.length === 0;
+
+  // Save user message immediately
+  await adminClient.from('chat_messages').insert({
+    session_id, role: 'user', content: message.trim()
+  });
+
+  // Auto-title the session on first message
+  const newTitle = isFirst
+    ? (message.trim().slice(0, 55) + (message.trim().length > 55 ? '…' : ''))
+    : null;
+
+  await adminClient.from('chat_sessions')
+    .update({ updated_at: new Date().toISOString(), ...(newTitle ? { title: newTitle } : {}) })
+    .eq('id', session_id);
+
+  // Build Claude messages (full history + new)
+  const claudeMessages = [
+    ...history.map(function(m) { return { role: m.role, content: m.content }; }),
+    { role: 'user', content: message.trim() }
+  ];
+
   const systemPrompt = buildSystemPrompt(
     contract, analysis, riskItems, missingClauses, contract.extracted_text
   );
-
-  const trimmed = messages.slice(-MAX_HISTORY);
 
   try {
     const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
@@ -128,16 +149,29 @@ export default async function handler(req, res) {
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
 
+    // Send session metadata first (client uses this to update sidebar)
+    res.write('data: ' + JSON.stringify({
+      session_id,
+      title: newTitle || session.title
+    }) + '\n\n');
+
     const stream = anthropic.messages.stream({
       model:      'claude-sonnet-4-6',
       max_tokens: 2048,
       system:     systemPrompt,
-      messages:   trimmed
+      messages:   claudeMessages
     });
 
+    var fullResponse = '';
     for await (const text of stream.textStream) {
+      fullResponse += text;
       res.write('data: ' + JSON.stringify({ text }) + '\n\n');
     }
+
+    // Save AI response
+    await adminClient.from('chat_messages').insert({
+      session_id, role: 'assistant', content: fullResponse || '(No response)'
+    });
 
     res.write('data: ' + JSON.stringify({ done: true }) + '\n\n');
     res.end();
