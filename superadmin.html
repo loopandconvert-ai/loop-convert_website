@@ -61,6 +61,40 @@
   </div>
 </div>
 
+<!-- ── Edit Firm Modal ───────────────────────────── -->
+<div class="modal-overlay hidden" id="edit-firm-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Edit Firm</span>
+      <button class="modal-close" id="edit-firm-modal-close">✕</button>
+    </div>
+    <div id="edit-firm-alert" class="alert"></div>
+    <input type="hidden" id="edit-firm-id" />
+    <div class="form-group">
+      <label class="form-label">Firm Name</label>
+      <input class="form-input" type="text" id="edit-firm-name" autocomplete="off" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Subscription Tier</label>
+      <select class="form-select" id="edit-firm-tier">
+        <option value="solo">Solo (1–4 lawyers)</option>
+        <option value="small">Small (5–19 lawyers)</option>
+        <option value="mid">Mid (20–99 lawyers)</option>
+        <option value="large">Large (100–499 lawyers)</option>
+        <option value="enterprise">Enterprise (500+ lawyers)</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Seat Limit</label>
+      <input class="form-input" type="number" id="edit-firm-seats" min="1" max="2000" />
+      <div style="font-size:.75rem;color:var(--text-3);margin-top:.35rem">Current active members are shown in the firms table — seat limit must be ≥ active members.</div>
+    </div>
+    <button class="btn btn-primary" id="edit-firm-save-btn" style="width:100%;justify-content:center;margin-top:.5rem">
+      <span id="edit-firm-save-text">Save Changes</span>
+    </button>
+  </div>
+</div>
+
 <!-- ── Members Modal ─────────────────────────────── -->
 <div class="modal-overlay hidden" id="members-modal">
   <div class="modal" style="max-width:560px">
@@ -237,6 +271,7 @@
         +'<td class="td-muted">'+fmtDate(f.created_at)+'</td>'
         +'<td class="td-actions">'
         +'<button class="btn btn-secondary btn-sm" onclick="openMembersModal(\''+f.id+'\',\''+esc(f.name)+'\')">Members</button>'
+        +' <button class="btn btn-secondary btn-sm" onclick="openEditFirm(\''+f.id+'\',\''+esc(f.name)+'\',\''+f.subscription_tier+'\','+f.seat_limit+')">Edit</button>'
         +' <button class="btn btn-secondary btn-sm" onclick="openInviteToFirm(\''+f.id+'\',\''+esc(f.name)+'\')">Invite</button>'
         +(f.status==='active'
           ? ' <button class="btn btn-danger btn-sm" onclick="toggleFirmStatus(\''+f.id+'\',\'suspended\',\''+esc(f.name)+'\')">Suspend</button>'
@@ -350,6 +385,63 @@
 
     this.disabled = false;
     document.getElementById('create-firm-btn-text').textContent = 'Create Firm';
+  });
+
+  // ── Edit firm modal ───────────────────────────────
+  window.openEditFirm = function(firmId, name, tier, seats) {
+    document.getElementById('edit-firm-id').value        = firmId;
+    document.getElementById('edit-firm-name').value      = name;
+    document.getElementById('edit-firm-tier').value      = tier;
+    document.getElementById('edit-firm-seats').value     = seats;
+    document.getElementById('edit-firm-alert').className = 'alert';
+    document.getElementById('edit-firm-modal').classList.remove('hidden');
+    document.getElementById('edit-firm-name').focus();
+  };
+
+  document.getElementById('edit-firm-modal-close').addEventListener('click', function() {
+    document.getElementById('edit-firm-modal').classList.add('hidden');
+  });
+  document.getElementById('edit-firm-modal').addEventListener('click', function(e) {
+    if (e.target === this) document.getElementById('edit-firm-modal-close').click();
+  });
+
+  document.getElementById('edit-firm-save-btn').addEventListener('click', async function() {
+    var firmId = document.getElementById('edit-firm-id').value;
+    var name   = document.getElementById('edit-firm-name').value.trim();
+    var tier   = document.getElementById('edit-firm-tier').value;
+    var seats  = parseInt(document.getElementById('edit-firm-seats').value) || 1;
+    var alertEl = document.getElementById('edit-firm-alert');
+
+    if (!name) {
+      alertEl.className = 'alert alert-error show';
+      alertEl.textContent = 'Firm name cannot be empty.';
+      return;
+    }
+    if (seats < 1) {
+      alertEl.className = 'alert alert-error show';
+      alertEl.textContent = 'Seat limit must be at least 1.';
+      return;
+    }
+
+    this.disabled = true;
+    document.getElementById('edit-firm-save-text').textContent = 'Saving…';
+    alertEl.className = 'alert';
+
+    var res = await sb.from('firms')
+      .update({ name: name, subscription_tier: tier, seat_limit: seats })
+      .eq('id', firmId);
+
+    if (res.error) {
+      alertEl.className = 'alert alert-error show';
+      alertEl.textContent = 'Error: ' + res.error.message;
+    } else {
+      await LC_AUTH.logAudit('firm_updated', 'firms', firmId, null, { name: name, tier: tier, seat_limit: seats });
+      document.getElementById('edit-firm-modal-close').click();
+      await Promise.all([loadFirms(), loadStats()]);
+    }
+
+    this.disabled = false;
+    document.getElementById('edit-firm-save-text').textContent = 'Save Changes';
   });
 
   // ── Members modal ────────────────────────────────
