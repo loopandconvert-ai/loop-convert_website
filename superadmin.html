@@ -61,6 +61,20 @@
   </div>
 </div>
 
+<!-- ── Members Modal ─────────────────────────────── -->
+<div class="modal-overlay hidden" id="members-modal">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-header">
+      <span class="modal-title" id="members-modal-title">Members</span>
+      <button class="modal-close" id="members-modal-close">✕</button>
+    </div>
+    <div id="members-alert" class="alert"></div>
+    <div id="members-list">
+      <div class="state-loading"><div class="spinner"></div> Loading…</div>
+    </div>
+  </div>
+</div>
+
 <!-- ── Invite to Firm Modal ──────────────────────── -->
 <div class="modal-overlay hidden" id="invite-modal">
   <div class="modal">
@@ -222,10 +236,11 @@
         +'<td>'+statusBadge+'</td>'
         +'<td class="td-muted">'+fmtDate(f.created_at)+'</td>'
         +'<td class="td-actions">'
-        +'<button class="btn btn-secondary btn-sm" onclick="openInviteToFirm(\''+f.id+'\',\''+esc(f.name)+'\')">Invite Admin</button>'
+        +'<button class="btn btn-secondary btn-sm" onclick="openMembersModal(\''+f.id+'\',\''+esc(f.name)+'\')">Members</button>'
+        +' <button class="btn btn-secondary btn-sm" onclick="openInviteToFirm(\''+f.id+'\',\''+esc(f.name)+'\')">Invite</button>'
         +(f.status==='active'
-          ? '<button class="btn btn-danger btn-sm" style="margin-left:.4rem" onclick="toggleFirmStatus(\''+f.id+'\',\'suspended\',\''+esc(f.name)+'\')">Suspend</button>'
-          : '<button class="btn btn-secondary btn-sm" style="margin-left:.4rem" onclick="toggleFirmStatus(\''+f.id+'\',\'active\',\''+esc(f.name)+'\')">Reactivate</button>')
+          ? ' <button class="btn btn-danger btn-sm" onclick="toggleFirmStatus(\''+f.id+'\',\'suspended\',\''+esc(f.name)+'\')">Suspend</button>'
+          : ' <button class="btn btn-secondary btn-sm" onclick="toggleFirmStatus(\''+f.id+'\',\'active\',\''+esc(f.name)+'\')">Reactivate</button>')
         +'</td>'
         +'</tr>';
     }).join('');
@@ -318,6 +333,96 @@
 
     this.disabled = false;
     document.getElementById('create-firm-btn-text').textContent = 'Create Firm';
+  });
+
+  // ── Members modal ────────────────────────────────
+  var currentMembersFirmId = null;
+
+  function showMembersAlert(msg, type) {
+    var el = document.getElementById('members-alert');
+    el.className = 'alert alert-' + type + ' show';
+    el.textContent = msg;
+  }
+
+  function initials(name) {
+    if (!name) return '?';
+    return name.trim().split(/\s+/).map(function(w){return w[0];}).join('').toUpperCase().slice(0,2);
+  }
+
+  function renderMembers(members) {
+    var list = document.getElementById('members-list');
+    if (!members.length) {
+      list.innerHTML = '<div class="state-empty" style="padding:2rem 0"><h3>No members yet</h3><p>Use Invite to add someone to this firm.</p></div>';
+      return;
+    }
+    list.innerHTML = members.map(function(m) {
+      var name      = m.full_name || m.email || 'Unknown';
+      var roleLabel = m.role === 'firm_admin' ? 'Firm Admin' : m.role === 'super_admin' ? 'Super Admin' : 'Lawyer';
+      var isSuper   = m.role === 'super_admin';
+      var active    = m.status === 'active';
+
+      var statusBadge = active
+        ? '<span class="badge badge-completed">Active</span>'
+        : '<span class="badge badge-failed">Disabled</span>';
+
+      var actions = isSuper ? '<span style="font-size:.75rem;color:var(--text-4)">Protected</span>' :
+        active
+          ? '<button class="btn btn-danger btn-sm" onclick="toggleMember(\''+m.id+'\',\'disable\',\''+esc(name)+'\')">Disable</button>'
+          : '<button class="btn btn-secondary btn-sm" onclick="toggleMember(\''+m.id+'\',\'enable\',\''+esc(name)+'\')">Enable</button>';
+
+      return '<div class="member-row">'
+        +'<div class="member-avatar">'+initials(name)+'</div>'
+        +'<div class="member-info">'
+        +'<div class="member-name">'+esc(name)+'</div>'
+        +'<div class="member-email">'+esc(m.email)+'</div>'
+        +'</div>'
+        +'<span class="badge" style="background:rgba(100,116,139,.1);color:var(--text-2)">'+roleLabel+'</span>'
+        +statusBadge
+        +'<div class="member-actions">'+actions+'</div>'
+        +'</div>';
+    }).join('');
+  }
+
+  window.openMembersModal = async function(firmId, firmName) {
+    currentMembersFirmId = firmId;
+    document.getElementById('members-modal-title').textContent = firmName + ' — Members';
+    document.getElementById('members-alert').className = 'alert';
+    document.getElementById('members-list').innerHTML = '<div class="state-loading"><div class="spinner"></div> Loading…</div>';
+    document.getElementById('members-modal').classList.remove('hidden');
+
+    var res = await sb.from('profiles')
+      .select('id, full_name, email, role, status')
+      .eq('firm_id', firmId)
+      .order('created_at', { ascending: true });
+
+    if (res.error) {
+      document.getElementById('members-list').innerHTML = '<div class="state-empty"><p>Could not load members.</p></div>';
+      return;
+    }
+    renderMembers(res.data || []);
+  };
+
+  window.toggleMember = async function(memberId, action, name) {
+    var newStatus = action === 'disable' ? 'disabled' : 'active';
+    var verb = action === 'disable' ? 'Disable' : 'Re-enable';
+    if (!confirm(verb + ' access for ' + name + '?')) return;
+
+    var res = await sb.from('profiles').update({ status: newStatus }).eq('id', memberId);
+    if (res.error) { showMembersAlert('Error: ' + res.error.message, 'error'); return; }
+
+    await LC_AUTH.logAudit('member_' + (action === 'disable' ? 'disabled' : 'enabled'), 'profiles', memberId, null, { name: name });
+    showMembersAlert(name + ' has been ' + (newStatus === 'disabled' ? 'disabled' : 're-enabled') + '.', 'success');
+
+    // Refresh member list
+    await openMembersModal(currentMembersFirmId, document.getElementById('members-modal-title').textContent.replace(' — Members', ''));
+  };
+
+  document.getElementById('members-modal-close').addEventListener('click', function() {
+    document.getElementById('members-modal').classList.add('hidden');
+    currentMembersFirmId = null;
+  });
+  document.getElementById('members-modal').addEventListener('click', function(e) {
+    if (e.target === this) document.getElementById('members-modal-close').click();
   });
 
   // ── Invite to firm modal ──────────────────────────
