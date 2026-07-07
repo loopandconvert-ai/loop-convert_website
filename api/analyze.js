@@ -113,12 +113,17 @@ export default async function handler(req, res) {
 
     const message = await anthropic.messages.create({
       model:      'claude-sonnet-5',
-      max_tokens: 4096,
+      max_tokens: 16000,
       system:     SYSTEM_PROMPT,
       messages:   [{ role: 'user', content: 'Analyze this contract:\n\n' + contractText }]
     });
 
+    if (message.stop_reason === 'max_tokens') {
+      throw new Error('Response was cut off — contract may be too complex. Try a shorter document.');
+    }
+
     const rawText = message.content[0]?.text || '';
+    if (!rawText) throw new Error('Empty response from AI model');
     const parsed  = parseJson(rawText);
 
     // Normalize fields
