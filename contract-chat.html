@@ -187,10 +187,9 @@
   async function deleteSession(id, item) {
     if (isStreaming) return;
     var token = (await sb.auth.getSession()).data.session.access_token;
-    var resp = await fetch('/api/chat-history.js', {
+    var resp = await fetch('/api/chat-history.js?session_id=' + id, {
       method: 'DELETE',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-      body: JSON.stringify({ session_id: id })
+      headers: { 'Authorization': 'Bearer ' + token }
     });
     if (!resp.ok) return;
     item.remove();

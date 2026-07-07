@@ -85,7 +85,7 @@ export default async function handler(req, res) {
 
   // ── DELETE: delete a session ──────────────────────
   if (req.method === 'DELETE') {
-    const { session_id } = req.body || {};
+    const session_id = (req.query && req.query.session_id) || (req.body && req.body.session_id);
     if (!session_id) return res.status(400).json({ error: 'session_id required' });
 
     const { data: sess } = await adminClient

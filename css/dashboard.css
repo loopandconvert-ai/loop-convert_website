@@ -570,6 +570,7 @@ tr.contract-row:hover td { background: rgba(59,130,246,.04); }
   padding: .6rem .85rem; cursor: pointer;
   border-left: 2px solid transparent;
   transition: background .1s, border-color .1s;
+  position: relative;
 }
 .chat-session-item:hover { background: rgba(255,255,255,.03); }
 .chat-session-item.active {
