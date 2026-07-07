@@ -353,6 +353,7 @@
     var res = await sb.from('contracts')
       .select('id, file_name, contract_type, status, created_at, analyses(overall_risk_score, risk_level)')
       .eq('firm_id', profile.firm_id)
+      .eq('uploaded_by', profile.id)
       .order('created_at', { ascending: false });
 
     if (res.error) {
