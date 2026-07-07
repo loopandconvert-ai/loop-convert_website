@@ -155,17 +155,21 @@ export default async function handler(req, res) {
       title: newTitle || session.title
     }) + '\n\n');
 
-    const stream = anthropic.messages.stream({
+    const stream = await anthropic.messages.create({
       model:      'claude-sonnet-4-6',
       max_tokens: 2048,
       system:     systemPrompt,
-      messages:   claudeMessages
+      messages:   claudeMessages,
+      stream:     true
     });
 
     var fullResponse = '';
-    for await (const text of stream.textStream) {
-      fullResponse += text;
-      res.write('data: ' + JSON.stringify({ text }) + '\n\n');
+    for await (const event of stream) {
+      if (event.type === 'content_block_delta' && event.delta.type === 'text_delta') {
+        const text = event.delta.text;
+        fullResponse += text;
+        res.write('data: ' + JSON.stringify({ text }) + '\n\n');
+      }
     }
 
     // Save AI response
