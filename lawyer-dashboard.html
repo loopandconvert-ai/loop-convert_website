@@ -288,7 +288,9 @@
         + '<td>' + riskScoreDisplay(score, level) + '</td>'
         + '<td>' + riskBadge(level) + '</td>'
         + '<td class="td-muted">' + fmtDate(c.created_at) + '</td>'
-        + '<td class="td-actions">' + viewBtn + '</td>'
+        + '<td class="td-actions">' + viewBtn
+          + ' <button class="btn btn-ghost btn-sm" style="color:var(--critical)" data-delete-id="' + c.id + '" onclick="event.stopPropagation()">Delete</button>'
+          + '</td>'
         + '</tr>';
     }).join('');
 
@@ -305,6 +307,28 @@
         }
       });
     });
+    body.querySelectorAll('[data-delete-id]').forEach(function(btn) {
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        deleteContract(this.dataset.deleteId);
+      });
+    });
+  }
+
+  async function deleteContract(id) {
+    if (!confirm('Delete this contract? This will also remove the analysis and all chat history. This cannot be undone.')) return;
+    var token = (await sb.auth.getSession()).data.session.access_token;
+    var resp = await fetch('/api/delete-contract.js?contract_id=' + id, {
+      method: 'DELETE',
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    if (!resp.ok) {
+      var e = await resp.json().catch(function(){ return {}; });
+      return alert('Delete failed: ' + (e.error || resp.status));
+    }
+    allContracts = allContracts.filter(function(c) { return c.id !== id; });
+    computeStats(allContracts);
+    applyFilters();
   }
 
   // ── Filters ──────────────────────────────────────

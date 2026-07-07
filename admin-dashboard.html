@@ -312,15 +312,40 @@
         +'<td>'+statusBadge(c.status)+'</td>'
         +'<td>'+riskBadge(a?a.risk_level:null)+'</td>'
         +'<td class="td-muted">'+fmtDate(c.created_at)+'</td>'
-        +'<td class="td-actions">'+(c.status==='completed'
-          ?'<a href="analysis-report.html?id='+c.id+'" class="btn btn-secondary btn-sm">View Report</a>'
-           +' <a href="contract-chat.html?id='+c.id+'" class="btn btn-ghost btn-sm" style="color:var(--accent)">Chat</a>'
-          :'<span style="color:var(--text-4);font-size:.78rem">—</span>')+'</td>'
+        +'<td class="td-actions">'
+          +(c.status==='completed'
+            ?'<a href="analysis-report.html?id='+c.id+'" class="btn btn-secondary btn-sm">View Report</a>'
+             +' <a href="contract-chat.html?id='+c.id+'" class="btn btn-ghost btn-sm" style="color:var(--accent)">Chat</a>'
+            :'<span style="color:var(--text-4);font-size:.78rem">—</span>')
+          +' <button class="btn btn-ghost btn-sm" style="color:var(--critical)" data-delete-id="'+c.id+'">Delete</button>'
+          +'</td>'
         +'</tr>';
     }).join('');
     body.innerHTML = '<div class="table-wrap"><table>'
       +'<thead><tr><th>File</th><th>Uploaded by</th><th>Type</th><th>Status</th><th>Risk</th><th>Date</th><th></th></tr></thead>'
       +'<tbody>'+rows+'</tbody></table></div>';
+    body.querySelectorAll('[data-delete-id]').forEach(function(btn) {
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        deleteContract(this.dataset.deleteId);
+      });
+    });
+  }
+
+  async function deleteContract(id) {
+    if (!confirm('Delete this contract? This will also remove the analysis and all chat history. This cannot be undone.')) return;
+    var token = (await sb.auth.getSession()).data.session.access_token;
+    var resp = await fetch('/api/delete-contract.js?contract_id=' + id, {
+      method: 'DELETE',
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    if (!resp.ok) {
+      var e = await resp.json().catch(function(){ return {}; });
+      return alert('Delete failed: ' + (e.error || resp.status));
+    }
+    allContracts = allContracts.filter(function(c) { return c.id !== id; });
+    applyFilters();
+    loadStats(allContracts);
   }
 
   function applyFilters() {
