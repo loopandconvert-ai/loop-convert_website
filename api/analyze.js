@@ -112,7 +112,7 @@ export default async function handler(req, res) {
     const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
     const message = await anthropic.messages.create({
-      model:      'claude-sonnet-4-6',
+      model:      'claude-sonnet-5',
       max_tokens: 4096,
       system:     SYSTEM_PROMPT,
       messages:   [{ role: 'user', content: 'Analyze this contract:\n\n' + contractText }]
@@ -137,7 +137,7 @@ export default async function handler(req, res) {
         overall_risk_score: riskScore,
         risk_level:         riskLevel,
         executive_summary:  summary,
-        model_version:      'claude-sonnet-4-6',
+        model_version:      'claude-sonnet-5',
         processing_ms:      processingMs,
         raw_json:           { ...parsed, missing_clauses: missing }
       })
