@@ -503,8 +503,13 @@
         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
         body: JSON.stringify({ contract_id: contractId, text: pdfText })
       });
-      var result = await resp.json();
-
+      var result;
+      try { result = await resp.json(); }
+      catch (e) {
+        throw new Error(resp.status === 504 || resp.status === 408
+          ? 'Analysis timed out — the contract may be too large. Try a shorter document.'
+          : 'Analysis failed (server error ' + resp.status + '). Check Vercel logs for details.');
+      }
       if (!resp.ok) throw new Error(result.error || 'Analysis failed');
 
       // Reload contracts to show completed state + score
