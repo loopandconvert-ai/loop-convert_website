@@ -113,7 +113,7 @@ export default async function handler(req, res) {
 
     const message = await anthropic.messages.create({
       model:      'claude-sonnet-5',
-      max_tokens: 16000,
+      max_tokens: 8000,
       system:     SYSTEM_PROMPT,
       messages:   [{ role: 'user', content: 'Analyze this contract:\n\n' + contractText }]
     });
