@@ -576,14 +576,40 @@
     var listEl=document.getElementById('chat-session-list');
     if(!sessions.length){listEl.innerHTML='<div class="chat-no-sessions">No conversations yet</div>';return;}
     listEl.innerHTML='';
-    sessions.forEach(function(s){
-      var item=document.createElement('div');
-      item.className='chat-session-item'+(s.id===chatSessionId?' active':'');
-      item.dataset.id=s.id;
-      item.innerHTML='<div class="chat-session-title">'+s.title+'</div><div class="chat-session-time">'+timeAgo(s.updated_at)+'</div>';
-      item.addEventListener('click',function(){openTabSession(s.id,item);});
-      listEl.appendChild(item);
+    sessions.forEach(function(s){listEl.appendChild(buildTabSessionItem(s));});
+  }
+
+  function buildTabSessionItem(s){
+    var listEl=document.getElementById('chat-session-list');
+    var item=document.createElement('div');
+    item.className='chat-session-item'+(s.id===chatSessionId?' active':'');
+    item.dataset.id=s.id;
+    item.innerHTML='<div class="chat-session-title">'+s.title+'</div><div class="chat-session-time">'+timeAgo(s.updated_at)+'</div>'
+      +'<button class="chat-session-del" title="Delete">✕</button>';
+    item.addEventListener('click',function(){openTabSession(s.id,item);});
+    item.querySelector('.chat-session-del').addEventListener('click',function(e){
+      e.stopPropagation();deleteTabSession(s.id,item,listEl);
     });
+    return item;
+  }
+
+  async function deleteTabSession(id,item,listEl){
+    if(chatStreaming)return;
+    var token=(await sb.auth.getSession()).data.session.access_token;
+    var resp=await fetch('/api/chat-history.js',{
+      method:'DELETE',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+      body:JSON.stringify({session_id:id})
+    });
+    if(!resp.ok)return;
+    item.remove();
+    if(!listEl.querySelector('.chat-session-item')){listEl.innerHTML='<div class="chat-no-sessions">No conversations yet</div>';}
+    if(id===chatSessionId){
+      chatSessionId=null;
+      document.getElementById('tab-chat-msgs').innerHTML='';
+      document.getElementById('tab-chat-msgs').style.display='none';
+      document.getElementById('chat-foot-area').style.display='none';
+      document.getElementById('chat-empty-state').style.display='flex';
+    }
   }
 
   function markTabActive(item){
@@ -623,10 +649,7 @@
     var d=await r.json();if(!d.session)return;
     var s=d.session,listEl=document.getElementById('chat-session-list');
     if(listEl.querySelector('.chat-no-sessions'))listEl.innerHTML='';
-    var item=document.createElement('div');
-    item.className='chat-session-item';item.dataset.id=s.id;
-    item.innerHTML='<div class="chat-session-title">New Chat</div><div class="chat-session-time">just now</div>';
-    item.addEventListener('click',function(){openTabSession(s.id,item);});
+    var item=buildTabSessionItem(s);
     listEl.insertBefore(item,listEl.firstChild);
     openTabSession(s.id,item);
   }

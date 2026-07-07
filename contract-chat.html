@@ -165,14 +165,46 @@
     }
     listEl.innerHTML = '';
     sessions.forEach(function(s) {
-      var item = document.createElement('div');
-      item.className = 'chat-session-item' + (s.id === sessionId ? ' active' : '');
-      item.dataset.id = s.id;
-      item.innerHTML = '<div class="chat-session-title">' + escHtml(s.title) + '</div>'
-        + '<div class="chat-session-time">' + timeAgo(s.updated_at) + '</div>';
-      item.addEventListener('click', function() { openSession(s.id, item); });
-      listEl.appendChild(item);
+      listEl.appendChild(buildSessionItem(s));
     });
+  }
+
+  function buildSessionItem(s) {
+    var item = document.createElement('div');
+    item.className = 'chat-session-item' + (s.id === sessionId ? ' active' : '');
+    item.dataset.id = s.id;
+    item.innerHTML = '<div class="chat-session-title">' + escHtml(s.title) + '</div>'
+      + '<div class="chat-session-time">' + timeAgo(s.updated_at) + '</div>'
+      + '<button class="chat-session-del" title="Delete">✕</button>';
+    item.addEventListener('click', function() { openSession(s.id, item); });
+    item.querySelector('.chat-session-del').addEventListener('click', function(e) {
+      e.stopPropagation();
+      deleteSession(s.id, item);
+    });
+    return item;
+  }
+
+  async function deleteSession(id, item) {
+    if (isStreaming) return;
+    var token = (await sb.auth.getSession()).data.session.access_token;
+    var resp = await fetch('/api/chat-history.js', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ session_id: id })
+    });
+    if (!resp.ok) return;
+    item.remove();
+    if (!listEl.querySelector('.chat-session-item')) {
+      listEl.innerHTML = '<div class="chat-no-sessions">No conversations yet.<br>Start one!</div>';
+    }
+    if (id === sessionId) {
+      sessionId = null;
+      msgsEl.innerHTML = '';
+      msgsEl.style.display = 'none';
+      footEl.style.display = 'none';
+      suggestEl.innerHTML = '';
+      emptyEl.style.display = 'flex';
+    }
   }
 
   function markActive(item) {
@@ -234,13 +266,7 @@
 
     // Prepend to session list
     var s    = data.session;
-    var item = document.createElement('div');
-    item.className  = 'chat-session-item';
-    item.dataset.id = s.id;
-    item.innerHTML  = '<div class="chat-session-title">New Chat</div>'
-      + '<div class="chat-session-time">just now</div>';
-    item.addEventListener('click', function() { openSession(s.id, item); });
-
+    var item = buildSessionItem(s);
     if (listEl.querySelector('.chat-no-sessions')) listEl.innerHTML = '';
     listEl.insertBefore(item, listEl.firstChild);
 

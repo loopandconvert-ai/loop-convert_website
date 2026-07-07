@@ -23,7 +23,7 @@
   <div class="dash-nav-inner">
     <a href="index.html" class="nav-logo">Loop <span>&</span> Convert</a>
     <div class="nav-links">
-      <a href="javascript:history.back()" class="nav-link">← Back</a>
+      <a href="#" id="back-nav-link" class="nav-link">← Back to Contracts</a>
     </div>
     <div class="nav-right">
       <div>
@@ -64,14 +64,16 @@
     return level || 'medium';
   }
 
+  var dashUrl = 'lawyer-dashboard.html'; // set properly after profile loads
+
   function renderEmpty(main) {
-    main.innerHTML = '<a href="javascript:history.back()" class="back-link">← Back to Contracts</a>'
+    main.innerHTML = '<a href="' + dashUrl + '" class="back-link">← Back to Contracts</a>'
       + '<div class="state-empty" style="margin-top:3rem">'
       + '<h3>Contract not found</h3><p>This contract may not exist or you may not have access.</p></div>';
   }
 
   function renderPending(main, contract) {
-    main.innerHTML = '<a href="javascript:history.back()" class="back-link">← Back to Contracts</a>'
+    main.innerHTML = '<a href="' + dashUrl + '" class="back-link">← Back to Contracts</a>'
       + '<div class="card"><div class="card-body" style="text-align:center;padding:3rem">'
       + '<div style="font-size:2.5rem;margin-bottom:1rem">⏳</div>'
       + '<h2 style="font-size:1.1rem;font-weight:700;margin-bottom:.5rem">' + esc(contract.file_name) + '</h2>'
@@ -90,7 +92,7 @@
   }
 
   function renderFailed(main, contract) {
-    main.innerHTML = '<a href="javascript:history.back()" class="back-link">← Back to Contracts</a>'
+    main.innerHTML = '<a href="' + dashUrl + '" class="back-link">← Back to Contracts</a>'
       + '<div class="card"><div class="card-body" style="text-align:center;padding:3rem">'
       + '<div style="font-size:2.5rem;margin-bottom:1rem">❌</div>'
       + '<h2 style="font-size:1.1rem;font-weight:700;margin-bottom:.5rem">' + esc(contract.file_name) + '</h2>'
@@ -148,7 +150,7 @@
       '<div class="print-only" style="margin-bottom:1.5rem"><strong style="font-size:1.3rem">Loop &amp; Convert — Analysis Report</strong><br>'
       + '<span style="font-size:.85rem;color:#666">Generated ' + new Date().toLocaleDateString('en-GB') + '</span></div>'
 
-      + '<a href="javascript:history.back()" class="back-link no-print">← Back to Contracts</a>'
+      + '<a href="' + dashUrl + '" class="back-link no-print">← Back to Contracts</a>'
 
       // Header card
       + '<div class="card">'
@@ -201,6 +203,8 @@
     if (!profile) return LC_AUTH.signOut();
     document.getElementById('nav-name').textContent = profile.full_name || profile.email;
     document.getElementById('nav-firm').textContent = profile.firms ? profile.firms.name : '';
+    dashUrl = LC_AUTH.dashboardUrl(profile.role);
+    document.getElementById('back-nav-link').href = dashUrl;
 
     var main = document.getElementById('report-main');
     var contractId = new URLSearchParams(window.location.search).get('id');

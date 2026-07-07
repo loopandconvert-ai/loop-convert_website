@@ -583,6 +583,14 @@ tr.contract-row:hover td { background: rgba(59,130,246,.04); }
 }
 .chat-session-item.active .chat-session-title { color: var(--text); }
 .chat-session-time { font-size: .68rem; color: var(--text-4); }
+.chat-session-del {
+  position: absolute; right: .35rem; top: 50%; transform: translateY(-50%);
+  display: none; background: none; border: none; color: var(--text-4);
+  cursor: pointer; font-size: .8rem; padding: .2rem .35rem;
+  border-radius: 4px; line-height: 1; transition: color .1s, background .1s;
+}
+.chat-session-item:hover .chat-session-del { display: block; }
+.chat-session-del:hover { color: #f87171; background: rgba(239,68,68,.1); }
 .chat-no-sessions {
   padding: 1.5rem .85rem; font-size: .77rem; color: var(--text-4);
   text-align: center; line-height: 1.6;
