@@ -10,7 +10,7 @@
       "maxDuration": 15
     },
     "api/chat.js": {
-      "maxDuration": 30
+      "maxDuration": 120
     },
     "api/analyze.js": {
       "maxDuration": 300
