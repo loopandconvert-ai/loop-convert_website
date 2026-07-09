@@ -42,6 +42,10 @@ Order risk_items by severity (critical first). Be thorough — identify ALL sign
 function parseJson(raw) {
   var clean = raw.trim()
     .replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/, '').trim();
+  // Opus sometimes adds text before/after the JSON object — extract just the object
+  var first = clean.indexOf('{');
+  var last  = clean.lastIndexOf('}');
+  if (first !== -1 && last !== -1) clean = clean.slice(first, last + 1);
   return JSON.parse(clean);
 }
 
