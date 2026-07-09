@@ -577,12 +577,23 @@
     });
   }
 
+  function renderMd(text){
+    var s=text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    s=s.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
+    s=s.replace(/\*([^*\n]+?)\*/g,'<em>$1</em>');
+    s=s.replace(/^&gt; ?(.*)$/gm,'<span style="display:block;border-left:3px solid rgba(255,255,255,.2);padding-left:.6rem;color:var(--text-2);font-style:italic;margin:.2rem 0">$1</span>');
+    s=s.replace(/^- (.+)$/gm,'<span style="display:block;padding-left:.75rem">• $1</span>');
+    s=s.replace(/\n/g,'<br>');
+    return s;
+  }
+
   function addTabBubble(role,content){
     var msgsEl=document.getElementById('tab-chat-msgs');
     var wrap=document.createElement('div');wrap.className='chat-msg '+role;
     var av=document.createElement('div');av.className='chat-avatar';av.textContent=role==='user'?'You':'AI';
     var bub=document.createElement('div');bub.className='chat-bubble';
     if(content==='__typing__'){bub.innerHTML='<div class="chat-typing"><span></span><span></span><span></span></div>';}
+    else if(role==='assistant'){bub.innerHTML=renderMd(content);}
     else{bub.textContent=content;}
     wrap.appendChild(av);wrap.appendChild(bub);
     msgsEl.appendChild(wrap);msgsEl.scrollTop=msgsEl.scrollHeight;
@@ -734,8 +745,8 @@
             if(json.error)throw new Error(json.error);
             if(json.title)updateTabTitle(chatSessionId,json.title);
             if(json.done)break;
-            if(json.text){if(!started){aiBubble.textContent='';started=true;}
-              aiText+=json.text;aiBubble.textContent=aiText;
+            if(json.text){if(!started){aiBubble.innerHTML='';started=true;}
+              aiText+=json.text;aiBubble.innerHTML=renderMd(aiText);
               document.getElementById('tab-chat-msgs').scrollTop=999999;}
           }catch(pe){if(pe.message!=='Unexpected end of JSON input')throw pe;}
         }
