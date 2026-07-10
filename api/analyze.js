@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import Anthropic from '@anthropic-ai/sdk';
 
-const MAX_TEXT_CHARS = 80000; // ~20k tokens — covers up to ~40 pages
+const MAX_TEXT_CHARS = 150000; // ~37k tokens — covers up to ~75 pages
 
 const SYSTEM_PROMPT = `You are an expert legal analyst specializing in contract risk assessment for law firms.
 
@@ -104,7 +104,7 @@ export default async function handler(req, res) {
 
   // Mark as processing and store extracted text for chat feature
   await adminClient.from('contracts')
-    .update({ status: 'processing', extracted_text: text.slice(0, 200000) })
+    .update({ status: 'processing', extracted_text: text.slice(0, 300000) })
     .eq('id', contract_id);
 
   const startMs     = Date.now();

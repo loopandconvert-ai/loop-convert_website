@@ -872,11 +872,12 @@
       document.getElementById('contract-type').value = '';
 
       // 4. Trigger AI analysis
-      showUploadAlert('Analyzing your contract with AI… this may take up to 60 seconds.', 'info');
+      showUploadAlert('Analyzing your contract with AI… large contracts may take 2–3 minutes.', 'info');
       updateContractInList(contractId, 'processing', null, null);
 
-      var session = await sb.auth.getSession();
-      var token   = session.data.session.access_token;
+      var { data: refreshed } = await sb.auth.refreshSession();
+      var token = refreshed && refreshed.session ? refreshed.session.access_token : null;
+      if (!token) { LC_AUTH.signOut(); throw new Error('Session expired. Please sign in again.'); }
 
       var resp = await fetch('/api/analyze.js', {
         method: 'POST',
