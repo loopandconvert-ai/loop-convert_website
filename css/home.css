@@ -358,7 +358,11 @@
 .offer.dark { background: var(--ink); color: #0F0F0F; border-color: var(--ink); }
 .offer.dark p, .offer.dark .tag, .offer.dark .price small { color: rgba(15,15,15,.68); }
 .offer.dark:hover { box-shadow: 0 24px 70px rgba(255,255,255,.12); }
-.pilot-cta { display: flex; justify-content: center; margin-top: 40px; }
+.offer .tag.trial { align-self: flex-start; background: #0F0F0F; color: #EDEDEB !important; padding: 8px 12px; border-radius: 999px; }
+.pilot-cta { display: flex; flex-direction: column; align-items: center; gap: 16px; margin-top: 44px; text-align: center; }
+.pilot-note { color: var(--ink-2); max-width: 34em; }
+.pilot-mail { font-size: .82rem; color: var(--muted); user-select: all; }
+.offer-more { font-size: .92rem; padding-top: 14px; border-top: 1px solid rgba(15,15,15,.16); }
 
 /* ─── Founder ────────────────────────────────────────────────── */
 .h-founder { display: grid; grid-template-columns: auto 1fr; gap: 32px; align-items: start; max-width: 860px; }
