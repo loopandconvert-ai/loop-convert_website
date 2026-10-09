@@ -7,7 +7,7 @@
   <meta name="description" content="Calculate how many hours and how much money your law firm saves by using AI contract analysis instead of manual review." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700&family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
   <link rel="icon" type="image/png" href="images/logo.png" />
   <link rel="stylesheet" href="css/style.css" />
 </head>
@@ -16,7 +16,7 @@
   <!-- â”€â”€â”€ Navbar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
   <header class="navbar">
     <div class="container nav-inner">
-      <a href="index.html" class="nav-logo">Loop <span class="accent">&amp;</span> Convert</a>
+      <a href="index.html" class="nav-logo"><img src="images/logo-white.png" alt="Loop &amp; Convert" class="brand-logo" width="70" height="34" style="height:34px;width:auto;display:block;" /></a>
       <nav>
         <ul class="nav-links">
           <li><a href="index.html">Home</a></li>
@@ -83,7 +83,7 @@
           <div class="slider-group">
             <div class="slider-label-row">
               <label class="slider-label" for="rate">Attorney hourly billing rate</label>
-              <span class="slider-value" id="rate-val">â‚¬250</span>
+              <span class="slider-value" id="rate-val">€250</span>
             </div>
             <input type="range" id="rate" min="50" max="800" value="250" step="25" />
             <p class="slider-hint">The rate at which your firm bills clients — or your own cost per hour.</p>
@@ -109,17 +109,17 @@
           </div>
 
           <div class="roi-result-card">
-            <div class="roi-result-value" id="r-cost-saved">â‚¬0</div>
+            <div class="roi-result-value" id="r-cost-saved">€0</div>
             <div class="roi-result-label">Attorney time freed per month</div>
           </div>
 
           <div class="roi-result-card">
-            <div class="roi-result-value" id="r-billable">â‚¬0</div>
+            <div class="roi-result-value" id="r-billable">€0</div>
             <div class="roi-result-label">Extra billable hours unlocked / month</div>
           </div>
 
           <div class="roi-result-card highlight">
-            <div class="roi-result-value" id="r-annual">â‚¬0</div>
+            <div class="roi-result-value" id="r-annual">€0</div>
             <div class="roi-result-label">Estimated annual value</div>
           </div>
 
@@ -138,7 +138,7 @@
         <p>Upload your first contract free and see a full AI analysis in under 3 minutes — no credit card, no commitment.</p>
         <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
           <a href="book.html" class="btn btn-primary">Book a Demo →</a>
-          <a href="book.html" class="btn btn-secondary">Book a Demo Call</a>
+          <a href="how-it-works.html" class="btn btn-secondary">See How It Works</a>
         </div>
       </div>
     </div>
@@ -149,7 +149,7 @@
     <div class="container">
       <div class="footer-grid">
         <div class="footer-brand">
-          <div class="nav-logo">Loop <span class="accent">&amp;</span> Convert</div>
+          <div class="nav-logo"><img src="images/logo-white.png" alt="Loop &amp; Convert" class="brand-logo" width="94" height="46" style="height:46px;width:auto;display:block;" /></div>
           <p>AI contract analysis for law firms &mdash; full review in under 3 minutes.</p>
         </div>
         <div class="footer-col">
@@ -238,8 +238,8 @@
     var recoveryEl   = document.getElementById('recovery');
 
     function fmt(n) {
-      if (n >= 1000) return 'â‚¬' + Math.round(n).toLocaleString('en-GB');
-      return 'â‚¬' + Math.round(n);
+      if (n >= 1000) return '€' + Math.round(n).toLocaleString('en-GB');
+      return '€' + Math.round(n);
     }
 
     function calc() {
@@ -258,7 +258,7 @@
 
       document.getElementById('contracts-val').textContent = contracts;
       document.getElementById('hours-per-val').textContent = hoursEach + ' hrs';
-      document.getElementById('rate-val').textContent      = 'â‚¬' + rate;
+      document.getElementById('rate-val').textContent      = '€' + rate;
       document.getElementById('recovery-val').textContent  = Math.round(recovery * 100) + '%';
 
       document.getElementById('r-hours-saved').textContent = Math.round(savedHours) + 'h';
