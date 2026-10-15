@@ -24,6 +24,16 @@ current: contact
               <p class="error" id="c-email-err" hidden></p>
             </div>
           </div>
+          <div class="field" data-field="phone">
+            <label for="c-phone">Phone number</label>
+            <div class="phone-row">
+              <select id="c-phone-code" aria-label="Country code" data-country-codes>
+                <option value="+31" data-country="Netherlands" selected>Netherlands (+31)</option>
+              </select>
+              <input id="c-phone" name="phone" type="tel" autocomplete="tel-national" required placeholder="6 12345678" data-msg="Enter your phone number, like 6 12345678.">
+            </div>
+            <p class="error" id="c-phone-err" hidden></p>
+          </div>
           <div class="field-row">
             <div class="field">
               <label for="c-company">Company <span class="opt">(optional)</span></label>

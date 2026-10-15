@@ -253,6 +253,16 @@
               </select>
             </div>
           </div>
+          <div class="field" data-field="phone">
+            <label for="d-phone">Phone number</label>
+            <div class="phone-row">
+              <select id="d-phone-code" aria-label="Country code" data-country-codes>
+                <option value="+31" data-country="Netherlands" selected>Netherlands (+31)</option>
+              </select>
+              <input id="d-phone" name="phone" type="tel" autocomplete="tel-national" required placeholder="6 12345678" data-msg="Enter your phone number, like 6 12345678.">
+            </div>
+            <p class="error" id="d-phone-err" hidden></p>
+          </div>
           <div class="field">
             <label for="d-volume">Contracts reviewed per month</label>
             <select id="d-volume" name="volume">
@@ -332,6 +342,7 @@
   </div>
 </footer>
 <script>window.LC_SITE = { email: "loopandconvert@gmail.com", phone: "+31 6 25500911" };</script>
+<script src="assets/country-codes.js"></script>
 <script src="assets/main.js"></script>
 </body>
 </html>

@@ -848,3 +848,7 @@ legend span { display: block; font-family: var(--body); font-size: 0.95rem; font
 .legal table { width: 100%; border-collapse: collapse; font-size: 0.95rem; min-width: 560px; }
 .legal th, .legal td { text-align: left; padding: 12px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
 .legal th { font-weight: 600; color: var(--muted); font-size: 0.85rem; }
+
+/* Phone field: country code dropdown next to the number */
+.phone-row { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: 8px; }
+@media (max-width: 520px) { .phone-row { grid-template-columns: minmax(0, 1fr); } }

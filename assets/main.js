@@ -222,6 +222,33 @@ var LC_CONFIG = {
     });
   });
 
+  /* Phone fields: fill the country code dropdowns. Netherlands stays selected. */
+  var countryCodes = window.LC_COUNTRY_CODES || [];
+  var countryTop = window.LC_COUNTRY_TOP || [];
+  document.querySelectorAll("select[data-country-codes]").forEach(function (sel) {
+    if (!countryCodes.length) return;
+    var defaultCountry = sel.options[sel.selectedIndex].getAttribute("data-country");
+    var defaultSet = false;
+    var addOption = function (country) {
+      var o = document.createElement("option");
+      o.value = country[1];
+      o.textContent = country[0] + " (" + country[1] + ")";
+      o.setAttribute("data-country", country[0]);
+      if (!defaultSet && country[0] === defaultCountry) { o.selected = true; defaultSet = true; }
+      sel.appendChild(o);
+    };
+    sel.innerHTML = "";
+    countryTop.forEach(function (name) {
+      var match = countryCodes.filter(function (c) { return c[0] === name; })[0];
+      if (match) addOption(match);
+    });
+    var divider = document.createElement("option");
+    divider.disabled = true;
+    divider.textContent = "──────────";
+    sel.appendChild(divider);
+    countryCodes.forEach(addOption);
+  });
+
   /* Simple forms: demo request (product page) and questions (contact page) */
   var simpleForms = {
     demo: { done: "Demo requested.", body: "We'll email you within one working day to set up a 30-minute demo.", area: "demo-area", subject: "Demo request: Contract Analysis" },
@@ -242,7 +269,10 @@ var LC_CONFIG = {
     var check = function (input) {
       var v = input.value.trim();
       var min = parseInt(input.getAttribute("data-min") || "2", 10);
-      var ok = input.type === "email" ? /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v) : v.length >= min;
+      var ok;
+      if (input.type === "email") ok = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v);
+      else if (input.type === "tel") ok = /^\+?[\d\s().-]+$/.test(v) && v.replace(/\D/g, "").length >= 6;
+      else ok = v.length >= min;
       fieldError(input, ok ? "" : input.getAttribute("data-msg"));
       return ok;
     };
@@ -266,6 +296,14 @@ var LC_CONFIG = {
       var data = new FormData(f);
       var payload = { form: kind, page: window.location.pathname, sent_at: new Date().toISOString() };
       data.forEach(function (v, k) { payload[k] = String(v).trim(); });
+      /* Put the chosen country code in front of the number, dropping a leading 0
+         (06 12345678 becomes +31 6 12345678). A number typed with + is kept as is. */
+      var codeSel = f.querySelector("select[data-country-codes]");
+      if (codeSel && payload.phone) {
+        var picked = codeSel.options[codeSel.selectedIndex];
+        if (payload.phone.charAt(0) !== "+") payload.phone = codeSel.value + " " + payload.phone.replace(/^0+/, "");
+        payload.country = picked.getAttribute("data-country") || "";
+      }
       var btn = f.querySelector('button[type="submit"]');
       var label = btn.textContent;
       btn.disabled = true; btn.textContent = "Sending...";

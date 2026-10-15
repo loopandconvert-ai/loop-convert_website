@@ -46,6 +46,7 @@ HEAD = """<!doctype html>
 <body>
 """
 TAIL = """<script>window.LC_SITE = {{ email: "{email}", phone: "{phone}" }};</script>
+<script src="assets/country-codes.js"></script>
 <script src="assets/main.js"></script>
 </body>
 </html>
