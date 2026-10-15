@@ -1,430 +1,264 @@
-﻿<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script>
-    // If Supabase redirects here after a password reset, forward immediately to reset-password.html
-    if (window.location.hash.indexOf('type=recovery') !== -1) {
-      window.location.replace('reset-password.html' + window.location.hash);
-    }
-  </script>
-  <title>Loop &amp; Convert | AI contract analysis for law firms</title>
-  <meta name="description" content="Upload a contract and get a structured risk report in under three minutes: risk score, key clauses, red flags and questions to ask the other side." />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700&family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
-  <link rel="icon" type="image/png" href="images/logo.png" />
-  <link rel="stylesheet" href="css/style.css" />
-  <link rel="stylesheet" href="css/home.css" />
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<script>
+  if (window.location.hash.indexOf("type=recovery") !== -1) {
+    window.location.replace("reset-password.html" + window.location.hash);
+  }
+</script>
+<title>Loop&Convert</title>
+<meta name="description" content="Loop&Convert builds custom platforms, automations, AI agents and campaigns that take repetitive work off your team.">
+<link rel="icon" type="image/png" href="assets/img/icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Geist:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="assets/styles.css">
 </head>
-<body class="home">
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="wrap header-row">
+    <a class="brand" href="index.html">
+      <img src="assets/img/logo.png" alt="Loop&amp;Convert home" width="68" height="34">
+    </a>
+    <button class="menu-btn" type="button" aria-expanded="false" aria-controls="site-nav" id="menu-btn">Menu</button>
+    <nav class="nav" id="site-nav" aria-label="Main">
+      <a class="nav-link" href="index.html#services">Services</a>
+      <div class="nav-drop">
+        <button class="nav-drop-btn" type="button" aria-expanded="false" aria-controls="products-menu" id="products-btn">
+          Products
+          <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 4.5 6 8.5l4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="drop-panel" id="products-menu" hidden>
+          <a class="drop-item" href="contract-analysis.html">
+            <span class="ico" aria-hidden="true"><svg viewBox="0 0 20 20"><path d="M5 2.5h6.5L15.5 6.5V17a.5.5 0 0 1-.5.5H5a.5.5 0 0 1-.5-.5V3a.5.5 0 0 1 .5-.5Z" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M7.5 10.5l1.8 1.8 3.5-3.6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <span><strong>Contract Analysis</strong><span>Upload a contract, get a risk report with red flags and key clauses in under three minutes.</span></span>
+          </a>
+          <p class="drop-foot">Need something built for your own team? <a href="book-a-call.html">Tell us the problem</a></p>
+        </div>
+      </div>
+      <a class="nav-link" href="about.html">About</a>
+      <a class="nav-link" href="contact.html">Contact</a>
+      <a class="nav-link" href="login.html">Log in</a>
+      <a class="btn btn-sm" href="book-a-call.html">Book a call</a>
+    </nav>
+  </div>
+</header>
+<main id="main">
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div class="hero-copy">
+        <h1>Tell us the job your team hates. We build the system that does it.</h1>
+        <p class="lede">Loop&amp;Convert builds platforms, automations and campaigns for businesses. Dashboards your team works in every day, AI agents that answer, sort and follow up, and back ends that connect the tools you already pay for.</p>
+        <form class="ask" id="ask-form" novalidate>
+          <label for="ask-input">What takes up too much of your team's time?</label>
+          <div class="ask-row">
+            <input id="ask-input" name="problem" type="text" autocomplete="off" placeholder="For example: we copy every order email into Excel by hand">
+            <button class="btn" type="submit">Send it to us</button>
+          </div>
+          <p class="hint">Next you pick a time for a free 30-minute call. What you typed here goes along with your booking.</p>
+        </form>
+      </div>
 
-  <!-- ─── Navbar ─────────────────────────────────────────── -->
-  <header class="navbar">
-    <div class="container nav-inner">
-      <a href="index.html" class="nav-logo"><img src="images/logo-white.png" alt="Loop &amp; Convert" class="brand-logo" width="70" height="34" style="height:34px;width:auto;display:block;" /></a>
-      <nav>
-        <ul class="nav-links">
-          <li><a href="index.html" data-i18n="nav_home">Home</a></li>
-          <li><a href="about.html" data-i18n="nav_about">About</a></li>
-          <li><a href="how-it-works.html" data-i18n="nav_how">How It Works</a></li>
-          <li><a href="contact.html" data-i18n="nav_contact">Contact</a></li>
-          <li>
-            <div class="lang" role="group" aria-label="Language">
-              <button type="button" data-lang="en" aria-pressed="true">EN</button>
-              <button type="button" data-lang="nl" aria-pressed="false">NL</button>
-            </div>
-          </li>
-          <li><a href="login.html" id="nav-auth-link" data-i18n="nav_login">Log In</a></li>
-          <li class="nav-cta"><a href="book.html" class="btn btn-primary" data-i18n="nav_cta">Book a Call</a></li>
+      <div class="converter is-converted" id="converter" aria-roledescription="carousel" aria-label="Examples of jobs we take on">
+        <div class="converter-top">
+          <p>Examples of jobs we take on</p>
+          <div class="conv-controls">
+            <button type="button" id="conv-prev" aria-label="Previous example"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M9 2.5 4.5 7 9 11.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+            <span class="conv-count" id="conv-count" aria-live="polite">1 of 5</span>
+            <button type="button" id="conv-next" aria-label="Next example"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M5 2.5 9.5 7 5 11.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          </div>
+        </div>
+        <div class="conv-stage">
+          <p class="conv-label">Today</p>
+          <p class="conv-before"><span id="conv-before">Copying order emails into a spreadsheet every morning</span></p>
+          <svg class="conv-arrow" viewBox="0 0 28 28" aria-hidden="true"><path d="M14 4v18M7 15l7 7 7-7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div class="conv-after">
+            <span class="kind" id="conv-kind">Automation and dashboard</span>
+            <strong id="conv-after">An agent reads each order email and lists it in one dashboard your team already has open.</strong>
+            <span id="conv-link-wrap" hidden><a class="text-link" id="conv-link" href="contract-analysis.html">See the product</a></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="hero-photo">
+    <div class="wrap">
+      <figure class="media" style="margin:0">
+        <img src="assets/img/home-hero.jpg" alt="A laptop showing a simple operations dashboard on a desk in a bright office" width="1344" height="752" loading="eager">
+      </figure>
+    </div>
+  </div>
+
+  <section class="section" id="services">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>What we build</h2>
+        <p class="lede">Every project starts from a problem in your business, not from a tool. Most of what we build falls into three kinds of work.</p>
+      </div>
+      <div class="services">
+        <article class="service">
+          <h3>Platforms and dashboards</h3>
+          <p>Software your team and your clients actually log into. Built around how you work, not around a template.</p>
+          <ul>
+            <li>Internal tools and team dashboards</li>
+            <li>Client portals with logins and roles</li>
+            <li>Back ends, databases and integrations</li>
+            <li>Websites that do more than show information</li>
+          </ul>
+        </article>
+        <article class="service">
+          <h3>Automations and AI agents</h3>
+          <p>The repetitive work between your tools, handled automatically, with a person stepping in where it matters.</p>
+          <ul>
+            <li>Email sorting and drafted replies</li>
+            <li>Reading documents, invoices and forms</li>
+            <li>Call and chat assistants that answer and book</li>
+            <li>Reports and alerts sent to you automatically</li>
+          </ul>
+        </article>
+        <article class="service">
+          <h3>Campaigns</h3>
+          <p>Systems that bring in work, so growth doesn't depend on someone finding time on a Friday afternoon.</p>
+          <ul>
+            <li>Outreach and follow-up systems</li>
+            <li>Content pipelines for social media</li>
+            <li>Landing pages built to convert</li>
+            <li>Tracking so you see what works</li>
+          </ul>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap for-row">
+      <figure class="media media-43" style="margin:0">
+        <img src="assets/img/workshop.jpg" alt="A tablet showing job status in a clean machining workshop" width="1168" height="880" loading="lazy">
+      </figure>
+      <div style="display:grid;gap:28px">
+        <div class="section-head" style="margin-bottom:0">
+          <h2>Built for businesses that run on people and paperwork</h2>
+          <p class="lede">We work best with companies of 5 to 100 people where a few repetitive jobs quietly eat hours every week.</p>
+        </div>
+        <ul class="for-list">
+          <li><strong>Manufacturing and workshops</strong><span>Job tracking, quote requests, customer emails and planning.</span></li>
+          <li><strong>Salons, clinics and local services</strong><span>Bookings, reminders, social content and customer questions.</span></li>
+          <li><strong>Legal and professional services</strong><span>Document review, intake and client follow-up.</span></li>
+          <li><strong>Webshops and wholesale</strong><span>Orders, stock updates, returns and supplier emails.</span></li>
         </ul>
-      </nav>
-      <button class="hamburger" aria-label="Open menu">
-        <span></span><span></span><span></span>
-      </button>
-    </div>
-    <div class="mobile-menu">
-      <a href="index.html" data-i18n="nav_home">Home</a>
-      <a href="about.html" data-i18n="nav_about">About</a>
-      <a href="how-it-works.html" data-i18n="nav_how">How It Works</a>
-      <a href="contact.html" data-i18n="nav_contact">Contact</a>
-      <a href="login.html" id="mob-auth-link" data-i18n="nav_login">Log In</a>
-      <div class="lang" role="group" aria-label="Language">
-        <button type="button" data-lang="en" aria-pressed="true">EN</button>
-        <button type="button" data-lang="nl" aria-pressed="false">NL</button>
-      </div>
-      <a href="book.html" class="btn btn-primary" data-i18n="nav_cta">Book a Call</a>
-    </div>
-  </header>
-
-  <main id="top">
-
-    <!-- ─── Hero ─────────────────────────────────────────── -->
-    <section class="h-hero">
-      <div class="h-hero-glow" aria-hidden="true"></div>
-      <div class="container h-hero-grid">
-        <div class="h-hero-copy">
-          <span class="eyebrow fade-in" data-i18n="hero_eyebrow">Contract review for law firms</span>
-          <h1>
-            <span class="line"><span data-i18n="hero_l1">The first read</span></span>
-            <span class="line"><span data-i18n="hero_l2">of every contract,</span></span>
-            <span class="line"><span data-i18n="hero_l3"><em>in under three minutes.</em></span></span>
-          </h1>
-          <p class="h-hero-sub fade-in" data-i18n="hero_sub">Upload a PDF. Loop &amp; Convert returns a structured risk report with a risk score, the key clauses, red flags and the questions to ask the other side. Your lawyers check the output instead of producing it.</p>
-          <div class="h-hero-actions fade-in">
-            <a class="btn btn-primary" href="book.html"><span data-i18n="hero_cta1">Test it on a contract you know</span> <span class="arr" aria-hidden="true">&rarr;</span></a>
-            <a class="btn btn-secondary" href="#report" data-i18n="hero_cta2">View the sample report</a>
-          </div>
-          <p class="h-hero-note fade-in">
-            <svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5 2.5 3.8v3.7c0 3.3 2.3 6 5.5 7 3.2-1 5.5-3.7 5.5-7V3.8L8 1.5Z" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>
-            <span data-i18n="hero_note">Send a contract you have already reviewed. We return the report. You check our work.</span>
-          </p>
-        </div>
-
-        <div class="stage">
-          <div class="rcard" id="card" role="img" aria-label="Animated example of a risk report being generated">
-            <div class="rcard-bar">
-              <div class="rcard-file"><span class="pdf-tag">PDF</span><span>Huurovereenkomst_kantoor.pdf</span></div>
-              <div class="rstatus" id="status"><i></i><span id="status-txt">Report ready</span></div>
-            </div>
-            <div class="rcard-body">
-              <div class="rdoc" aria-hidden="true">
-                <div class="rscan" id="scan"></div>
-                <div class="rdoc-h"></div>
-                <div class="dl" style="width:94%"></div><div class="dl" style="width:88%"></div><div class="dl" style="width:60%"></div>
-                <div class="rdoc-art">ART. 3</div>
-                <div class="dl hit med on" data-hit="2" style="width:91%"></div><div class="dl" style="width:72%"></div>
-                <div class="rdoc-art">ART. 4</div>
-                <div class="dl" style="width:86%"></div><div class="dl hit on" data-hit="0" style="width:95%"></div><div class="dl" style="width:48%"></div>
-                <div class="rdoc-art">ART. 8</div>
-                <div class="dl" style="width:90%"></div><div class="dl hit on" data-hit="1" style="width:83%"></div><div class="dl" style="width:66%"></div>
-                <div class="rdoc-art">ART. 9</div>
-                <div class="dl" style="width:92%"></div><div class="dl" style="width:55%"></div>
-              </div>
-              <div class="findings">
-                <div class="score">
-                  <svg class="ring" viewBox="0 0 80 80" aria-hidden="true"><circle class="track" cx="40" cy="40" r="34"/><circle class="val" id="ring" cx="40" cy="40" r="34" style="stroke-dashoffset:59.8"/></svg>
-                  <div class="score-txt"><b id="score">72</b><small data-i18n="card_risk">High risk</small></div>
-                </div>
-                <ul class="flags">
-                  <li class="flag on" data-flag="0"><i></i><span data-i18n="card_f1">Indexation floor of 3% per year</span></li>
-                  <li class="flag on" data-flag="1"><i></i><span data-i18n="card_f2">Liability for hidden defects excluded</span></li>
-                  <li class="flag med on" data-flag="2"><i></i><span data-i18n="card_f3">Automatic renewal, 12 months notice</span></li>
-                </ul>
-              </div>
-            </div>
-            <div class="rcard-foot"><span data-i18n="card_foot1">14 pages &middot; 11 key clauses</span><span data-i18n="card_foot2">Example</span></div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ─── Facts ────────────────────────────────────────── -->
-    <div class="facts">
-      <div class="container facts-grid">
-        <div class="fact"><b>&lt; 3 min</b><span data-i18n="fact1">from upload to finished report</span></div>
-        <div class="fact"><b>EU</b><span data-i18n="fact2">documents are processed in the European Union</span></div>
-        <div class="fact"><b>0</b><span data-i18n="fact3">client contracts used to train AI models</span></div>
       </div>
     </div>
+  </section>
 
-    <!-- ─── Sample report ────────────────────────────────── -->
-    <section class="block" id="report">
-      <div class="container">
-        <div class="head">
-          <div>
-            <span class="eyebrow" data-i18n="rep_eyebrow">Sample report</span>
-            <h2 data-i18n="rep_title">This is what lands in your dashboard.</h2>
-          </div>
-          <p data-i18n="rep_sub">An illustration of the report format, run on a fictional office lease. Every report follows the same four parts, so your lawyers always know where to look.</p>
-        </div>
+  <section class="section" id="process">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>How a project runs</h2>
+        <p class="lede">You always know what you're paying and what you'll get before we write a line of code.</p>
+      </div>
+      <ol class="steps">
+        <li><h3>Tell us the problem</h3><p>Pick a time for a free 30-minute call and tell us what slows your team down. Booking takes about two minutes.<span class="meta">Online calendar</span></p></li>
+        <li><h3>Discovery call</h3><p>We walk through the process with you, find out what it costs you today and what a fix should do.<span class="meta">30 minutes, free</span></p></li>
+        <li><h3>Fixed proposal</h3><p>You get the scope, price and timeline in writing. No hourly surprises.<span class="meta">Before any work starts</span></p></li>
+        <li><h3>Build and launch</h3><p>We build it, your team tests it with real work, and we launch when it does what was agreed.</p></li>
+        <li><h3>Keep it running</h3><p>An optional monthly plan covers hosting, monitoring and improvements, so the system keeps working as your business changes.</p></li>
+      </ol>
+    </div>
+  </section>
 
-        <div class="report">
-          <div class="rep-top">
-            <div>
-              <div class="rep-file">Huurovereenkomst_kantoorruimte_Zaandam.pdf</div>
-              <div class="rep-meta" data-i18n="rep_meta">14 pages &middot; analysed in 2 min 41 s &middot; risk score 72/100</div>
-            </div>
-            <span class="badge" data-i18n="rep_badge">High risk</span>
-          </div>
-          <div class="tabs" role="tablist" aria-label="Report sections">
-            <button class="tab" role="tab" id="t-sum" aria-controls="p-sum" aria-selected="true"><span data-i18n="tab1">Risk summary</span></button>
-            <button class="tab" role="tab" id="t-cl" aria-controls="p-cl" aria-selected="false" tabindex="-1"><span data-i18n="tab2">Key clauses</span><span class="n">5</span></button>
-            <button class="tab" role="tab" id="t-rf" aria-controls="p-rf" aria-selected="false" tabindex="-1"><span data-i18n="tab3">Red flags</span><span class="n">4</span></button>
-            <button class="tab" role="tab" id="t-q" aria-controls="p-q" aria-selected="false" tabindex="-1"><span data-i18n="tab4">Questions</span><span class="n">3</span></button>
-          </div>
-
-          <div class="panel" role="tabpanel" id="p-sum" aria-labelledby="t-sum">
-            <ul class="plist" data-i18n="p_sum">
-              <li>Rent indexation has a 3% annual floor, so rent rises even when inflation is lower.</li>
-              <li>Major maintenance (groot onderhoud) is moved to the tenant, departing from the ROZ general conditions.</li>
-              <li>The landlord excludes liability for defects, including hidden ones.</li>
-              <li>The lease renews automatically for five years unless notice is given twelve months ahead.</li>
-            </ul>
-          </div>
-          <div class="panel" role="tabpanel" id="p-cl" aria-labelledby="t-cl" hidden>
-            <div class="clauses" data-i18n="p_cl">
-              <div class="clause"><h4>Term and renewal</h4><span class="ref">art. 3</span><p>Five years from 1 January 2027, then renewed for five years. Notice period twelve months.</p></div>
-              <div class="clause"><h4>Rent and indexation</h4><span class="ref">art. 4</span><p>&euro;84,000 per year excl. VAT, indexed annually to CPI with a minimum of 3%.</p></div>
-              <div class="clause"><h4>Security</h4><span class="ref">art. 6</span><p>Bank guarantee of six months' rent, callable on first demand.</p></div>
-              <div class="clause"><h4>Maintenance</h4><span class="ref">art. 9</span><p>Tenant bears all maintenance, including major maintenance to the structure.</p></div>
-              <div class="clause"><h4>Subletting</h4><span class="ref">art. 11</span><p>Not permitted without prior written consent. No standard of reasonableness for a refusal.</p></div>
-            </div>
-          </div>
-          <div class="panel" role="tabpanel" id="p-rf" aria-labelledby="t-rf" hidden>
-            <div class="redflags" data-i18n="p_rf">
-              <div class="rf"><span class="badge">High</span><p>Indexation floor of 3% (art. 4.2) moves the inflation risk entirely to the tenant.</p></div>
-              <div class="rf"><span class="badge">High</span><p>Landlord excludes liability for hidden defects (art. 8.4). Check against art. 7:209 BW.</p></div>
-              <div class="rf"><span class="badge med">Medium</span><p>Major maintenance is on the tenant (art. 9.1), departing from the ROZ default.</p></div>
-              <div class="rf"><span class="badge med">Medium</span><p>Twelve months' notice before automatic renewal (art. 3.2) is easy to miss.</p></div>
-            </div>
-          </div>
-          <div class="panel" role="tabpanel" id="p-q" aria-labelledby="t-q" hidden>
-            <ol class="qs" data-i18n="p_q">
-              <li>Will the landlord accept a cap on CPI indexation instead of a 3% floor, or drop the floor altogether?</li>
-              <li>Can major maintenance return to the landlord, as in the ROZ general conditions?</li>
-              <li>Will the landlord add that consent to sublet may not be unreasonably withheld?</li>
-            </ol>
-          </div>
-          <div class="rep-note" data-i18n="rep_note">Illustration. Fictional contract; names, amounts and article numbers are invented for this example.</div>
+  <section class="section">
+    <div class="wrap teaser">
+      <div class="teaser-copy">
+        <h2>Our own product: Contract Analysis</h2>
+        <p class="lede">We also build products of our own. Contract Analysis reads a contract and returns a risk report with red flags, key clauses and a risk score in under three minutes. It's built for lawyers and in-house legal teams, as a first pass before their own review.</p>
+        <div class="actions">
+          <a class="btn" href="contract-analysis.html">See Contract Analysis</a>
+          <a class="btn btn-ghost" href="contract-analysis.html#demo">Request a demo</a>
         </div>
       </div>
-    </section>
-
-    <!-- ─── How it works ─────────────────────────────────── -->
-    <section class="block tight" id="how">
-      <div class="container">
-        <div class="head">
-          <div>
-            <span class="eyebrow" data-i18n="how_eyebrow">How it works</span>
-            <h2 data-i18n="how_title">Three steps. The lawyer stays in charge.</h2>
-          </div>
-          <p data-i18n="how_sub">Loop &amp; Convert does the first read. Judgement and advice stay with your lawyers.</p>
+      <div class="report" aria-label="Sample Contract Analysis report">
+        <div class="report-head">
+          <p class="doc">Supply agreement<span>Demo document, 14 pages</span></p>
+          <span class="sample-tag">Sample report</span>
         </div>
-        <div class="h-steps">
-          <div class="h-step"><span class="num">01</span><h3 data-i18n="s1_h">Upload the PDF</h3><p data-i18n="s1_p">Leases, NDAs, service agreements, employment contracts, shareholder agreements.</p></div>
-          <div class="h-step"><span class="num">02</span><h3 data-i18n="s2_h">The AI reads every clause</h3><p data-i18n="s2_p">It scores the risk, pulls out the clauses that matter and flags anything one-sided or unusual.</p></div>
-          <div class="h-step"><span class="num">03</span><h3 data-i18n="s3_h">Your lawyer verifies</h3><p data-i18n="s3_p">The report is a first pass. Your lawyer checks it and advises the client. Every report stays in your firm's dashboard.</p></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ─── Security ─────────────────────────────────────── -->
-    <section class="block tight" id="security">
-      <div class="container">
-        <div class="sec-wrap">
-          <div class="sec-glow" aria-hidden="true"></div>
-          <div class="head">
-            <div>
-              <span class="eyebrow" data-i18n="sec_eyebrow">Security</span>
-              <h2 data-i18n="sec_title">Your client's documents stay your client's.</h2>
+        <div class="report-body">
+          <div class="score">
+            <p class="score-num">64<small>/100</small></p>
+            <div class="score-meter">
+              <div class="meter"><i style="--v:64%"></i></div>
+              <p><strong>Elevated risk.</strong> 3 red flags, 2 need attention before signing.</p>
             </div>
-            <p data-i18n="sec_sub">Data security is the first question every firm asks. These are the answers.</p>
           </div>
-          <div class="sec-grid">
-            <div class="sec">
-              <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true"><circle cx="14" cy="14" r="11" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M3 14h22M14 3c3 3.2 4.4 7 4.4 11S17 21.8 14 25c-3-3.2-4.4-7-4.4-11S11 6.2 14 3Z" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
-              <div><h3 data-i18n="sec1_h">Processed in the EU</h3><p data-i18n="sec1_p">Contracts are processed inside the European Union.</p></div>
-            </div>
-            <div class="sec">
-              <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true"><rect x="4" y="5" width="20" height="18" rx="3" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M4 10h20M9 15l10 5M19 15 9 20" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
-              <div><h3 data-i18n="sec2_h">Never used for training</h3><p data-i18n="sec2_p">Your documents are not used to train AI models, ours or anyone else's.</p></div>
-            </div>
-            <div class="sec">
-              <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true"><rect x="3.5" y="5" width="9" height="18" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="15.5" y="5" width="9" height="18" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
-              <div><h3 data-i18n="sec3_h">Separated per firm</h3><p data-i18n="sec3_p">Each firm has its own workspace. Lawyers see their own firm's contracts and nothing else.</p></div>
-            </div>
-            <div class="sec">
-              <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true"><path d="M7 3.5h10l5 5v16H7z" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M11 15l2.5 2.5L18 13" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
-              <div><h3 data-i18n="sec4_h">Processing agreement</h3><p data-i18n="sec4_p">We sign a data processing agreement (verwerkersovereenkomst) before any pilot starts.</p></div>
-            </div>
+          <div class="flags">
+            <div class="flag"><span class="sev sev-high">High</span><p>Liability capped at fees paid in the last 3 months<span>Clause 11.2</span></p></div>
+            <div class="flag"><span class="sev sev-med">Medium</span><p>Renews automatically, 90 days' notice to cancel<span>Clause 4.1</span></p></div>
           </div>
         </div>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <!-- ─── Pilot ────────────────────────────────────────── -->
-    <section class="block tight" id="pilot">
-      <div class="container">
-        <div class="head">
-          <div>
-            <span class="eyebrow" data-i18n="pil_eyebrow">Pilot</span>
-            <h2 data-i18n="pil_title">Check our work before you pay for anything.</h2>
-          </div>
-          <p data-i18n="pil_sub">Two steps, no long contract. You decide after each one.</p>
-        </div>
-        <div class="pilot">
-          <div class="offer">
-            <span class="tag" data-i18n="o1_tag">Step 1 &middot; Free</span>
-            <h3 data-i18n="o1_h">Mark our homework</h3>
-            <p data-i18n="o1_p">Send a contract or template your firm has already reviewed. We run it and send back the report. You compare it with your own review. No account and nothing to sign.</p>
-            <div class="price">&euro;0</div>
-          </div>
-          <div class="offer dark">
-            <span class="tag trial" data-i18n="o2_tag">First 30 days free trial</span>
-            <h3 data-i18n="o2_h">Monthly plan for your firm</h3>
-            <p data-i18n="o2_p">Unlimited analyses for up to 10 lawyers, with onboarding. The first 30 days are free, then &euro;500 per month.</p>
-            <p class="offer-more" data-i18n="o2_more">More than 10 lawyers? We agree the price together on a call.</p>
-            <div class="price">&euro;500<small data-i18n="o2_small">per month, excl. VAT, up to 10 lawyers</small></div>
-          </div>
-        </div>
-        <div class="pilot-cta">
-          <p class="pilot-note" data-i18n="pil_note">There is no online checkout. Email us that you are interested and when you are free for a 15 minute call.</p>
-          <a class="btn btn-primary" href="mailto:loopandconvert@gmail.com?subject=Interested%20in%20a%20Loop%20%26%20Convert%20pilot"><span data-i18n="pil_cta">Email us your interest</span> <span class="arr" aria-hidden="true">&rarr;</span></a>
-          <span class="pilot-mail mono">loopandconvert@gmail.com</span>
-        </div>
-      </div>
-    </section>
-
-    <!-- ─── Founder ──────────────────────────────────────── -->
-    <section class="block tight">
-      <div class="container">
-        <div class="h-founder">
-          <div class="avatar"><img src="images/founder.jpg" alt="Iulian Bostan" loading="lazy" /></div>
-          <div>
-            <blockquote data-i18n="founder_q">I would rather show you the product on your own contract than describe it on a website. Call me directly.</blockquote>
-            <div class="who"><span><b>Iulian Bostan</b> &middot; <span data-i18n="founder_role">Founder, Loop &amp; Convert, Zaandam</span></span><a class="mono" href="tel:+31625500911">+31 6 2550 0911</a></div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ─── Final CTA ────────────────────────────────────── -->
-    <section class="block final">
-      <div class="container final-grid">
-        <h2 data-i18n="final_h">Send us one contract you already know well.</h2>
+  <section class="cta-band">
+    <div class="wrap">
+      <div class="cta-inner">
         <div>
-          <p data-i18n="final_p">You get the report back and judge it against your own review. If it is not useful, you have lost ten minutes.</p>
-          <a class="btn btn-primary" href="book.html"><span data-i18n="final_cta">Book a call</span> <span class="arr" aria-hidden="true">&rarr;</span></a>
+          <h2>Got a job that eats hours every week?</h2>
+          <p>Tell us what it is. On a free 30-minute call we'll tell you honestly whether we can fix it, roughly what it would cost, and whether it's worth it.</p>
         </div>
-      </div>
-    </section>
-
-  </main>
-
-  <!-- ─── Footer ──────────────────────────────────────────── -->
-  <footer>
-    <div class="container">
-      <div class="footer-grid">
-        <div class="footer-brand">
-          <div class="nav-logo"><img src="images/logo-white.png" alt="Loop &amp; Convert" class="brand-logo" width="94" height="46" style="height:46px;width:auto;display:block;" /></div>
-          <p data-i18n="foot_tag">AI contract analysis for law firms. Full review in under 3 minutes.</p>
+        <div class="actions">
+          <a class="btn" href="book-a-call.html">Book a call</a>
+          <a class="btn btn-ghost" href="contact.html">Ask a question</a>
         </div>
-        <div class="footer-col">
-          <h4 data-i18n="foot_company">Company</h4>
-          <ul>
-            <li><a href="index.html" data-i18n="nav_home">Home</a></li>
-            <li><a href="about.html" data-i18n="nav_about">About</a></li>
-            <li><a href="how-it-works.html" data-i18n="nav_how">How It Works</a></li>
-            <li><a href="contact.html" data-i18n="nav_contact">Contact</a></li>
-          </ul>
-        </div>
-        <div class="footer-col">
-          <h4 data-i18n="foot_product">Product</h4>
-          <ul>
-            <li><a href="login.html">Dashboard</a></li>
-          </ul>
-        </div>
-        <div class="footer-col">
-          <h4 data-i18n="foot_start">Get Started</h4>
-          <ul>
-            <li><a href="book.html" data-i18n="nav_cta">Book a Call</a></li>
-            <li><a href="mailto:loopandconvert@gmail.com">loopandconvert@gmail.com</a></li>
-            <li><a href="tel:+31625500911">+31 625 500 911</a></li>
-          </ul>
-        </div>
-      </div>
-
-      <!-- ─── Hover text ───────────────────────────────── -->
-      <div class="footer-hover-text">
-        <svg id="footerHoverSvg" width="100%" height="100%"
-             viewBox="0 0 500 120" xmlns="http://www.w3.org/2000/svg"
-             style="cursor:pointer;user-select:none;display:block;">
-          <defs>
-            <radialGradient id="footerRevealMask" gradientUnits="userSpaceOnUse" cx="50%" cy="50%" r="20%">
-              <stop offset="0%" stop-color="white"/>
-              <stop offset="100%" stop-color="black"/>
-            </radialGradient>
-            <mask id="footerTextMask">
-              <rect x="0" y="0" width="100%" height="100%" fill="url(#footerRevealMask)"/>
-            </mask>
-            <linearGradient id="footerTextGradient" gradientUnits="userSpaceOnUse" x1="0%" y1="0%" x2="100%" y2="0%">
-            </linearGradient>
-          </defs>
-          <text id="footerOutlineText" x="50%" y="52%" text-anchor="middle" dominant-baseline="middle"
-                fill="none" stroke="#cccccc" stroke-width="0.3"
-                font-family="Helvetica,Arial,sans-serif" font-size="48" font-weight="700"
-                textLength="492" lengthAdjust="spacing" style="opacity:0;transition:opacity .3s;">
-            Loop &amp; Convert
-          </text>
-          <text id="footerDrawText" x="50%" y="52%" text-anchor="middle" dominant-baseline="middle"
-                fill="none" stroke="#3a3a3a" stroke-width="0.3"
-                font-family="Helvetica,Arial,sans-serif" font-size="48" font-weight="700"
-                textLength="492" lengthAdjust="spacing"
-                stroke-dasharray="2000" stroke-dashoffset="2000">
-            Loop &amp; Convert
-          </text>
-          <text x="50%" y="52%" text-anchor="middle" dominant-baseline="middle"
-                fill="none" stroke="url(#footerTextGradient)" stroke-width="0.3"
-                mask="url(#footerTextMask)"
-                font-family="Helvetica,Arial,sans-serif" font-size="48" font-weight="700"
-                textLength="492" lengthAdjust="spacing">
-            Loop &amp; Convert
-          </text>
-        </svg>
-      </div>
-
-      <div class="footer-bottom">
-        <p>&copy; <span id="year"></span> Loop &amp; Convert. <span data-i18n="foot_rights">All rights reserved.</span></p>
-        <p>
-          <span data-i18n="foot_line">AI contract analysis for forward-thinking law firms.</span> &nbsp;&middot;&nbsp;
-          <a href="terms.html" data-i18n="foot_terms">Terms of Service</a> &nbsp;&middot;&nbsp;
-          <a href="privacy.html" data-i18n="foot_priv">Privacy Policy</a>
-        </p>
       </div>
     </div>
-  </footer>
-
-  <script src="js/main.js"></script>
-  <script src="js/home.js"></script>
-  <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
-  <script>
-  (function () {
-    var svg        = document.getElementById('footerHoverSvg');
-    var drawText   = document.getElementById('footerDrawText');
-    var outline    = document.getElementById('footerOutlineText');
-    var revealGrad = document.getElementById('footerRevealMask');
-    var textGrad   = document.getElementById('footerTextGradient');
-    if (!svg) return;
-    var drawn = false;
-    var observer = new IntersectionObserver(function (entries) {
-      if (entries[0].isIntersecting && !drawn) { drawn = true; drawText.classList.add('footer-draw-anim'); }
-    }, { threshold: 0.3 });
-    observer.observe(svg);
-    svg.addEventListener('mouseenter', function () {
-      outline.style.opacity = '0.7';
-      textGrad.innerHTML =
-        '<stop offset="0%"   stop-color="#ffffff"/>' +
-        '<stop offset="30%"  stop-color="#e0e0e0"/>' +
-        '<stop offset="50%"  stop-color="#ffffff"/>' +
-        '<stop offset="70%"  stop-color="#c0c0c0"/>' +
-        '<stop offset="100%" stop-color="#ffffff"/>';
-    });
-    svg.addEventListener('mouseleave', function () {
-      outline.style.opacity = '0';
-      textGrad.innerHTML = '';
-      revealGrad.setAttribute('cx', '50%');
-      revealGrad.setAttribute('cy', '50%');
-    });
-    svg.addEventListener('mousemove', function (e) {
-      var rect = svg.getBoundingClientRect();
-      revealGrad.setAttribute('cx', ((e.clientX - rect.left) / rect.width  * 100).toFixed(2) + '%');
-      revealGrad.setAttribute('cy', ((e.clientY - rect.top)  / rect.height * 100).toFixed(2) + '%');
-    });
-  })();
-  </script>
+  </section>
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div class="about">
+        <a class="brand" href="index.html">
+          <img src="assets/img/logo.png" alt="Loop&amp;Convert home" width="84" height="42">
+        </a>
+        <p>We build platforms, automations and campaigns that take repetitive work off your team. Based in Zaandam, the Netherlands.</p>
+      </div>
+      <div>
+        <h3>Company</h3>
+        <ul>
+          <li><a href="index.html#services">Services</a></li>
+          <li><a href="about.html">About</a></li>
+          <li><a href="contact.html">Contact</a></li>
+        </ul>
+      </div>
+      <div>
+        <h3>Products</h3>
+        <ul>
+          <li><a href="contract-analysis.html">Contract Analysis</a></li>
+          <li><a href="contract-analysis.html#pricing">Pricing</a></li>
+          <li><a href="contract-analysis.html#demo">Request a demo</a></li>
+          <li><a href="login.html">Log in</a></li>
+        </ul>
+      </div>
+      <div>
+        <h3>Get in touch</h3>
+        <ul>
+          <li><a href="book-a-call.html">Book a call</a></li>
+          <li><a href="mailto:loopandconvert@gmail.com">loopandconvert@gmail.com</a></li>
+          <li><a href="tel:+31625500911">+31 6 25500911</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-base">
+      <span>&copy; <span data-year>2026</span> Loop&amp;Convert, Zaandam, the Netherlands</span>
+      <span class="footer-legal"><a href="privacy.html">Privacy policy</a><a href="terms.html">Terms of service</a></span>
+    </div>
+  </div>
+</footer>
+<script>window.LC_SITE = { email: "loopandconvert@gmail.com", phone: "+31 6 25500911" };</script>
+<script src="assets/main.js"></script>
 </body>
 </html>
-
-

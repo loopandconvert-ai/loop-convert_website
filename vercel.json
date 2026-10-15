@@ -15,5 +15,22 @@
     "api/analyze.js": {
       "maxDuration": 300
     }
-  }
+  },
+  "redirects": [
+    {
+      "source": "/book.html",
+      "destination": "/book-a-call.html",
+      "permanent": true
+    },
+    {
+      "source": "/how-it-works.html",
+      "destination": "/contract-analysis.html",
+      "permanent": true
+    },
+    {
+      "source": "/roi.html",
+      "destination": "/contract-analysis.html",
+      "permanent": true
+    }
+  ]
 }
